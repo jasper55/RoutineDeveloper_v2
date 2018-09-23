@@ -1,0 +1,32 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.example.app.jasper.routinedeveloper_v2.OverviewActivity"
+    android:gravity="right">
+
+
+    <item
+        android:id="@+id/clearScore"
+        android:orderInCategory="100"
+        android:title="clear score"
+        android:layout_width="wrap_content"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/clearTarget"
+        android:orderInCategory="200"
+        android:title="clear Target Date"
+        android:layout_width="wrap_content"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/alertTime"
+        android:orderInCategory="300"
+        android:title="set daily reminder"
+        android:layout_width="wrap_content"
+        app:showAsAction="never" />
+
+
+
+
+</menu>
