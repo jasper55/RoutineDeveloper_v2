@@ -41,7 +41,6 @@ public class DetailviewActivity extends AppCompatActivity implements DetailviewA
         bindingMediator.setActions(this);
     }
 
-
     @Override
     public void saveTodo() {
 
@@ -79,7 +78,6 @@ public class DetailviewActivity extends AppCompatActivity implements DetailviewA
         setResult(RESULT_OK, returnIntent);    // RESULT_OK comes from the Activity.class
         finish();
     }
-
 
 }
 

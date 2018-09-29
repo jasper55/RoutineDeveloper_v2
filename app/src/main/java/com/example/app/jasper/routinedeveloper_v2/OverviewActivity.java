@@ -2,14 +2,12 @@ package com.example.app.jasper.routinedeveloper_v2;
 
 import android.app.AlarmManager;
 import android.app.DatePickerDialog;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -32,7 +30,6 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 
-import com.example.app.jasper.routinedeveloper_v2.model.LocalData;
 import com.example.app.jasper.routinedeveloper_v2.model.SQLCRUDOperations;
 import com.example.app.jasper.routinedeveloper_v2.model.Todo;
 
@@ -43,15 +40,12 @@ import java.util.List;
 
 public class OverviewActivity extends AppCompatActivity {
 
-
-    /*private static final String ENDING_DATE = "endingDate";
-    String endingDateString;
-    SharedPreferences myPrefs;*/
-
     private static final String SHARED_PREFS = "sharedPrefs";
     private static final String DATE = "date";
     private static final String SCOREPLUS = "scorePlus";
     private static final String SCOREMINUS = "scoreMinus";
+    private static final String STOREDDAY = "storedDay";
+    private static final String FIRSTSTART = "firstStart";
     private String date, prefs_scorePlus, prefs_scoreMinus;
 
     private TimePicker timepicker;
@@ -62,22 +56,15 @@ public class OverviewActivity extends AppCompatActivity {
     private ArrayAdapter<Todo> listViewAdapter;
     private List<Todo> todoList = new ArrayList<>();
 
-    private TextView endingDate;
-    private DatePickerDialog.OnDateSetListener endingDateSetListener;
+    private TextView challengeEndingDate;
+    private DatePickerDialog.OnDateSetListener challengeEndingDateSetListener;
     private TextView textViewPlus, textViewMinus;
-
 
     private static final int CALL_EDIT_ITEM = 0;
     private static final int CALL_CREATE_ITEM = 1;
-    private static final int RESULT_DELETED = 99;
 
-    private static final int REQUEST_PERMISSIONS = 4;
     private Todo item;
     private SQLCRUDOperations crudOperations;
-    //private LocalData localData;
-    private int done;
-    private int undone;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,9 +74,9 @@ public class OverviewActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        firstTimeStartingApp();
 
         this.crudOperations = new SQLCRUDOperations(this);
-        //this.localData = new LocalData();
 
         listView = (ViewGroup) findViewById(R.id.ListView_layout);
         listViewAdapter = new ArrayAdapter<Todo>(
@@ -102,7 +89,6 @@ public class OverviewActivity extends AppCompatActivity {
                 Todo item = this.getItem(position);
                 View itemView = existingView;
                 ListItemViewHolder viewHolder;
-
 
                 if (itemView == null) {
                     Log.i("OverviewActivity", "create new View for position " + position);
@@ -135,17 +121,14 @@ public class OverviewActivity extends AppCompatActivity {
             }
         });
 
-
-
-        endingDate = (TextView) findViewById(R.id.tvDate);
+        challengeEndingDate = (TextView) findViewById(R.id.tvDate);
         this.textViewPlus = (TextView) findViewById(R.id.scorePlus);
         this.textViewMinus = (TextView) findViewById(R.id.scoreMinus);
-        loadData();
-        applyDataToView();
 
+        loadSharedPrefs();
+        applyPrefsToView();
 
-        
-        endingDate.setOnClickListener(new View.OnClickListener() {
+        challengeEndingDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Calendar calender = Calendar.getInstance();
@@ -155,30 +138,25 @@ public class OverviewActivity extends AppCompatActivity {
 
                 DatePickerDialog datePickerDialog = new DatePickerDialog(OverviewActivity.this,
                         android.R.style.Theme_Holo_Light_Dialog_MinWidth,
-                        endingDateSetListener,
+                        challengeEndingDateSetListener,
                         year, month, day);
                 // Hintergrund transparent machen
                 datePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
                 datePickerDialog.show();
                 month = month + 1;
                 String date = day + "." + month + "." + year;
-
             }
         });
 
-        endingDateSetListener = new DatePickerDialog.OnDateSetListener() {
+        challengeEndingDateSetListener = new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker datePicker, int year, int month, int day) {
                 month = month + 1;
                 String date = day + "." + month + "." + year;
-                endingDate.setText(date);
-
+                challengeEndingDate.setText(date);
+                saveSharedPrefs();
             }
         };
-
-
-
-
 
         this.timepicker = new TimePicker(this);
         alertTimeListener = new TimePickerDialog.OnTimeSetListener() {
@@ -190,7 +168,6 @@ public class OverviewActivity extends AppCompatActivity {
             }
         };
 
-
         FloatingActionButton fab_add = (FloatingActionButton) findViewById(R.id.fab_add);
         fab_add.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -199,12 +176,11 @@ public class OverviewActivity extends AppCompatActivity {
             }
         });
 
-
         FloatingActionButton fab_timer = (FloatingActionButton) findViewById(R.id.fab_timer);
         fab_timer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setEndingTime();
+                setChallengeEndingTime();
             }
         });
 
@@ -219,31 +195,17 @@ public class OverviewActivity extends AppCompatActivity {
 
     }       // onCreate() - end
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        listenForScoreUpdates();
+    }       // onPause - end
 
-    public void loadData() {
-        SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS,MODE_PRIVATE);
-
-        date = sharedPreferences.getString(DATE,"");
-        prefs_scorePlus = sharedPreferences.getString(SCOREPLUS,"0");
-        prefs_scoreMinus = sharedPreferences.getString(SCOREMINUS,"0");
-    }
-    public void saveData() {
-        SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS,MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-
-        editor.putString(DATE,endingDate.getText().toString());
-        editor.putString(SCOREPLUS,textViewPlus.getText().toString());
-        editor.putString(SCOREMINUS,textViewMinus.getText().toString());
-
-        editor.apply();
-    }
-    public void applyDataToView(){
-        endingDate.setText(date);
-        textViewPlus.setText(prefs_scorePlus);
-        textViewMinus.setText(prefs_scoreMinus);
-    }
-
-
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        applyPrefsToView();
+    }       //onPostResume - end
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -268,12 +230,55 @@ public class OverviewActivity extends AppCompatActivity {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
         } // if resultCode
         updateList(item);
 
     }   // onActivityResult
 
+    public void loadSharedPrefs() {
+        SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS,MODE_PRIVATE);
+
+        date = sharedPreferences.getString(DATE,"");
+        prefs_scorePlus = sharedPreferences.getString(SCOREPLUS,"0");
+        prefs_scoreMinus = sharedPreferences.getString(SCOREMINUS,"0");
+    }
+    public void saveSharedPrefs() {
+        SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS,MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        editor.putString(DATE, challengeEndingDate.getText().toString());
+        editor.putString(SCOREPLUS,textViewPlus.getText().toString());
+        editor.putString(SCOREMINUS,textViewMinus.getText().toString());
+        editor.apply();
+    }
+    public void applyPrefsToView(){
+        challengeEndingDate.setText(date);
+        textViewPlus.setText(prefs_scorePlus);
+        textViewMinus.setText(prefs_scoreMinus);
+    }
+
+    private void firstTimeStartingApp() {
+        SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS,MODE_PRIVATE);
+        boolean firstStart = sharedPreferences.getBoolean(FIRSTSTART,true);
+
+        if(firstStart) {
+
+            Toast.makeText(this, "Welcome to Routine Developer!", Toast.LENGTH_SHORT).show();
+            saveCurrentDateToPrefs();
+
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean(FIRSTSTART,false);
+            editor.apply();
+        }
+    }
+    private void saveCurrentDateToPrefs() {
+        SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS,MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Calendar calendar = Calendar.getInstance();
+        int currentday = calendar.get(Calendar.DAY_OF_YEAR);
+        editor.putInt(STOREDDAY,currentday);
+        editor.apply();
+    }
 
     protected void addItemToList(Todo item){
         this.listViewAdapter.add(item);
@@ -284,8 +289,7 @@ public class OverviewActivity extends AppCompatActivity {
         ((ListView)this.listView).setSelection(this.listViewAdapter.getPosition(item));
     }
 
-
-    private void setEndingTime() {
+    private void setChallengeEndingTime() {
 
             Calendar calender = Calendar.getInstance();
             int year = calender.get(Calendar.YEAR);
@@ -294,7 +298,7 @@ public class OverviewActivity extends AppCompatActivity {
 
             DatePickerDialog datePickerDialog = new DatePickerDialog(OverviewActivity.this,
                     android.R.style.Theme_Holo_Light_Dialog_MinWidth,
-                    endingDateSetListener,
+                    challengeEndingDateSetListener,
                     year, month, day);
             // Hintergrund transparent machen
             datePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -334,11 +338,11 @@ public class OverviewActivity extends AppCompatActivity {
         long current_sec = Calendar.getInstance().get(Calendar.SECOND)*1000;
         long passed_millis = current_hour + current_min + current_sec;
 
-        long alertTime = timeInMillis - passed_millis + time;
+        long alertTimeinMillis = timeInMillis - passed_millis + time;
 
 
-        long dif = alertTime - timeInMillis;
-        Log.i("notTime",String.valueOf(alertTime));
+        long dif = alertTimeinMillis - timeInMillis;
+        Log.i("notTime",String.valueOf(alertTimeinMillis));
         Log.i("notTime",String.valueOf(timeInMillis));
 
         //Log.i("currentTime", String.valueOf(System.currentTimeMillis()));
@@ -348,9 +352,33 @@ public class OverviewActivity extends AppCompatActivity {
         PendingIntent pIntent = PendingIntent.getBroadcast(getApplicationContext(),CALL_NOTIFICATION_ALERT_TIME, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, alertTime, AlarmManager.INTERVAL_DAY, pIntent);
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, alertTimeinMillis, AlarmManager.INTERVAL_DAY, pIntent);
     }
 
+    private void listenForScoreUpdates(){
+        Calendar calendar = Calendar.getInstance();
+
+        int currentday = calendar.get(Calendar.DAY_OF_YEAR);
+        SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS,MODE_PRIVATE);
+        int lastday = sharedPreferences.getInt(STOREDDAY,0);
+
+        if (currentday != lastday) {
+            calendar.setTimeInMillis(System.currentTimeMillis());
+            calendar.set(Calendar.HOUR_OF_DAY, 23);
+            calendar.set(Calendar.MINUTE, 59);
+            calendar.set(Calendar.SECOND, 59);
+
+            long currentTime = Calendar.getInstance().getTimeInMillis();
+            long updateTimeTimeInMillis = calendar.getTimeInMillis();
+
+            if (currentTime > updateTimeTimeInMillis) {
+                summUpCheckBoxes(todoList);
+            }
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putInt(STOREDDAY,currentday);
+            editor.apply();
+        }
+    }
 
     protected void summUpCheckBoxes(List<Todo> todoList){
 
@@ -369,19 +397,16 @@ public class OverviewActivity extends AppCompatActivity {
         }
 
         if (done == todoListSize){
-            Log.i("summUpCheckBoxes", "all Todos done");
-
-            Toast.makeText(this,"All Todos done for today",Toast.LENGTH_SHORT).show();
             doneCounter = ++doneCounter;
             textViewPlus.setText(String.valueOf(doneCounter));
-            saveData();
-            resetCheckBoxes();
+            Toast.makeText(this,"All Todos done yesterday",Toast.LENGTH_SHORT).show();
         } else {
             undoneCounter = ++undoneCounter;
             textViewMinus.setText(String.valueOf(undoneCounter));
-            int undone = todoListSize - done;
-            Log.i("summUpCheckBoxes", undone +  " Todos still undone");
         }
+
+        saveSharedPrefs();
+        resetCheckBoxes();
 
     }
     private void resetCheckBoxes() {
@@ -396,9 +421,6 @@ public class OverviewActivity extends AppCompatActivity {
         }
     }
 
-
-
-
     private void showDetailViewForCreate() {
         Intent createIntent = new Intent(this,DetailviewActivity.class);
         startActivityForResult(createIntent,CALL_CREATE_ITEM);
@@ -409,7 +431,6 @@ public class OverviewActivity extends AppCompatActivity {
         startActivityForResult(editIntent,CALL_EDIT_ITEM);
     }
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -418,7 +439,6 @@ public class OverviewActivity extends AppCompatActivity {
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
         int id = item.getItemId();
 
         if (id == R.id.alertTime) {
@@ -443,14 +463,14 @@ public class OverviewActivity extends AppCompatActivity {
         SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS,MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
-        editor.putString(DATE,endingDate.getText().toString());
+        editor.putString(DATE, challengeEndingDate.getText().toString());
         editor.putString(SCOREPLUS,"0");
         editor.putString(SCOREMINUS,"0");
         prefs_scorePlus = "0";
         prefs_scoreMinus = "0";
 
         editor.apply();
-        applyDataToView();
+        applyPrefsToView();
     }
     public void clearTargetDate(){
         SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS,MODE_PRIVATE);
@@ -462,10 +482,8 @@ public class OverviewActivity extends AppCompatActivity {
         editor.putString(SCOREMINUS,textViewMinus.getText().toString());
 
         editor.apply();
-        applyDataToView();
+        applyPrefsToView();
     }
-
-
 
     private class ListItemViewHolder{
 
@@ -485,7 +503,7 @@ public class OverviewActivity extends AppCompatActivity {
                 Todo mockItem = null;
 
                 @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean b) {    // boolean b gibt null pointer exception, warum? -> boolean selbst abfragen
+                public void onCheckedChanged(CompoundButton buttonView, boolean b) {
                     int position = (int) buttonView.getTag();
                     boolean checked = checkBox.isChecked();
                     Log.i("Checkbox listener", String.valueOf(checked));
@@ -494,7 +512,6 @@ public class OverviewActivity extends AppCompatActivity {
                     mockItem = listViewAdapter.getItem(position);
                     mockItem.setDone(checked);
                     crudOperations.updateItem(mockItem.getId(),mockItem);
-                    summUpCheckBoxes(todoList);
                 }
             });
         }
@@ -510,7 +527,5 @@ public class OverviewActivity extends AppCompatActivity {
             return todoItem;
         }
     }
-
-
 
 }

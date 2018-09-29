@@ -30,10 +30,9 @@ public class NotificationReceiver extends BroadcastReceiver {
                 .setContentText("Checkmark reminder.\nHave you done all tasks already?")
                 .setTicker("Don't forget to your tasks") // text, der in der taskbar angezeigt wird!
                 .setAutoCancel(true)
-                .setSmallIcon(CHECKBOX_ON_BACKGROUND)
+                .setSmallIcon(R.drawable.alert_symbol)
                 .setDefaults(NotificationCompat.DEFAULT_ALL);
 
         notificationManager.notify(CALL_NOTIFICATION_ALERT_TIME,notifBuilder.build());
-
     }
 }

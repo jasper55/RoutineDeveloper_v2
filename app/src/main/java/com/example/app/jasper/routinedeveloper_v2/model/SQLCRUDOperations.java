@@ -19,7 +19,6 @@ public class SQLCRUDOperations {
     private static final String NAME = "NAME";
     private static final String DONE = "DONE";
 
-
     private static final String [] ALL_COLUMS = new String[]{ID, NAME, DONE};
 
     private static final String CREATION_QUERY =
@@ -27,7 +26,6 @@ public class SQLCRUDOperations {
                     "(ID INTEGER PRIMARY KEY, " +
                     "NAME TEXT, " +
                     "DONE BOOLEAN)";
-
 
     // Im Konstrukter wird die SQLiteDAtenbank entweder geöffnet oder erstellt, wenn sie noch nicht exitiert
     public SQLCRUDOperations(Context context){
@@ -41,11 +39,7 @@ public class SQLCRUDOperations {
     }
 
 
-
-
-
     //////////// CRUD Operations ///////////
-
     public long createItem(Todo item) {             // item kommt vom databinding, hat also schon namen und done, aber keine id
 
         ContentValues values = new ContentValues();
@@ -58,8 +52,6 @@ public class SQLCRUDOperations {
         return id;
     }
 
-
-
     public Todo readItem(long id){
 
         Cursor cursor = db.query(TABLE_DATAITEM,ALL_COLUMS,"ID=?",new String[]{String.valueOf(id)},null,null,null);
@@ -67,7 +59,6 @@ public class SQLCRUDOperations {
         if (cursor.getCount()>0){
             cursor.moveToFirst();
         }
-
         return getItemValuesFromCursor(cursor);
     }
 
@@ -102,24 +93,13 @@ public class SQLCRUDOperations {
         item.setId(id);
         values.put(ID,id);
         Log.i("SQL/updateItem mockId", String.valueOf(id));
-/*
-        Cursor cursor = db.query(TABLE_DATAITEM,ALL_COLUMS,"ID=?",new String[]{String.valueOf(mockId)},null,null,null);
 
-        if (cursor.getCount()>0){
-            cursor.moveToFirst();
-        }
-
-        updateDataItemFromCursor(item,cursor);*/
         return true;
-
     }
 
     public void deleteItem(long id){
         db.delete(TABLE_DATAITEM,ID + "=" + id,null);
     }
-
-
-
 
 
     ///////////   support methods   ////////////
@@ -145,12 +125,8 @@ public class SQLCRUDOperations {
         item.setId(id);
         item.setName(name);
         item.setDone(done);
-
         return item;
     }
-
-
-
 }
 
 
