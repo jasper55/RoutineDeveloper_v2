@@ -12,4 +12,6 @@
     <color name="LightRed">#e15b43</color>
     <color name="orange">#e49443</color>
 
+    <color name="colorTransBg">#8d000000</color>
+
 </resources>

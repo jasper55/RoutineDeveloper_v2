@@ -23,7 +23,6 @@ public class DetailviewActivity extends AppCompatActivity implements DetailviewA
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //final ActivityDetailviewBinding bindingMediator = DataBindingUtil.setContentView(this, R.layout.activity_detailview);
         final ActivityDetailviewBinding bindingMediator = DataBindingUtil.setContentView(this, R.layout.activity_detailview);
 
         this.crudOperations = new SQLCRUDOperations(this);

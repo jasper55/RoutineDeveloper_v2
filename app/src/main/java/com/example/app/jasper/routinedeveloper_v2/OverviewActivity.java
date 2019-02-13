@@ -1,5 +1,7 @@
 package com.example.app.jasper.routinedeveloper_v2;
 
+import android.animation.Animator;
+import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.DatePickerDialog;
 import android.app.PendingIntent;
@@ -24,6 +26,7 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -37,6 +40,8 @@ import com.example.app.jasper.routinedeveloper_v2.model.Todo;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+
+import jp.wasabeef.blurry.Blurry;
 
 public class OverviewActivity extends AppCompatActivity {
 
@@ -66,19 +71,80 @@ public class OverviewActivity extends AppCompatActivity {
     private Todo item;
     private SQLCRUDOperations crudOperations;
 
+    private boolean isFABOpen = false;
+    private FloatingActionButton fab_add, fab_timer, fab_notification, fab_menu;
+    LinearLayout fab_container_add, fab_container_notification, fab_container_timer;
+    View fabOverlay;
+    //private ViewGroup content_main;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.layout_overview);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        //content_main = findViewById(R.id.content_main);
 
         firstTimeStartingApp();
 
         this.crudOperations = new SQLCRUDOperations(this);
 
-        listView = (ViewGroup) findViewById(R.id.ListView_layout);
+        instantiateViewElements();
+        setListenersToViewElements();
+
+        loadSharedPrefs();
+        applyPrefsToView();
+
+
+        instantiateTimePicker();
+
+        instantiateFABMenu();
+
+
+    }       // onCreate() - end
+
+    private void setListenersToViewElements() {
+        ((ListView)listView).setAdapter(listViewAdapter);
+        listViewAdapter.addAll(crudOperations.readAllItems());
+
+        ((ListView) listView).setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                Todo selectedItem = listViewAdapter.getItem(position);
+                showDetailViewForEdit(selectedItem);
+            }
+        });
+
+        challengeEndingDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Calendar calender = Calendar.getInstance();
+                int year = calender.get(Calendar.YEAR);
+                int month = calender.get(Calendar.MONTH);
+                int day = calender.get(Calendar.DAY_OF_MONTH);
+
+                DatePickerDialog datePickerDialog = new DatePickerDialog(OverviewActivity.this,
+                        android.R.style.Theme_Holo_Light_Dialog_MinWidth,
+                        challengeEndingDateSetListener,
+                        year, month, day);
+                // Hintergrund transparent machen
+                datePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                datePickerDialog.show();
+            }
+        });
+
+        challengeEndingDateSetListener = new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker datePicker, int year, int month, int day) {
+                month = month + 1;
+                String date = day + "." + month + "." + year;
+                challengeEndingDate.setText(date);
+                saveSharedPrefs();
+            }
+        };
+    }
+
+    private void instantiateViewElements() {
+        listView = (ViewGroup) findViewById(R.id.ListView_data);
         listViewAdapter = new ArrayAdapter<Todo>(
                 this, R.layout.layout_todoitem, todoList){
 
@@ -110,54 +176,15 @@ public class OverviewActivity extends AppCompatActivity {
 
         };
 
-        ((ListView)listView).setAdapter(listViewAdapter);
-        listViewAdapter.addAll(crudOperations.readAllItems());
-
-        ((ListView) listView).setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                Todo selectedItem = listViewAdapter.getItem(position);
-                showDetailViewForEdit(selectedItem);
-            }
-        });
-
         challengeEndingDate = (TextView) findViewById(R.id.tvDate);
         this.textViewPlus = (TextView) findViewById(R.id.scorePlus);
         this.textViewMinus = (TextView) findViewById(R.id.scoreMinus);
 
-        loadSharedPrefs();
-        applyPrefsToView();
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+    }
 
-        challengeEndingDate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Calendar calender = Calendar.getInstance();
-                int year = calender.get(Calendar.YEAR);
-                int month = calender.get(Calendar.MONTH);
-                int day = calender.get(Calendar.DAY_OF_MONTH);
-
-                DatePickerDialog datePickerDialog = new DatePickerDialog(OverviewActivity.this,
-                        android.R.style.Theme_Holo_Light_Dialog_MinWidth,
-                        challengeEndingDateSetListener,
-                        year, month, day);
-                // Hintergrund transparent machen
-                datePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                datePickerDialog.show();
-                month = month + 1;
-                String date = day + "." + month + "." + year;
-            }
-        });
-
-        challengeEndingDateSetListener = new DatePickerDialog.OnDateSetListener() {
-            @Override
-            public void onDateSet(DatePicker datePicker, int year, int month, int day) {
-                month = month + 1;
-                String date = day + "." + month + "." + year;
-                challengeEndingDate.setText(date);
-                saveSharedPrefs();
-            }
-        };
-
+    private void instantiateTimePicker() {
         this.timepicker = new TimePicker(this);
         alertTimeListener = new TimePickerDialog.OnTimeSetListener() {
             @Override
@@ -167,8 +194,35 @@ public class OverviewActivity extends AppCompatActivity {
                 createNotificationIntent(timepicker);
             }
         };
+    }
 
-        FloatingActionButton fab_add = (FloatingActionButton) findViewById(R.id.fab_add);
+    private void instantiateFABMenu() {
+
+        fab_container_add = findViewById(R.id.fab_container_add);
+        fab_container_notification = findViewById(R.id.fab_container_notification);
+        fab_container_timer = findViewById(R.id.fab_container_timer);
+        fabOverlay = findViewById(R.id.fabOverlay);
+
+        fab_menu = findViewById(R.id.fab_menu);
+        fab_menu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(!isFABOpen){
+                    showFABMenu();
+                }else{
+                    closeFABMenu();
+                }
+            }
+        });
+
+        fabOverlay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                closeFABMenu();
+            }
+        });
+
+        fab_add = findViewById(R.id.fab_add);
         fab_add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -176,7 +230,7 @@ public class OverviewActivity extends AppCompatActivity {
             }
         });
 
-        FloatingActionButton fab_timer = (FloatingActionButton) findViewById(R.id.fab_timer);
+        fab_timer = findViewById(R.id.fab_timer);
         fab_timer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -184,7 +238,7 @@ public class OverviewActivity extends AppCompatActivity {
             }
         });
 
-        FloatingActionButton fab_notification = (FloatingActionButton) findViewById(R.id.fab_notificaton);
+        fab_notification = findViewById(R.id.fab_notification);
         fab_notification.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -192,8 +246,102 @@ public class OverviewActivity extends AppCompatActivity {
                 createNotificationIntent(timepicker);
             }
         });
+    }
 
-    }       // onCreate() - end
+    @SuppressLint("RestrictedApi")
+    private void showFABMenu() {
+        isFABOpen=true;
+        applyBlurOnBackground();
+        fab_container_add.setVisibility(View.VISIBLE);
+        fab_container_timer.setVisibility(View.VISIBLE);
+        fab_container_notification.setVisibility(View.VISIBLE);
+        fabOverlay.setVisibility(View.VISIBLE);
+
+        fab_menu.animate().rotationBy(270).setListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animator) {}
+
+            @Override
+            public void onAnimationEnd(Animator animator) {
+//                if (fab_menu.getRotation() != 270) {
+//                    fab_menu.setRotation(270);
+//                }
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animator) {}
+
+            @Override
+            public void onAnimationRepeat(Animator animator) {}
+        });
+        fab_container_add.animate().translationY(-getResources().getDimension(R.dimen.standard_175));
+        fab_container_notification.animate().translationY(-getResources().getDimension(R.dimen.standard_120));
+        fab_container_timer.animate().translationY(-getResources().getDimension(R.dimen.standard_65));
+    }
+
+    private void applyBlurOnBackground() {
+        ViewGroup content_main = findViewById(R.id.content_main);
+        Blurry.with(content_main.getContext())
+                .radius(1).sampling(10)
+                .animate(500)
+                .onto(content_main);
+    }
+
+    @SuppressLint("RestrictedApi")
+    private void closeFABMenu() {
+            removeBlurOnBackground();
+            isFABOpen=false;
+            fabOverlay.setVisibility(View.GONE);
+            fab_container_add.animate().translationY(0);
+            fab_container_notification.animate().translationY(0);
+            fab_container_timer.animate().translationY(0);
+            fab_menu.animate().rotationBy(-270).setListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animator) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animator) {
+                    if(!isFABOpen){
+                        fab_container_add.setVisibility(View.GONE);
+                        fab_container_notification.setVisibility(View.GONE);
+                        fab_container_timer.setVisibility(View.GONE);
+                    }
+//                    if (fab_menu.getRotation() != -270) {
+//                        fab_menu.setRotation(-270);
+//                    }
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animator) {
+
+                }
+
+                @Override
+                public void onAnimationRepeat(Animator animator) {
+
+                }
+            });
+        }
+
+    private void removeBlurOnBackground() {
+//        ViewGroup content_main = findViewById(R.id.content_main);
+//        Blurry.with(getBaseContext())
+//                .radius(0).sampling(0)
+//                .animate(500)
+//                .onto(content_main);
+    }
+
+
+    @Override
+    public void onBackPressed() {
+        if(isFABOpen){
+            closeFABMenu();
+        }else{
+            super.onBackPressed();
+        }
+    }
 
     @Override
     protected void onPause() {
@@ -433,7 +581,6 @@ public class OverviewActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_overview, menu);
         return true;
     }
