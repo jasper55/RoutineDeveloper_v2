@@ -82,7 +82,6 @@ public class OverviewActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.layout_overview);
-        //content_main = findViewById(R.id.content_main);
 
         firstTimeStartingApp();
 
@@ -94,12 +93,9 @@ public class OverviewActivity extends AppCompatActivity {
         loadSharedPrefs();
         applyPrefsToView();
 
-
         instantiateTimePicker();
 
         instantiateFABMenu();
-
-
     }       // onCreate() - end
 
     private void setListenersToViewElements() {
@@ -227,6 +223,7 @@ public class OverviewActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 showDetailViewForCreate();
+                closeFABMenu();
             }
         });
 
@@ -235,6 +232,7 @@ public class OverviewActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 setChallengeEndingTime();
+                closeFABMenu();
             }
         });
 
@@ -244,6 +242,7 @@ public class OverviewActivity extends AppCompatActivity {
             public void onClick(View view) {
                 setNotificationTime();
                 createNotificationIntent(timepicker);
+                closeFABMenu();
             }
         });
     }
@@ -251,7 +250,7 @@ public class OverviewActivity extends AppCompatActivity {
     @SuppressLint("RestrictedApi")
     private void showFABMenu() {
         isFABOpen=true;
-        applyBlurOnBackground();
+        //applyBlurOnBackground();
         fab_container_add.setVisibility(View.VISIBLE);
         fab_container_timer.setVisibility(View.VISIBLE);
         fab_container_notification.setVisibility(View.VISIBLE);
@@ -263,9 +262,6 @@ public class OverviewActivity extends AppCompatActivity {
 
             @Override
             public void onAnimationEnd(Animator animator) {
-//                if (fab_menu.getRotation() != 270) {
-//                    fab_menu.setRotation(270);
-//                }
             }
 
             @Override
@@ -308,19 +304,14 @@ public class OverviewActivity extends AppCompatActivity {
                         fab_container_notification.setVisibility(View.GONE);
                         fab_container_timer.setVisibility(View.GONE);
                     }
-//                    if (fab_menu.getRotation() != -270) {
-//                        fab_menu.setRotation(-270);
-//                    }
                 }
 
                 @Override
                 public void onAnimationCancel(Animator animator) {
-
                 }
 
                 @Override
                 public void onAnimationRepeat(Animator animator) {
-
                 }
             });
         }
@@ -350,27 +341,29 @@ public class OverviewActivity extends AppCompatActivity {
     }       // onPause - end
 
     @Override
-    protected void onPostResume() {
-        super.onPostResume();
+    protected void onResume() {
+        super.onResume();
+        listenForScoreUpdates();
+        loadSharedPrefs();
         applyPrefsToView();
-    }       //onPostResume - end
+    }       //onResume - end
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent intent) {
         listViewAdapter.clear();
-        super.onActivityResult(requestCode, resultCode, data);
+        super.onActivityResult(requestCode, resultCode, intent);
 
         if (resultCode == RESULT_OK){
             try {
-                long id = data.getLongExtra(DetailviewActivity.ARG_ITEM_ID, 1);
+                long id = intent.getLongExtra(DetailviewActivity.ARG_ITEM_ID, 1);
                 item = crudOperations.readItem(id);
 
                 if(requestCode == CALL_CREATE_ITEM){
-                    Toast.makeText(this, "Item received", Toast.LENGTH_LONG).show();
-                    addItemToList(item);
+                    Toast.makeText(this, "new item received", Toast.LENGTH_LONG).show();
+                    //addItemToList(item);   ist überflüssig
                 }
                 if (requestCode == CALL_EDIT_ITEM){
-                    //updateList(item);
+                    Toast.makeText(this, "item updated", Toast.LENGTH_LONG).show();
                 }
                 else {
                     Log.i("onActivityResult","NO new item received");
@@ -451,6 +444,7 @@ public class OverviewActivity extends AppCompatActivity {
             // Hintergrund transparent machen
             datePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
             datePickerDialog.show();
+            closeFABMenu();
     }
 
     private void setNotificationTime(){
@@ -474,7 +468,7 @@ public class OverviewActivity extends AppCompatActivity {
     }
     private void createNotificationIntent(TimePicker timePicker){
 
-        long time = 0;
+        long time;
         long hour = timePicker.getCurrentHour()*60*60*1000;
         long min = timePicker.getCurrentMinute()*60*1000;
 
@@ -487,7 +481,6 @@ public class OverviewActivity extends AppCompatActivity {
         long passed_millis = current_hour + current_min + current_sec;
 
         long alertTimeinMillis = timeInMillis - passed_millis + time;
-
 
         long dif = alertTimeinMillis - timeInMillis;
         Log.i("notTime",String.valueOf(alertTimeinMillis));
@@ -559,7 +552,7 @@ public class OverviewActivity extends AppCompatActivity {
     }
     private void resetCheckBoxes() {
         int size = todoList.size();
-        Todo item = null;
+        Todo item;
 
         for (int i = 0;  i < size; i++){
             item = todoList.get(i);
