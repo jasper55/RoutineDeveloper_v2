@@ -30,13 +30,13 @@ public class DetailviewActivity extends AppCompatActivity implements DetailviewA
         long itemId = getIntent().getLongExtra(ARG_ITEM_ID, -1);
         if(itemId != -1){
             item = crudOperations.readItem(itemId);
-            bindingMediator.setTodo(item); // setMethode hängt vom variablenNamen aus dem Layout ab: <data> <variable name="todo"
-            bindingMediator.setActions(DetailviewActivity.this);
+            //bindingMediator.setTodo(item); // setMethode hängt vom variablenNamen aus dem Layout ab: <data> <variable name="todo"
+//            bindingMediator.setActions(this);
         } else {
             this.item = new Todo();
         }
 
-        bindingMediator.setTodo(item);         // sorgt dafür, dass die Ansicht zur Darstellung kommt
+        bindingMediator.setTodo(item);         // verbindet den bindingMediator mit dem erstellten item, sodass die Daten auch auf der OverviewActivity landet
         bindingMediator.setActions(this);
     }
 
@@ -44,12 +44,12 @@ public class DetailviewActivity extends AppCompatActivity implements DetailviewA
     public void saveTodo() {
 
         if (item.getId() == -1) {
-            Log.i("Detailview","crudOperations.createItem started");
-            Log.i("Detailview",item.getName());
+            Log.i("RD_Detailview","crudOperations.createItem started");
+            Log.i("RD_Detailview",item.getName());
 
             long id = crudOperations.createItem(this.item);
             this.item.setId(id);
-            Log.i("Detailview","created id: " + String.valueOf(item.getId()));
+            Log.i("RD_Detailview","created id: " + String.valueOf(item.getId()));
 
         } else {
             crudOperations.updateItem(item.getId(),item);
@@ -58,9 +58,9 @@ public class DetailviewActivity extends AppCompatActivity implements DetailviewA
         Intent returnIntent = new Intent();
         returnIntent.putExtra(ARG_ITEM_ID, item.getId());
 
-        Log.i("Detailview","created intent: " + String.valueOf(returnIntent.getExtras()));
+        Log.i("RD_Detailview","created intent: " + String.valueOf(returnIntent.getExtras()));
 
-        setResult(RESULT_OK, returnIntent);    // RESULT_OK comes from the Activity.class
+        setResult(RESULT_OK, returnIntent);    // RESULT_OK comes from Activity.class
         finish();
     }
 

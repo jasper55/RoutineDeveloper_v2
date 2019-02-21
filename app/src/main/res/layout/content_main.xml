@@ -34,6 +34,7 @@
                 android:layout_height="match_parent"
                 android:layout_alignParentBottom="true"
                 android:orientation="vertical"
+                android:longClickable="true"
                 app:layout_behavior="@string/appbar_scrolling_view_behavior"/> <!-- contains the todo items -->
 
         </LinearLayout>
