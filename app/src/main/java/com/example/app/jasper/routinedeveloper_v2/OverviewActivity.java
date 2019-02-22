@@ -133,7 +133,8 @@ public class OverviewActivity extends AppCompatActivity {
         listView.setOnContextClickListener(new View.OnContextClickListener() {
             @Override
             public boolean onContextClick(View v) {
-
+                Toast.makeText(getApplicationContext(),"LongClick",Toast.LENGTH_SHORT).show();
+                //registerForContextMenu(v);
                 return true;
             }
         });
@@ -142,6 +143,7 @@ public class OverviewActivity extends AppCompatActivity {
 //        ((ListView) listView).setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
 //            @Override
 //            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+//                Toast.makeText(getApplicationContext(),"LongClick",Toast.LENGTH_SHORT).show();
 //                registerForContextMenu(listView);
 //                selectedItemId = listViewAdapter.getItemId(position);
 //                selectedItem = listViewAdapter.getItem(position);
@@ -350,7 +352,6 @@ public class OverviewActivity extends AppCompatActivity {
         fab_menu.animate().rotationBy(-270).setListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animator) {
-
             }
 
             @Override
@@ -379,6 +380,7 @@ public class OverviewActivity extends AppCompatActivity {
                 .animate(500)
                 .onto(content_main);
     }
+
     private void removeBlurOnBackground() {
 //        ViewGroup content_main = findViewById(R.id.content_main);
 //        Blurry.with(getBaseContext())
@@ -416,9 +418,6 @@ public class OverviewActivity extends AppCompatActivity {
         listViewAdapter.clear();
         super.onActivityResult(requestCode, resultCode, intent);
 
-        Log.i("RD_OnActivityResult: ", "called");
-
-
         if (resultCode == RESULT_OK) {
             try {
                 long id = intent.getLongExtra(DetailviewActivity.ARG_ITEM_ID, 1);
@@ -426,14 +425,11 @@ public class OverviewActivity extends AppCompatActivity {
 
                 if (requestCode == CALL_CREATE_ITEM) {
                     Toast.makeText(this, "new item received", Toast.LENGTH_LONG).show();
-                    Log.i("RD_RequestCode: ", "create_Item");
-
-                    //addItemToList(item);   ist überflüssig
                 }
                 if (requestCode == CALL_EDIT_ITEM) {
                     Toast.makeText(this, "item updated", Toast.LENGTH_LONG).show();
                 } else {
-                    Log.i("onActivityResult", "NO new item received");
+                    Log.i("onActivityResult", "No new item received");
                 }
             } catch (Exception e) {
                 e.printStackTrace();
