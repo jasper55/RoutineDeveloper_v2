@@ -14,9 +14,12 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.ContextMenu;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -33,6 +36,7 @@ import android.widget.Toast;
 
 import com.example.app.jasper.routinedeveloper_v2.model.ListItemViewHolder;
 import com.example.app.jasper.routinedeveloper_v2.model.MySharedPrefs;
+import com.example.app.jasper.routinedeveloper_v2.model.RecyclerViewAdapter;
 import com.example.app.jasper.routinedeveloper_v2.model.SQLCRUDOperations;
 import com.example.app.jasper.routinedeveloper_v2.model.Todo;
 
@@ -49,7 +53,9 @@ public class OverviewActivity extends AppCompatActivity {
     private TimePickerDialog.OnTimeSetListener alertTimeListener;
     private static final int CALL_NOTIFICATION_ALERT_TIME = 100;
 
-    private ViewGroup listView;
+    private ListView listView;
+    private RecyclerView recyclerView;
+    private RecyclerViewAdapter recyclerViewAdapter;
     private ArrayAdapter<Todo> listViewAdapter;
     private List<Todo> todoList = new ArrayList<>();
     private long selectedItemId;
@@ -97,7 +103,7 @@ public class OverviewActivity extends AppCompatActivity {
         instantiateTimePicker();
 
         instantiateFABMenu();
-        registerForContextMenu(listView);
+        registerForContextMenu(recyclerView);
     }       // onCreate() - end
 
 
@@ -113,11 +119,11 @@ public class OverviewActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.option_delete:
                 crudOperations.deleteItem(selectedItemId);
-                listViewAdapter.setNotifyOnChange(true);
-                listViewAdapter.notifyDataSetChanged();
+                //recyclerViewAdapter.setNotifyOnChange(true);
+                recyclerViewAdapter.notifyDataSetChanged();
                 return true;
             case R.id.option_edit:
-                selectedItem = listViewAdapter.getItem((int) selectedItemId);
+                selectedItem = recyclerViewAdapter.getItem((int) selectedItemId);
                 showDetailViewForEdit(selectedItem);
                 return true;
             default:
@@ -126,32 +132,40 @@ public class OverviewActivity extends AppCompatActivity {
     }
 
     private void setListenersToViewElements() {
-        ((ListView) listView).setAdapter(listViewAdapter);
-        listViewAdapter.addAll(crudOperations.readAllItems());
+//        recyclerView.setAdapter(recyclerViewAdapter);
+//        recyclerViewAdapter.addAll(crudOperations.readAllItems());
+//
+//
+//        recyclerView.setOnContextClickListener(new View.OnContextClickListener() {
+//            @Override
+//            public boolean onContextClick(View v) {
+//                Toast.makeText(getApplicationContext(),"LongClick",Toast.LENGTH_SHORT).show();
+//                //registerForContextMenu(v);
+//                return true;
+//            }
+//        });
+//
+//        recyclerView.setOnLongClickListener(new View.OnLongClickListener() {
+//            @Override
+//            public boolean onLongClick(View v) {
+//                return false;
+//            }
+//        });
 
 
-        listView.setOnContextClickListener(new View.OnContextClickListener() {
-            @Override
-            public boolean onContextClick(View v) {
-                Toast.makeText(getApplicationContext(),"LongClick",Toast.LENGTH_SHORT).show();
-                //registerForContextMenu(v);
-                return true;
-            }
-        });
-
-
-//        ((ListView) listView).setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+//        ((recyclerView) recyclerView).setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
 //            @Override
 //            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 //                Toast.makeText(getApplicationContext(),"LongClick",Toast.LENGTH_SHORT).show();
-//                registerForContextMenu(listView);
-//                selectedItemId = listViewAdapter.getItemId(position);
-//                selectedItem = listViewAdapter.getItem(position);
+//                registerForContextMenu(recyclerView);
+//                selectedItemId = recyclerViewAdapter.getItemId(position);
+//                selectedItem = recyclerViewAdapter.getItem(position);
 //                return true;
 //            }
 //        });
 
-        setItemListClickListener();
+        //setItemListClickListener();
+
         setEndingDateListener();
 
     }
@@ -187,10 +201,10 @@ public class OverviewActivity extends AppCompatActivity {
     }
 
     private void setItemListClickListener() {
-        ((ListView) listView).setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                Todo selectedItem = listViewAdapter.getItem(position);
+                Todo selectedItem = recyclerViewAdapter.getItem(position);
                 Log.i("RD_Position: ", String.valueOf(position));
                 Log.i("RD_ViewID: ", String.valueOf(view.getId()));
                 showDetailViewForEdit(selectedItem);
@@ -199,7 +213,8 @@ public class OverviewActivity extends AppCompatActivity {
     }
 
     private void instantiateViewElements() {
-        setUpListView();
+        //setUpListView();
+        initRecyclerViewList();
 
         challengeEndingDate = findViewById(R.id.tvDate);
         this.textViewPlus = findViewById(R.id.scorePlus);
@@ -209,8 +224,18 @@ public class OverviewActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
     }
 
+    private void initRecyclerViewList() {
+        recyclerView = new RecyclerView(this);
+
+        recyclerView.findViewById(R.id.ListView_data);
+        recyclerViewAdapter = new RecyclerViewAdapter(this, crudOperations.readAllItems(), crudOperations);
+        recyclerView.setAdapter(recyclerViewAdapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        RecyclerView.ViewHolder viewHolder = recyclerViewAdapter.onCreateViewHolder()
+    }
+
     private void setUpListView() {
-        listView = (ViewGroup) findViewById(R.id.ListView_data);
+        listView = findViewById(R.id.ListView_data);
         listViewAdapter = new ArrayAdapter<Todo>(
                 this, R.layout.layout_todoitem, todoList) {
 
@@ -415,7 +440,7 @@ public class OverviewActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent intent) {
-        listViewAdapter.clear();
+//        recyclerViewAdapter;
         super.onActivityResult(requestCode, resultCode, intent);
 
         if (resultCode == RESULT_OK) {
@@ -435,19 +460,19 @@ public class OverviewActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         } // if resultCode
-        updateList(item);
+//        updateList(item);
 
     }   // onActivityResult
 
-    protected void addItemToList(Todo item) {
-        this.listViewAdapter.add(item);
-        ((ListView) this.listView).setSelection(this.listViewAdapter.getPosition(item));
-    }
-
-    protected void updateList(Todo item) {
-        listViewAdapter.addAll(crudOperations.readAllItems());
-        ((ListView) this.listView).setSelection(this.listViewAdapter.getPosition(item));
-    }
+//    protected void addItemToList(Todo item) {
+//        this.recyclerViewAdapter.add(item);
+//        ((recyclerView) this.recyclerView).setSelection(this.recyclerViewAdapter.getPosition(item));
+//    }
+//
+//    protected void updateList(Todo item) {
+//        recyclerViewAdapter.addAll(crudOperations.readAllItems());
+//        ((recyclerView) this.recyclerView).setSelection(this.recyclerViewAdapter.getPosition(item));
+//    }
 
     private void setChallengeEndingTime() {
 

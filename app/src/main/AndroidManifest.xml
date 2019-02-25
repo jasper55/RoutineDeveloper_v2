@@ -20,6 +20,8 @@
         </activity>
 
         <activity android:name="com.example.app.jasper.routinedeveloper_v2.DetailviewActivity"/>
+        <activity android:name=".model.RecyclerViewAdapter" />
+
         <receiver android:name=".NotificationReceiver"/>
 
 

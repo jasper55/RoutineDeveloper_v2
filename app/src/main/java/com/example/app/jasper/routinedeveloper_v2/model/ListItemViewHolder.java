@@ -1,5 +1,6 @@
 package com.example.app.jasper.routinedeveloper_v2.model;
 
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -19,9 +20,9 @@ public class ListItemViewHolder {
 
     public ListItemViewHolder(final ArrayAdapter<Todo> listViewAdapter, final SQLCRUDOperations crudOperations, View itemView) {
 
-        this.todoId = itemView.findViewById(R.id.listitemId);
-        this.todoName = itemView.findViewById(R.id.listitemName);
-        this.checkBox = itemView.findViewById(R.id.listitemCheckBox);
+        this.todoId = itemView.findViewById(R.id.list_item_id);
+        this.todoName = itemView.findViewById(R.id.list_item_name);
+        this.checkBox = itemView.findViewById(R.id.list_item_checkBox);
 
         this.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             Todo mockItem = null;
