@@ -195,7 +195,7 @@ public class OverviewActivity extends AppCompatActivity {
 
     private void initRecyclerViewList() {
 
-        recyclerView=findViewById(R.id.recycler_view_data);
+        recyclerView = findViewById(R.id.recycler_view_data);
         recyclerViewAdapter = new RecyclerViewAdapter(this, crudOperations.readAllItems(), crudOperations, new RecyclerViewAdapter.CustomItemClickListener() {
             @Override
             public void onItemClick(int position) {
@@ -422,23 +422,32 @@ public class OverviewActivity extends AppCompatActivity {
 
         if (resultCode == RESULT_OK) {
             try {
-                long id = intent.getLongExtra(DetailviewActivity.ARG_ITEM_ID, 1);
+                long id = intent.getLongExtra(DetailviewActivity.ARG_ITEM_ID, -1);
+                Log.i("RD_OnActivtyResult: ", String.valueOf(id));
                 item = crudOperations.readItem(id);
+                int position = recyclerViewAdapter.getPosition();
+                Log.i("RD_getposition: ", String.valueOf(position));
 
                 if (requestCode == CALL_CREATE_ITEM) {
                     Toast.makeText(this, "new item received", Toast.LENGTH_LONG).show();
-//                    recyclerViewAdapter.addItemToList(item, listViewAdapter.getPosition(item));
+                    recyclerViewAdapter.addItem(item);
                 }
                 if (requestCode == CALL_EDIT_ITEM) {
-                    Toast.makeText(this, "item updated", Toast.LENGTH_LONG).show();
-//                    recyclerViewAdapter.updateList(item, listViewAdapter.getPosition(item));
+                    if (id == -1) {
+                        recyclerViewAdapter.removeItem(position);
+                        Toast.makeText(this, "item removed", Toast.LENGTH_LONG).show();
+                    } else {
+                        recyclerViewAdapter.updateList(item, position);
+                        Toast.makeText(this, "item updated", Toast.LENGTH_LONG).show();
+                    }
+
                 } else {
                     Log.i("onActivityResult", "No new item received");
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            recyclerViewAdapter.updateList();
+
         } // if resultCode
 
     }   // onActivityResult

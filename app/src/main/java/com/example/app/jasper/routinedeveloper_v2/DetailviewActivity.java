@@ -53,12 +53,11 @@ public class DetailviewActivity extends AppCompatActivity implements DetailviewA
 
         } else {
             crudOperations.updateItem(item.getId(),item);
+            Log.i("RD_Detailview","updated id: " + String.valueOf(item.getId()));
         }
 
         Intent returnIntent = new Intent();
         returnIntent.putExtra(ARG_ITEM_ID, item.getId());
-
-        Log.i("RD_Detailview","created intent: " + String.valueOf(returnIntent.getExtras()));
 
         setResult(RESULT_OK, returnIntent);    // RESULT_OK comes from Activity.class
         finish();

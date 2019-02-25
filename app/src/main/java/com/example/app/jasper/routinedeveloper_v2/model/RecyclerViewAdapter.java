@@ -21,20 +21,18 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     private static final String TAG = "RecyclerViewAdapter";
 
-
     CustomItemClickListener customItemClickListener;
+    int currentPosition;
     private Context context;
     private List<Todo> todoList;
     private SQLCRUDOperations crudOperations;
-
 
     // Its similar to what your code in the ListView does (checking if convertView is null)
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, final int position) {
         View view = LayoutInflater.from(viewGroup.getContext())
-                .inflate(R.layout.layout_todoitem,viewGroup, false);
-
+                .inflate(R.layout.layout_todoitem, viewGroup, false);
         return new ViewHolder(view);
     }
 
@@ -44,27 +42,22 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         viewHolder.todoId.setText(String.valueOf(todoItem.getId()));
         viewHolder.todoName.setText(todoItem.getName());
         viewHolder.checkBox.setChecked(todoItem.isDone());
-
-        // or:
-
-//        viewHolder.todoId.setText(String.valueOf(todoItem.getId()));
-//        viewHolder.todoName.setText(todoItem.getName());
-//        viewHolder.checkBox.setChecked(todoItem.isDone());
-
-        // methode hier oder im ViewHolder???
-        //TODO testen wo der Clicklistner hinmuss
+        
         viewHolder.todoName.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 customItemClickListener.onItemClick(position);
+                currentPosition = position;
             }
         });
 
         viewHolder.todoName.setOnLongClickListener(new View.OnLongClickListener() {
+
             @Override
             public boolean onLongClick(View v) {
                 customItemClickListener.onLongItemClick(position);
-                Toast.makeText(context,"onLongClicked",Toast.LENGTH_SHORT );
+                currentPosition = position;
+                Toast.makeText(context, "onLongClicked", Toast.LENGTH_SHORT);
                 return true;
             }
         });
@@ -93,31 +86,28 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         return todoList.size();
     }
 
-
-
-    public Todo getItem(int position){
+    public Todo getItem(int position) {
         return todoList.get(position);
     }
 
-    public void updateList2(Todo item, int position) {crudOperations.updateItem(item.getId(),item);
-    todoList.add(item);
-    notifyItemChanged(position);
-    }
-
-    public void updateList(){
-        todoList = crudOperations.readAllItems();
-        notifyDataSetChanged();
-    }
-
-    public void addItemToList(Todo item, int position) {crudOperations.updateItem(item.getId(),item);
-        todoList = crudOperations.readAllItems();
+    public void addItem(Todo item) {
+        crudOperations.updateItem(item.getId(), item);
         todoList.add(item);
-        notifyItemChanged(position);
+        this.notifyDataSetChanged();
     }
 
+    public void updateList(Todo item, int position) {
+        todoList.set(position, crudOperations.readItem(item.getId()));
+        this.notifyDataSetChanged();
+    }
 
-    public void addAll(List<Todo> todos) {
-        crudOperations.readAllItems();
+    public void removeItem(int position) {
+        todoList.remove(position);
+        this.notifyDataSetChanged();
+    }
+
+    public int getPosition() {
+        return currentPosition;
     }
 
 
@@ -155,14 +145,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
 
-    public RecyclerViewAdapter(Context context, List<Todo> todoList,  SQLCRUDOperations crudOperations, CustomItemClickListener listener) {
+    public RecyclerViewAdapter(Context context, List<Todo> todoList, SQLCRUDOperations crudOperations, CustomItemClickListener listener) {
         this.customItemClickListener = listener;
         this.context = context;
         this.todoList = todoList;
         this.crudOperations = crudOperations;
     }
 
-    public interface CustomItemClickListener{
+    public interface CustomItemClickListener {
         void onItemClick(int position);
 
         void onLongItemClick(int position);
