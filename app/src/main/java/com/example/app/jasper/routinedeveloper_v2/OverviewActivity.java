@@ -19,7 +19,6 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.ContextMenu;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -95,7 +94,7 @@ public class OverviewActivity extends AppCompatActivity {
         myPrefs.firstTimeStartingApp();
 
         instantiateViewElements();
-        setListenersToViewElements();
+        setClickListenersToViewElements();
 
         myPrefs.loadSharedPrefs();
         myPrefs.applyPrefsToView(challengeEndingDate, textViewPlus, textViewMinus);
@@ -131,38 +130,7 @@ public class OverviewActivity extends AppCompatActivity {
         }
     }
 
-    private void setListenersToViewElements() {
-//        recyclerView.setAdapter(recyclerViewAdapter);
-//        recyclerViewAdapter.addAll(crudOperations.readAllItems());
-//
-//
-//        recyclerView.setOnContextClickListener(new View.OnContextClickListener() {
-//            @Override
-//            public boolean onContextClick(View v) {
-//                Toast.makeText(getApplicationContext(),"LongClick",Toast.LENGTH_SHORT).show();
-//                //registerForContextMenu(v);
-//                return true;
-//            }
-//        });
-//
-//        recyclerView.setOnLongClickListener(new View.OnLongClickListener() {
-//            @Override
-//            public boolean onLongClick(View v) {
-//                return false;
-//            }
-//        });
-
-
-//        ((recyclerView) recyclerView).setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-//            @Override
-//            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-//                Toast.makeText(getApplicationContext(),"LongClick",Toast.LENGTH_SHORT).show();
-//                registerForContextMenu(recyclerView);
-//                selectedItemId = recyclerViewAdapter.getItemId(position);
-//                selectedItem = recyclerViewAdapter.getItem(position);
-//                return true;
-//            }
-//        });
+    private void setClickListenersToViewElements() {
 
         //setItemListClickListener();
 
@@ -204,12 +172,13 @@ public class OverviewActivity extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                Todo selectedItem = recyclerViewAdapter.getItem(position);
+                Todo selectedItem = listViewAdapter.getItem(position);
                 Log.i("RD_Position: ", String.valueOf(position));
                 Log.i("RD_ViewID: ", String.valueOf(view.getId()));
                 showDetailViewForEdit(selectedItem);
             }
         });
+
     }
 
     private void instantiateViewElements() {
@@ -225,17 +194,25 @@ public class OverviewActivity extends AppCompatActivity {
     }
 
     private void initRecyclerViewList() {
-        recyclerView = new RecyclerView(this);
 
-        recyclerView.findViewById(R.id.ListView_data);
-        recyclerViewAdapter = new RecyclerViewAdapter(this, crudOperations.readAllItems(), crudOperations);
-        recyclerView.setAdapter(recyclerViewAdapter);
+        recyclerView=findViewById(R.id.recycler_view_data);
+        recyclerViewAdapter = new RecyclerViewAdapter(this, crudOperations.readAllItems(), crudOperations, new RecyclerViewAdapter.CustomItemClickListener() {
+            @Override
+            public void onItemClick(int position) {
+                showDetailViewForEdit(recyclerViewAdapter.getItem(position));
+            }
+
+            @Override
+            public void onLongItemClick(int position) {
+
+            }
+        });
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        RecyclerView.ViewHolder viewHolder = recyclerViewAdapter.onCreateViewHolder()
+        recyclerView.setAdapter(recyclerViewAdapter);
     }
 
     private void setUpListView() {
-        listView = findViewById(R.id.ListView_data);
+        listView = findViewById(R.id.recycler_view_data);
         listViewAdapter = new ArrayAdapter<Todo>(
                 this, R.layout.layout_todoitem, todoList) {
 
@@ -450,17 +427,19 @@ public class OverviewActivity extends AppCompatActivity {
 
                 if (requestCode == CALL_CREATE_ITEM) {
                     Toast.makeText(this, "new item received", Toast.LENGTH_LONG).show();
+//                    recyclerViewAdapter.addItemToList(item, listViewAdapter.getPosition(item));
                 }
                 if (requestCode == CALL_EDIT_ITEM) {
                     Toast.makeText(this, "item updated", Toast.LENGTH_LONG).show();
+//                    recyclerViewAdapter.updateList(item, listViewAdapter.getPosition(item));
                 } else {
                     Log.i("onActivityResult", "No new item received");
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            recyclerViewAdapter.updateList();
         } // if resultCode
-//        updateList(item);
 
     }   // onActivityResult
 
@@ -468,11 +447,13 @@ public class OverviewActivity extends AppCompatActivity {
 //        this.recyclerViewAdapter.add(item);
 //        ((recyclerView) this.recyclerView).setSelection(this.recyclerViewAdapter.getPosition(item));
 //    }
-//
-//    protected void updateList(Todo item) {
-//        recyclerViewAdapter.addAll(crudOperations.readAllItems());
-//        ((recyclerView) this.recyclerView).setSelection(this.recyclerViewAdapter.getPosition(item));
-//    }
+
+    protected void updateList(Todo item) {
+        crudOperations.readAllItems();
+        //recyclerViewAdapter.addAll(crudOperations.readAllItems());
+
+        //((recyclerView) this.recyclerView).setSelection(this.recyclerViewAdapter.getPosition(item));
+    }
 
     private void setChallengeEndingTime() {
 
