@@ -19,8 +19,6 @@ import java.util.List;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
 
-    private static final String TAG = "RecyclerViewAdapter";
-
     CustomItemClickListener customItemClickListener;
     int currentPosition;
     private Context context;
@@ -43,7 +41,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         viewHolder.todoName.setText(todoItem.getName());
         viewHolder.checkBox.setChecked(todoItem.isDone());
 
-        viewHolder.todoName.setOnClickListener(new View.OnClickListener() {
+        viewHolder.itemListContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 customItemClickListener.onItemClick(position);
@@ -51,16 +49,26 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             }
         });
 
-        viewHolder.todoName.setOnLongClickListener(new View.OnLongClickListener() {
+//        viewHolder.todoName.setOnLongClickListener(new View.OnLongClickListener() {
+//
+//            @Override
+//            public boolean onLongClick(View v) {
+//                customItemClickListener.onLongItemClick(position);
+//                currentPosition = position;
+//                return true;
+//            }
+//        });
 
-            @Override
-            public boolean onLongClick(View v) {
-                customItemClickListener.onLongItemClick(position);
-                currentPosition = position;
-
-                return true;
-            }
-        });
+//        registerForContextMenu(viewHolder.itemListContainer);
+//        viewHolder.itemListContainer.setOnContextClickListener(new View.OnContextClickListener() {
+//            @Override
+//            public boolean onContextClick(View v) {
+//                 customItemClickListener.onLongItemClick(position);
+//                 currentPosition = position;
+//                 registerForContextMenue
+//                 return true;
+//            }
+//        });
 
         viewHolder.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             Todo mockItem = null;
@@ -78,7 +86,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             }
         });
     }
-
 
     // Methode auch wichtig, da wenn default 0 gelassen wird, wird nichts angezeigt
     @Override

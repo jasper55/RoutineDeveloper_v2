@@ -102,33 +102,33 @@ public class OverviewActivity extends AppCompatActivity {
         instantiateTimePicker();
 
         instantiateFABMenu();
-        registerForContextMenu(recyclerView);
+//        registerForContextMenu(recyclerView);
     }       // onCreate() - end
 
 
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-        getMenuInflater().inflate(R.menu.menu_long_item_clicked, menu);
-    }
-
-
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.option_delete:
-                crudOperations.deleteItem(selectedItemId);
-                //recyclerViewAdapter.setNotifyOnChange(true);
-                recyclerViewAdapter.notifyDataSetChanged();
-                return true;
-            case R.id.option_edit:
-                selectedItem = recyclerViewAdapter.getItem((int) selectedItemId);
-                showDetailViewForEdit(selectedItem);
-                return true;
-            default:
-                return super.onContextItemSelected(item);
-        }
-    }
+//    @Override
+//    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+//        super.onCreateContextMenu(menu, v, menuInfo);
+//        getMenuInflater().inflate(R.menu.menu_long_item_clicked, menu);
+//    }
+//
+//
+//    @Override
+//    public boolean onContextItemSelected(MenuItem item) {
+//        switch (item.getItemId()) {
+//            case R.id.option_delete:
+//                crudOperations.deleteItem(selectedItemId);
+//                //recyclerViewAdapter.setNotifyOnChange(true);
+//                recyclerViewAdapter.notifyDataSetChanged();
+//                return true;
+//            case R.id.option_edit:
+//                selectedItem = recyclerViewAdapter.getItem((int) selectedItemId);
+//                showDetailViewForEdit(selectedItem);
+//                return true;
+//            default:
+//                return super.onContextItemSelected(item);
+//        }
+//    }
 
     private void setClickListenersToViewElements() {
         //setItemListClickListener();
