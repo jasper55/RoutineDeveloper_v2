@@ -66,14 +66,16 @@ public class DetailviewActivity extends AppCompatActivity implements DetailviewA
     @Override
     public void deleteTodo() {
 
+        long deletetedId = item.getId();
         crudOperations.deleteItem(item.getId());
 
         Intent returnIntent = new Intent();
         returnIntent.putExtra(ARG_ITEM_ID, (long[]) null);
 
-        Toast.makeText(this, "Element has been deleted", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(this, "Element has been deleted", Toast.LENGTH_SHORT).show();
 
         setResult(RESULT_OK, returnIntent);    // RESULT_OK comes from the Activity.class
+        Log.i("RESULT_OK", String.valueOf(returnIntent));
         finish();
     }
 

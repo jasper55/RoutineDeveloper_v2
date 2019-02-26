@@ -204,7 +204,6 @@ public class OverviewActivity extends AppCompatActivity {
 
             @Override
             public void onLongItemClick(int position) {
-
             }
         });
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -417,34 +416,30 @@ public class OverviewActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent intent) {
-//        recyclerViewAdapter;
+
         super.onActivityResult(requestCode, resultCode, intent);
 
         if (resultCode == RESULT_OK) {
+            int position = recyclerViewAdapter.getPosition();
+
             try {
-                long id = intent.getLongExtra(DetailviewActivity.ARG_ITEM_ID, -1);
-                Log.i("RD_OnActivtyResult: ", String.valueOf(id));
+                long id = intent.getLongExtra(DetailviewActivity.ARG_ITEM_ID, -99);
                 item = crudOperations.readItem(id);
-                int position = recyclerViewAdapter.getPosition();
-                Log.i("RD_getposition: ", String.valueOf(position));
 
                 if (requestCode == CALL_CREATE_ITEM) {
                     Toast.makeText(this, "new item received", Toast.LENGTH_LONG).show();
                     recyclerViewAdapter.addItem(item);
                 }
-                if (requestCode == CALL_EDIT_ITEM) {
-                    if (id == -1) {
-                        recyclerViewAdapter.removeItem(position);
-                        Toast.makeText(this, "item removed", Toast.LENGTH_LONG).show();
-                    } else {
-                        recyclerViewAdapter.updateList(item, position);
-                        Toast.makeText(this, "item updated", Toast.LENGTH_LONG).show();
-                    }
 
+                if (requestCode == CALL_EDIT_ITEM) {
+                    recyclerViewAdapter.updateList(item, position);
+                    Toast.makeText(this, "item updated", Toast.LENGTH_LONG).show();
                 } else {
                     Log.i("onActivityResult", "No new item received");
                 }
             } catch (Exception e) {
+                recyclerViewAdapter.removeItem(position);
+                Toast.makeText(this, "item removed", Toast.LENGTH_LONG).show();
                 e.printStackTrace();
             }
 
@@ -454,14 +449,13 @@ public class OverviewActivity extends AppCompatActivity {
 
 //    protected void addItemToList(Todo item) {
 //        this.recyclerViewAdapter.add(item);
-//        ((recyclerView) this.recyclerView).setSelection(this.recyclerViewAdapter.getPosition(item));
+//        ((listView) this.listView).setSelection(this.listViewAdapter.getPosition(item));
 //    }
 
     protected void updateList(Todo item) {
         crudOperations.readAllItems();
-        //recyclerViewAdapter.addAll(crudOperations.readAllItems());
-
-        //((recyclerView) this.recyclerView).setSelection(this.recyclerViewAdapter.getPosition(item));
+        //listViewAdapter.addAll(crudOperations.readAllItems());
+        //((listView) this.listView).setSelection(this.listViewAdapter.getPosition(item));
     }
 
     private void setChallengeEndingTime() {

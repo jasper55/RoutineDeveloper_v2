@@ -42,7 +42,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         viewHolder.todoId.setText(String.valueOf(todoItem.getId()));
         viewHolder.todoName.setText(todoItem.getName());
         viewHolder.checkBox.setChecked(todoItem.isDone());
-        
+
         viewHolder.todoName.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -57,7 +57,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             public boolean onLongClick(View v) {
                 customItemClickListener.onLongItemClick(position);
                 currentPosition = position;
-                Toast.makeText(context, "onLongClicked", Toast.LENGTH_SHORT);
+
                 return true;
             }
         });
@@ -80,7 +80,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
 
-    // Methode auch wichtig, da wenn default 0 gelassen, nicts wird angezeigt
+    // Methode auch wichtig, da wenn default 0 gelassen wird, wird nichts angezeigt
     @Override
     public int getItemCount() {
         return todoList.size();
@@ -124,23 +124,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             todoId = itemView.findViewById(R.id.list_item_id);
             todoName = itemView.findViewById(R.id.list_item_name);
             checkBox = itemView.findViewById(R.id.list_item_checkBox);
-
-//            this.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-//                Todo mockItem = null;
-//
-//                @Override
-//                public void onCheckedChanged(CompoundButton buttonView, boolean b) {
-//                    int position = (int) buttonView.getTag();
-//                    boolean checked = checkBox.isChecked();
-//                    Log.i("Checkbox listener", String.valueOf(checked));
-//                    Log.i("Checkbox position", String.valueOf(position));
-//
-//                    Todo item = todoList.get(position);
-//                    long id = item.getId();
-//                    mockItem.setDone(checked);
-//                    crudOperations.updateItem(id, mockItem);
-//                }
-//            });
         }
     }
 
