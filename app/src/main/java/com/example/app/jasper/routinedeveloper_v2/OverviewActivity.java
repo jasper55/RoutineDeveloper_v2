@@ -131,11 +131,8 @@ public class OverviewActivity extends AppCompatActivity {
     }
 
     private void setClickListenersToViewElements() {
-
         //setItemListClickListener();
-
         setEndingDateListener();
-
     }
 
     private void setEndingDateListener() {
@@ -344,7 +341,7 @@ public class OverviewActivity extends AppCompatActivity {
 
     @SuppressLint("RestrictedApi")
     private void closeFABMenu() {
-        removeBlurOnBackground();
+//        removeBlurOnBackground();
         isFABOpen = false;
         fabOverlay.setVisibility(View.GONE);
         fab_container_add.animate().translationY(0);
@@ -383,13 +380,12 @@ public class OverviewActivity extends AppCompatActivity {
     }
 
     private void removeBlurOnBackground() {
-//        ViewGroup content_main = findViewById(R.id.content_main);
-//        Blurry.with(getBaseContext())
-//                .radius(0).sampling(0)
-//                .animate(500)
-//                .onto(content_main);
+        ViewGroup content_main = findViewById(R.id.content_main);
+        Blurry.with(getBaseContext())
+                .radius(0).sampling(0)
+                .animate(500)
+                .onto(content_main);
     }
-
 
     @Override
     public void onBackPressed() {
@@ -447,15 +443,15 @@ public class OverviewActivity extends AppCompatActivity {
 
     }   // onActivityResult
 
-//    protected void addItemToList(Todo item) {
-//        this.recyclerViewAdapter.add(item);
-//        ((listView) this.listView).setSelection(this.listViewAdapter.getPosition(item));
-//    }
+    protected void addItemToList(Todo item) {
+        this.listViewAdapter.add(item);
+        this.listView.setSelection(this.listViewAdapter.getPosition(item));
+    }
 
     protected void updateList(Todo item) {
         crudOperations.readAllItems();
-        //listViewAdapter.addAll(crudOperations.readAllItems());
-        //((listView) this.listView).setSelection(this.listViewAdapter.getPosition(item));
+        listViewAdapter.addAll(crudOperations.readAllItems());
+        this.listView.setSelection(this.listViewAdapter.getPosition(item));
     }
 
     private void setChallengeEndingTime() {
