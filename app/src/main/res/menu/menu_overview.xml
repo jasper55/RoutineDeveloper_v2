@@ -4,7 +4,6 @@
     tools:context="com.example.app.jasper.routinedeveloper_v2.OverviewActivity"
     android:gravity="right">
 
-
     <item
         android:id="@+id/clearScore"
         android:orderInCategory="100"
@@ -25,8 +24,5 @@
         android:title="set daily reminder"
         android:layout_width="wrap_content"
         app:showAsAction="never" />
-
-
-
 
 </menu>

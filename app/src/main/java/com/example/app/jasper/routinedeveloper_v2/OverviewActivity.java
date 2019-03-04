@@ -426,15 +426,13 @@ public class OverviewActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        myPrefs.loadSharedPrefs();
-        myPrefs.applyPrefsToView(challengeEndingDate, textViewPlus, textViewMinus);
+        myPrefs.saveSharedPrefs(challengeEndingDate, textViewPlus, textViewMinus);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        myPrefs.loadSharedPrefs();
-        myPrefs.applyPrefsToView(challengeEndingDate, textViewPlus, textViewMinus);
+        myPrefs.saveSharedPrefs(challengeEndingDate, textViewPlus, textViewMinus);
     }
 
     @Override
@@ -587,10 +585,12 @@ public class OverviewActivity extends AppCompatActivity {
 
         if (id == R.id.clearScore) {
             backgroundTask.clearScore();
+            myPrefs.applyPrefsToView(challengeEndingDate, textViewPlus, textViewMinus);
             return true;
         }
         if (id == R.id.clearTarget) {
             backgroundTask.clearTargetDate();
+            myPrefs.applyPrefsToView(challengeEndingDate, textViewPlus, textViewMinus);
             return true;
         }
 

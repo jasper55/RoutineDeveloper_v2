@@ -108,7 +108,6 @@ public class BackgroundTasks {
         prefs_scoreMinus = "0";
 
         editor.apply();
-        myPrefs.applyPrefsToView(challengeEndingDate, textViewPlus, textViewMinus);
     }
 
     public void clearTargetDate() {
@@ -121,7 +120,6 @@ public class BackgroundTasks {
         editor.putString(SCOREMINUS, textViewMinus.getText().toString());
 
         editor.apply();
-        myPrefs.applyPrefsToView(challengeEndingDate, textViewPlus, textViewMinus);
     }
 
     public BackgroundTasks(Context context, final List<Todo> todoList, MySharedPrefs myPrefs,
