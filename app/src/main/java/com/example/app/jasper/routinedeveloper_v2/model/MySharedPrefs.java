@@ -18,7 +18,9 @@ public class MySharedPrefs {
     private static final String SCOREMINUS = "scoreMinus";
     private static final String STOREDDAY = "storedDay";
     private static final String FIRSTSTART = "firstStart";
-    private String date, prefs_scorePlus, prefs_scoreMinus;
+    public static String date;
+    private static String prefs_scorePlus;
+    private static String prefs_scoreMinus;
     private Context context;
 
     public void saveCurrentDateToPrefs() {

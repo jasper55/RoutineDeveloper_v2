@@ -2,6 +2,7 @@ package com.example.app.jasper.routinedeveloper_v2;
 
 import android.animation.Animator;
 import android.annotation.SuppressLint;
+import android.app.ActionBar;
 import android.app.AlarmManager;
 import android.app.DatePickerDialog;
 import android.app.PendingIntent;
@@ -18,7 +19,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.ContextMenu;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -85,7 +85,6 @@ public class OverviewActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.layout_overview);
-
 
         this.crudOperations = new SQLCRUDOperations(this);
         this.myPrefs = new MySharedPrefs(this);
@@ -181,13 +180,27 @@ public class OverviewActivity extends AppCompatActivity {
     private void instantiateViewElements() {
         //setUpListView();
         initRecyclerViewList();
-
         challengeEndingDate = findViewById(R.id.tvDate);
-        this.textViewPlus = findViewById(R.id.scorePlus);
-        this.textViewMinus = findViewById(R.id.scoreMinus);
+        initActionBar();
+        //initStandartToolbar();
+    }
 
+    private void initStandartToolbar() {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+    }
+
+    private void initActionBar(){
+        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+        getSupportActionBar().setDisplayShowCustomEnabled(true);
+        getSupportActionBar().setCustomView(R.layout.custom_action_bar_layout);
+        View view =getSupportActionBar().getCustomView();
+        initScoreContainer();
+    }
+
+    private void initScoreContainer() {
+        this.textViewPlus = findViewById(R.id.scorePlus);
+        this.textViewMinus = findViewById(R.id.scoreMinus);
     }
 
     private void initRecyclerViewList() {
@@ -399,13 +412,37 @@ public class OverviewActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        backgroundTask.listenForScoreUpdates();
+        backgroundTask.checkIsDateChanged(myPrefs.date, textViewPlus.getText(), textViewMinus.getText());
     }       // onPause - end
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        backgroundTask.checkIsDateChanged(myPrefs.date, textViewPlus.getText(), textViewMinus.getText());
+        myPrefs.loadSharedPrefs();
+        myPrefs.applyPrefsToView(challengeEndingDate, textViewPlus, textViewMinus);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        myPrefs.loadSharedPrefs();
+        myPrefs.applyPrefsToView(challengeEndingDate, textViewPlus, textViewMinus);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        myPrefs.loadSharedPrefs();
+        myPrefs.applyPrefsToView(challengeEndingDate, textViewPlus, textViewMinus);
+    }
 
     @Override
     protected void onResume() {
         super.onResume();
-        backgroundTask.listenForScoreUpdates();
+        this.backgroundTask = new BackgroundTasks(this, todoList, myPrefs, crudOperations, challengeEndingDate, textViewPlus, textViewMinus);
+
+        backgroundTask.checkIsDateChanged(myPrefs.date, textViewPlus.getText(), textViewMinus.getText());
         myPrefs.loadSharedPrefs();
         myPrefs.applyPrefsToView(challengeEndingDate, textViewPlus, textViewMinus);
     }       //onResume - end

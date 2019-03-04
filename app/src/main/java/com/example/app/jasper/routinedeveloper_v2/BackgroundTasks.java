@@ -18,11 +18,11 @@ import static android.content.Context.MODE_PRIVATE;
 public class BackgroundTasks {
 
     private MySharedPrefs myPrefs;
-    private List<Todo> todoList;
-    private Context context;
-    private SQLCRUDOperations crudOperations;
-    private TextView challengeEndingDate, textViewPlus, textViewMinus;
-    private Todo item;
+    private static List<Todo> todoList;
+    private static Context context;
+    private static SQLCRUDOperations crudOperations;
+    private static TextView challengeEndingDate, textViewPlus, textViewMinus;
+    private static Todo item;
 
     private static final String SHARED_PREFS = "sharedPrefs";
     private static final String DATE = "date";
@@ -32,25 +32,23 @@ public class BackgroundTasks {
     private static final String FIRSTSTART = "firstStart";
     private String date, prefs_scorePlus, prefs_scoreMinus;
 
-    public void listenForScoreUpdates() {
-        Calendar calendar = Calendar.getInstance();
+    public void loadPrefs(){
+        SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
 
-        int currentday = calendar.get(Calendar.DAY_OF_YEAR);
+        date = sharedPreferences.getString(DATE, "");
+        prefs_scorePlus = sharedPreferences.getString(SCOREPLUS, "0");
+        prefs_scoreMinus = sharedPreferences.getString(SCOREMINUS, "0");
+    }
+
+    public void checkIsDateChanged(String date, CharSequence text, CharSequence textViewMinusText) {
+
+        int currentday = Calendar.getInstance().DAY_OF_YEAR;
         SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
         int lastday = sharedPreferences.getInt(STOREDDAY, 0);
 
         if (currentday != lastday) {
-            calendar.setTimeInMillis(System.currentTimeMillis());
-            calendar.set(Calendar.HOUR_OF_DAY, 23);
-            calendar.set(Calendar.MINUTE, 59);
-            calendar.set(Calendar.SECOND, 59);
 
-            long currentTime = Calendar.getInstance().getTimeInMillis();
-            long updateTimeTimeInMillis = calendar.getTimeInMillis();
-
-            if (currentTime > updateTimeTimeInMillis) {
-                summUpCheckBoxes(todoList);
-            }
+            summUpCheckBoxes(todoList);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putInt(STOREDDAY, currentday);
             editor.apply();
@@ -59,6 +57,7 @@ public class BackgroundTasks {
 
     protected void summUpCheckBoxes(List<Todo> todoList) {
 
+        loadPrefs();
         int doneCounter = Integer.parseInt(prefs_scorePlus);
         int undoneCounter = Integer.parseInt(prefs_scoreMinus);
 
