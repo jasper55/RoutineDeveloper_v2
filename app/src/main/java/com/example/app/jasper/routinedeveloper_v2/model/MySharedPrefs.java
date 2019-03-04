@@ -2,6 +2,7 @@ package com.example.app.jasper.routinedeveloper_v2.model;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.view.ContextMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,9 +22,17 @@ public class MySharedPrefs {
     public static String date;
     private static String prefs_scorePlus;
     private static String prefs_scoreMinus;
-    private Context context;
 
-    public void saveCurrentDateToPrefs() {
+    private static MySharedPrefs instance;
+
+    public static MySharedPrefs getInstance(){
+        if(instance==null) {
+            instance=new MySharedPrefs();
+        }
+        return instance;
+    }
+
+    public void saveCurrentDateToPrefs(Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         Calendar calendar = Calendar.getInstance();
@@ -32,7 +41,7 @@ public class MySharedPrefs {
         editor.apply();
     }
 
-    public void loadSharedPrefs() {
+    public void loadSharedPrefs(Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
 
         date = sharedPreferences.getString(DATE, "");
@@ -40,31 +49,31 @@ public class MySharedPrefs {
         prefs_scoreMinus = sharedPreferences.getString(SCOREMINUS, "0");
     }
 
-    public void saveSharedPrefs(TextView challengeEndingDate, TextView textViewPlus, TextView textViewMinus) {
+    public void saveSharedPrefs(Context context,String endingDate, String scorePlus, String scoreMinus) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
-        editor.putString(DATE, challengeEndingDate.getText().toString());
-        editor.putString(SCOREPLUS, textViewPlus.getText().toString());
-        editor.putString(SCOREMINUS, textViewMinus.getText().toString());
+        editor.putString(DATE, endingDate);
+        editor.putString(SCOREPLUS, scorePlus);
+        editor.putString(SCOREMINUS, scoreMinus);
         editor.apply();
     }
 
-    public void applyPrefsToView(TextView challengeEndingDate, TextView textViewPlus, TextView textViewMinus) {
-        challengeEndingDate.setText(date);
-        textViewPlus.setText(prefs_scorePlus);
-        textViewMinus.setText(prefs_scoreMinus);
-    }
+//    public void applyPrefsToView(Context context,TextView challengeEndingDate, TextView textViewPlus, TextView textViewMinus) {
+//        challengeEndingDate.setText(date);
+//        textViewPlus.setText(prefs_scorePlus);
+//        textViewMinus.setText(prefs_scoreMinus);
+//    }
 
 
-    public void firstTimeStartingApp() {
+    public void firstTimeStartingApp(Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
         boolean firstStart = sharedPreferences.getBoolean(FIRSTSTART, true);
 
         if (firstStart) {
 
             Toast.makeText(context, "Welcome to Routine Developer!", Toast.LENGTH_SHORT).show();
-            saveCurrentDateToPrefs();
+            saveCurrentDateToPrefs(context);
 
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putBoolean(FIRSTSTART, false);
@@ -73,7 +82,5 @@ public class MySharedPrefs {
     }
 
 
-    public MySharedPrefs(Context context) {
-        this.context = context;
-    }
+
 }

@@ -17,12 +17,11 @@ import static android.content.Context.MODE_PRIVATE;
 
 public class BackgroundTasks {
 
-    private MySharedPrefs myPrefs;
-    private static List<Todo> todoList;
-    private static Context context;
-    private static SQLCRUDOperations crudOperations;
-    private static TextView challengeEndingDate, textViewPlus, textViewMinus;
-    private static Todo item;
+    private List<Todo> todoList;
+    private Context context;
+    private SQLCRUDOperations crudOperations;
+    private TextView challengeEndingDate, textViewPlus, textViewMinus;
+    private Todo item;
 
     private static final String SHARED_PREFS = "sharedPrefs";
     private static final String DATE = "date";
@@ -31,8 +30,9 @@ public class BackgroundTasks {
     private static final String STOREDDAY = "storedDay";
     private static final String FIRSTSTART = "firstStart";
     private String date, prefs_scorePlus, prefs_scoreMinus;
+    MyListener listener;
 
-    public void loadPrefs(){
+    public void loadPrefs() {
         SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
 
         date = sharedPreferences.getString(DATE, "");
@@ -79,13 +79,18 @@ public class BackgroundTasks {
         } else {
             undoneCounter = ++undoneCounter;
             textViewMinus.setText(String.valueOf(undoneCounter));
+            listener.callfunction(String.valueOf(undoneCounter));
         }
 
-        myPrefs.saveSharedPrefs(challengeEndingDate, textViewPlus, textViewMinus);
+        MySharedPrefs.getInstance().saveSharedPrefs(context,challengeEndingDate, textViewPlus, textViewMinus);
         resetCheckBoxes();
     }
 
-    private void resetCheckBoxes() {
+    interface MyListener{
+        void callfunction(String data);
+    }
+
+    private void resetCheckBoxes(List<Todo> todoList) {
         int size = todoList.size();
         Todo item;
 
@@ -98,40 +103,43 @@ public class BackgroundTasks {
     }
 
     public void clearScore() {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
+//        SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
+//        SharedPreferences.Editor editor = sharedPreferences.edit();
+//
+//        editor.putString(DATE, challengeEndingDate.getText().toString());
+//        editor.putString(SCOREPLUS, "0");
+//        editor.putString(SCOREMINUS, "0");
+//        prefs_scorePlus = "0";
+//        prefs_scoreMinus = "0";
+//
+//        editor.apply();
 
-        editor.putString(DATE, challengeEndingDate.getText().toString());
-        editor.putString(SCOREPLUS, "0");
-        editor.putString(SCOREMINUS, "0");
-        prefs_scorePlus = "0";
-        prefs_scoreMinus = "0";
-
-        editor.apply();
+        MySharedPrefs.getInstance().saveSharedPrefs(context,challengeEndingDate, "0", "0");
     }
 
     public void clearTargetDate() {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-
-        date = null;
-        editor.putString(DATE, date);
-        editor.putString(SCOREPLUS, textViewPlus.getText().toString());
-        editor.putString(SCOREMINUS, textViewMinus.getText().toString());
-
-        editor.apply();
+//        SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
+//        SharedPreferences.Editor editor = sharedPreferences.edit();
+//
+//        date = null;
+//        editor.putString(DATE, date);
+//        editor.putString(SCOREPLUS, textViewPlus.getText().toString());
+//        editor.putString(SCOREMINUS, textViewMinus.getText().toString());
+//
+//        editor.apply();
+        MySharedPrefs.getInstance().saveSharedPrefs(context,challengeEndingDate,textViewPlus, textViewMinus);
     }
 
-    public BackgroundTasks(Context context, final List<Todo> todoList, MySharedPrefs myPrefs,
+    public BackgroundTasks(Context context, final List<Todo> todoList,
                            SQLCRUDOperations crudOperations,
-                           TextView challengeEndingDate, TextView textViewPlus, TextView textViewMinus) {
+                           TextView challengeEndingDate, TextView textViewPlus, TextView textViewMinus,MyListener listener) {
 
         this.context = context;
         this.todoList = todoList;
-        this.myPrefs = myPrefs;
         this.crudOperations = crudOperations;
         this.challengeEndingDate = challengeEndingDate;
         this.textViewMinus = textViewMinus;
         this.textViewPlus = textViewPlus;
+        this.listener=listener;
     }
 }

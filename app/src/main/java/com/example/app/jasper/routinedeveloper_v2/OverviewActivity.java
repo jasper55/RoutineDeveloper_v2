@@ -46,7 +46,7 @@ import java.util.List;
 
 import jp.wasabeef.blurry.Blurry;
 
-public class OverviewActivity extends AppCompatActivity {
+public class OverviewActivity extends AppCompatActivity implements BackgroundTasks.MyListener {
 
     private TimePicker timepicker;
     private TimePickerDialog.OnTimeSetListener alertTimeListener;
@@ -80,6 +80,13 @@ public class OverviewActivity extends AppCompatActivity {
 
     //private ViewGroup content_main;
 
+    BackgroundTasks.MyListener mylist=new BackgroundTasks.MyListener() {
+        @Override
+        public void callfunction(String data) {
+            runOnUiThread();
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -87,8 +94,8 @@ public class OverviewActivity extends AppCompatActivity {
         setContentView(R.layout.layout_overview);
 
         this.crudOperations = new SQLCRUDOperations(this);
-        this.myPrefs = new MySharedPrefs(this);
-        this.backgroundTask = new BackgroundTasks(this, todoList, myPrefs, crudOperations, challengeEndingDate, textViewPlus, textViewMinus);
+        SQLCRUDOperations.getInstance(getApplicationContext())
+        this.backgroundTask = new BackgroundTasks(this, todoList, crudOperations, challengeEndingDate, textViewPlus, textViewMinus, mylist);
 
         myPrefs.firstTimeStartingApp();
 
@@ -595,5 +602,10 @@ public class OverviewActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void callfunction() {
+
     }
 }
