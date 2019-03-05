@@ -11,7 +11,6 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.app.jasper.routinedeveloper_v2.R;
 
@@ -23,7 +22,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     int currentPosition;
     private Context context;
     private List<Todo> todoList;
-    private SQLCRUDOperations crudOperations;
 
     // Its similar to what your code in the ListView does (checking if convertView is null)
     @NonNull
@@ -49,27 +47,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             }
         });
 
-//        viewHolder.todoName.setOnLongClickListener(new View.OnLongClickListener() {
-//
-//            @Override
-//            public boolean onLongClick(View v) {
-//                customItemClickListener.onLongItemClick(position);
-//                currentPosition = position;
-//                return true;
-//            }
-//        });
-
-//        registerForContextMenu(viewHolder.itemListContainer);
-//        viewHolder.itemListContainer.setOnContextClickListener(new View.OnContextClickListener() {
-//            @Override
-//            public boolean onContextClick(View v) {
-//                 customItemClickListener.onLongItemClick(position);
-//                 currentPosition = position;
-//                 registerForContextMenue
-//                 return true;
-//            }
-//        });
-
         viewHolder.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             Todo mockItem = null;
 
@@ -82,7 +59,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 mockItem = todoList.get(position);
                 long id = mockItem.getId();
                 mockItem.setDone(checked);
-                crudOperations.updateItem(id, mockItem);
+                SQLCRUDOperations.getInstance(context.getApplicationContext()).updateItem(id, mockItem);
             }
         });
     }
@@ -98,13 +75,13 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
     public void addItem(Todo item) {
-        crudOperations.updateItem(item.getId(), item);
+        SQLCRUDOperations.getInstance(context.getApplicationContext()).updateItem(item.getId(), item);
         todoList.add(item);
         this.notifyDataSetChanged();
     }
 
     public void updateList(Todo item, int position) {
-        todoList.set(position, crudOperations.readItem(item.getId()));
+        todoList.set(position, SQLCRUDOperations.getInstance(context.getApplicationContext()).readItem(item.getId()));
         this.notifyDataSetChanged();
     }
 
@@ -134,17 +111,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         }
     }
 
-
-    public RecyclerViewAdapter(Context context, List<Todo> todoList, SQLCRUDOperations crudOperations, CustomItemClickListener listener) {
+    public RecyclerViewAdapter(Context context, List<Todo> todoList,  CustomItemClickListener listener) {
         this.customItemClickListener = listener;
         this.context = context;
         this.todoList = todoList;
-        this.crudOperations = crudOperations;
     }
 
     public interface CustomItemClickListener {
         void onItemClick(int position);
-
         void onLongItemClick(int position);
     }
 }

@@ -28,16 +28,24 @@ public class SQLCRUDOperations {
                     "DONE BOOLEAN)";
 
     // Im Konstrukter wird die SQLiteDAtenbank entweder geöffnet oder erstellt, wenn sie noch nicht exitiert
-    public SQLCRUDOperations(Context context){
+    public SQLCRUDOperations(Context applicationContext){
 
         //Mode_PRIVATE: Ist eine vor-implementierte Konstante von Klasse Context
-        this.db = context.openOrCreateDatabase("myToDoDB.sqlite", Context.MODE_PRIVATE, null);
+        this.db = applicationContext.openOrCreateDatabase("myToDoDB.sqlite", Context.MODE_PRIVATE, null);
         if (db.getVersion() == 0){
             db.setVersion(1);
             db.execSQL(CREATION_QUERY);
         }
     }
 
+    private static SQLCRUDOperations instance;
+
+    public static SQLCRUDOperations getInstance(Context applicationContext){
+        if(instance==null) {
+            instance=new SQLCRUDOperations(applicationContext);
+        }
+        return instance;
+    }
 
     //////////// CRUD Operations ///////////
     public long createItem(Todo item) {             // item kommt vom databinding, hat also schon namen und done, aber keine id

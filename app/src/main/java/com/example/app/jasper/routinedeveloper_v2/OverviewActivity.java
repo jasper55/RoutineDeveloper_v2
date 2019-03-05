@@ -46,7 +46,7 @@ import java.util.List;
 
 import jp.wasabeef.blurry.Blurry;
 
-public class OverviewActivity extends AppCompatActivity implements BackgroundTasks.MyListener {
+public class OverviewActivity extends AppCompatActivity {
 
     private TimePicker timepicker;
     private TimePickerDialog.OnTimeSetListener alertTimeListener;
@@ -77,13 +77,39 @@ public class OverviewActivity extends AppCompatActivity implements BackgroundTas
     private MySharedPrefs myPrefs;
     private BackgroundTasks backgroundTask;
 
-
-    //private ViewGroup content_main;
-
-    BackgroundTasks.MyListener mylist=new BackgroundTasks.MyListener() {
+    BackgroundTasks.CallbackListener backgroundtaskListener = new BackgroundTasks.CallbackListener() {
         @Override
-        public void callfunction(String data) {
-            runOnUiThread();
+        public void updateMinusView(final String data) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    textViewMinus.setText(data);
+                }
+            });
+
+        }
+
+        @Override
+        public void updatePlusView(final String data) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    textViewPlus.setText(data);
+                }
+            });
+        }
+    };
+    MySharedPrefs.PrefsCallbackListener prefsCallbackListener = new MySharedPrefs.PrefsCallbackListener() {
+        @Override
+        public void callbackUpdateView(final String date, final String scorePlus, final String scoreMinus) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    challengeEndingDate.setText(date);
+                    textViewPlus.setText(scorePlus);
+                    textViewMinus.setText(scoreMinus);
+                }
+            });
         }
     };
 
@@ -93,17 +119,20 @@ public class OverviewActivity extends AppCompatActivity implements BackgroundTas
 
         setContentView(R.layout.layout_overview);
 
-        this.crudOperations = new SQLCRUDOperations(this);
-        SQLCRUDOperations.getInstance(getApplicationContext())
-        this.backgroundTask = new BackgroundTasks(this, todoList, crudOperations, challengeEndingDate, textViewPlus, textViewMinus, mylist);
-
-        myPrefs.firstTimeStartingApp();
-
+        crudOperations = SQLCRUDOperations.getInstance(getApplicationContext());
         instantiateViewElements();
-        setClickListenersToViewElements();
 
-        myPrefs.loadSharedPrefs();
-        myPrefs.applyPrefsToView(challengeEndingDate, textViewPlus, textViewMinus);
+        myPrefs = MySharedPrefs.getInstance();
+        myPrefs.loadSharedPrefs(this);
+        myPrefs.applyPrefsToView(prefsCallbackListener);
+
+        backgroundTask = new BackgroundTasks(this,
+                challengeEndingDate.getText().toString(), textViewPlus.getText().toString(), textViewMinus.getText().toString(), backgroundtaskListener);
+
+        myPrefs.firstTimeStartingApp(this);
+
+
+        setClickListenersToViewElements();
 
         instantiateTimePicker();
 
@@ -166,7 +195,7 @@ public class OverviewActivity extends AppCompatActivity implements BackgroundTas
                 month = month + 1;
                 String date = day + "." + month + "." + year;
                 challengeEndingDate.setText(date);
-                myPrefs.saveSharedPrefs(challengeEndingDate, textViewPlus, textViewMinus);
+                myPrefs.saveSharedPrefs(getApplicationContext(), challengeEndingDate.getText().toString(), textViewPlus.getText().toString(), textViewMinus.getText().toString());
             }
         };
     }
@@ -213,7 +242,7 @@ public class OverviewActivity extends AppCompatActivity implements BackgroundTas
     private void initRecyclerViewList() {
 
         recyclerView = findViewById(R.id.recycler_view_data);
-        recyclerViewAdapter = new RecyclerViewAdapter(this, crudOperations.readAllItems(), crudOperations, new RecyclerViewAdapter.CustomItemClickListener() {
+        recyclerViewAdapter = new RecyclerViewAdapter(this, getItemList(), new RecyclerViewAdapter.CustomItemClickListener() {
             @Override
             public void onItemClick(int position) {
                 showDetailViewForEdit(recyclerViewAdapter.getItem(position));
@@ -225,6 +254,11 @@ public class OverviewActivity extends AppCompatActivity implements BackgroundTas
         });
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(recyclerViewAdapter);
+    }
+
+    private List<Todo> getItemList() {
+        List<Todo> itemList = SQLCRUDOperations.getInstance(getApplicationContext()).readAllItems();
+        return itemList;
     }
 
     private void setUpListView() {
@@ -419,37 +453,41 @@ public class OverviewActivity extends AppCompatActivity implements BackgroundTas
     @Override
     protected void onPause() {
         super.onPause();
-        backgroundTask.checkIsDateChanged(myPrefs.date, textViewPlus.getText(), textViewMinus.getText());
+
     }       // onPause - end
 
     @Override
     protected void onRestart() {
         super.onRestart();
-        backgroundTask.checkIsDateChanged(myPrefs.date, textViewPlus.getText(), textViewMinus.getText());
-        myPrefs.loadSharedPrefs();
-        myPrefs.applyPrefsToView(challengeEndingDate, textViewPlus, textViewMinus);
+        boolean hasChanged = backgroundTask.checkIsDateChanged();
+        if (hasChanged){
+            backgroundTask.summUpCheckBoxes(todoList);
+        }
+//        myPrefs.loadSharedPrefs();
+        myPrefs.applyPrefsToView(prefsCallbackListener);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        myPrefs.saveSharedPrefs(challengeEndingDate, textViewPlus, textViewMinus);
+        myPrefs.saveSharedPrefs(this, challengeEndingDate.getText().toString(), textViewPlus.getText().toString(), textViewMinus.getText().toString());
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        myPrefs.saveSharedPrefs(challengeEndingDate, textViewPlus, textViewMinus);
+        myPrefs.saveSharedPrefs(this, challengeEndingDate.getText().toString(), textViewPlus.getText().toString(), textViewMinus.getText().toString());
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        this.backgroundTask = new BackgroundTasks(this, todoList, myPrefs, crudOperations, challengeEndingDate, textViewPlus, textViewMinus);
-
-        backgroundTask.checkIsDateChanged(myPrefs.date, textViewPlus.getText(), textViewMinus.getText());
-        myPrefs.loadSharedPrefs();
-        myPrefs.applyPrefsToView(challengeEndingDate, textViewPlus, textViewMinus);
+        boolean hasChanged = backgroundTask.checkIsDateChanged();
+        if (hasChanged){
+            backgroundTask.summUpCheckBoxes(todoList);
+        }
+//        myPrefs.loadSharedPrefs();
+        myPrefs.applyPrefsToView(prefsCallbackListener);
     }       //onResume - end
 
     @Override
@@ -592,20 +630,16 @@ public class OverviewActivity extends AppCompatActivity implements BackgroundTas
 
         if (id == R.id.clearScore) {
             backgroundTask.clearScore();
-            myPrefs.applyPrefsToView(challengeEndingDate, textViewPlus, textViewMinus);
+            myPrefs.applyPrefsToView(prefsCallbackListener);
             return true;
         }
         if (id == R.id.clearTarget) {
             backgroundTask.clearTargetDate();
-            myPrefs.applyPrefsToView(challengeEndingDate, textViewPlus, textViewMinus);
+            myPrefs.applyPrefsToView(prefsCallbackListener);
             return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void callfunction() {
-
-    }
 }
