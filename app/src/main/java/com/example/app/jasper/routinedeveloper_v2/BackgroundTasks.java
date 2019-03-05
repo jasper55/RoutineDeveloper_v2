@@ -28,6 +28,16 @@ public class BackgroundTasks {
     private String endingDate, scorePlus, scoreMinus;
     CallbackListener callbackListener;
 
+    private static BackgroundTasks instance;
+
+    public static BackgroundTasks getInstance(){
+
+        if(instance==null) {
+            instance=new BackgroundTasks();
+        }
+        return instance;
+    }
+
     public void loadPrefs() {
         SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
 
@@ -82,6 +92,14 @@ public class BackgroundTasks {
         resetCheckBoxes(todoList);
     }
 
+    public void init(Context context, String endingDate, String scorePlus, String scoreMinus, CallbackListener backgroundtaskListener) {
+        this.context = context;
+        this.endingDate = endingDate;
+        this.scorePlus = scorePlus;
+        this.scoreMinus = scoreMinus;
+        this.callbackListener = backgroundtaskListener;
+    }
+
     interface CallbackListener {
         void updateMinusView(String data);
         void updatePlusView(String data);
@@ -106,15 +124,5 @@ public class BackgroundTasks {
 
     public void clearTargetDate() {
         MySharedPrefs.getInstance().saveSharedPrefs(context, null, scorePlus, scoreMinus);
-    }
-
-    public BackgroundTasks(Context context,
-                           String endingDate, String scroePlus, String scroeMinus, CallbackListener callbackListener) {
-
-        this.context = context;
-        this.endingDate = endingDate;
-        this.scorePlus = scroePlus;
-        this.scoreMinus = scroeMinus;
-        this.callbackListener = callbackListener;
     }
 }

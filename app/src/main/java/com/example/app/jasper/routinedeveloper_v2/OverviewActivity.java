@@ -57,8 +57,6 @@ public class OverviewActivity extends AppCompatActivity {
     private RecyclerViewAdapter recyclerViewAdapter;
     private ArrayAdapter<Todo> listViewAdapter;
     private List<Todo> todoList = new ArrayList<>();
-    private long selectedItemId;
-    private Todo selectedItem;
 
     private TextView challengeEndingDate;
     private DatePickerDialog.OnDateSetListener challengeEndingDateSetListener;
@@ -123,14 +121,15 @@ public class OverviewActivity extends AppCompatActivity {
         instantiateViewElements();
 
         myPrefs = MySharedPrefs.getInstance();
+        myPrefs.firstTimeStartingApp(this);
         myPrefs.loadSharedPrefs(this);
         myPrefs.applyPrefsToView(prefsCallbackListener);
 
-        backgroundTask = new BackgroundTasks(this,
-                challengeEndingDate.getText().toString(), textViewPlus.getText().toString(), textViewMinus.getText().toString(), backgroundtaskListener);
-
-        myPrefs.firstTimeStartingApp(this);
-
+        backgroundTask = BackgroundTasks.getInstance();
+        backgroundTask.init(this,
+                challengeEndingDate.getText().toString(),
+                textViewPlus.getText().toString(), textViewMinus.getText().toString(),
+                backgroundtaskListener);
 
         setClickListenersToViewElements();
 
@@ -139,31 +138,6 @@ public class OverviewActivity extends AppCompatActivity {
         instantiateFABMenu();
 //        registerForContextMenu(recyclerView);
     }       // onCreate() - end
-
-
-//    @Override
-//    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-//        super.onCreateContextMenu(menu, v, menuInfo);
-//        getMenuInflater().inflate(R.menu.menu_long_item_clicked, menu);
-//    }
-//
-//
-//    @Override
-//    public boolean onContextItemSelected(MenuItem item) {
-//        switch (item.getItemId()) {
-//            case R.id.option_delete:
-//                crudOperations.deleteItem(selectedItemId);
-//                //recyclerViewAdapter.setNotifyOnChange(true);
-//                recyclerViewAdapter.notifyDataSetChanged();
-//                return true;
-//            case R.id.option_edit:
-//                selectedItem = recyclerViewAdapter.getItem((int) selectedItemId);
-//                showDetailViewForEdit(selectedItem);
-//                return true;
-//            default:
-//                return super.onContextItemSelected(item);
-//        }
-//    }
 
     private void setClickListenersToViewElements() {
         //setItemListClickListener();
@@ -200,24 +174,11 @@ public class OverviewActivity extends AppCompatActivity {
         };
     }
 
-    private void setItemListClickListener() {
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                Todo selectedItem = listViewAdapter.getItem(position);
-                Log.i("RD_Position: ", String.valueOf(position));
-                Log.i("RD_ViewID: ", String.valueOf(view.getId()));
-                showDetailViewForEdit(selectedItem);
-            }
-        });
-
-    }
-
     private void instantiateViewElements() {
-        //setUpListView();
         initRecyclerViewList();
         challengeEndingDate = findViewById(R.id.tvDate);
         initActionBar();
+        //setUpListView();
         //initStandartToolbar();
     }
 
@@ -230,7 +191,7 @@ public class OverviewActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
         getSupportActionBar().setDisplayShowCustomEnabled(true);
         getSupportActionBar().setCustomView(R.layout.custom_action_bar_layout);
-        View view =getSupportActionBar().getCustomView();
+        //View view =getSupportActionBar().getCustomView();
         initScoreContainer();
     }
 
@@ -259,40 +220,6 @@ public class OverviewActivity extends AppCompatActivity {
     private List<Todo> getItemList() {
         List<Todo> itemList = SQLCRUDOperations.getInstance(getApplicationContext()).readAllItems();
         return itemList;
-    }
-
-    private void setUpListView() {
-        listView = findViewById(R.id.recycler_view_data);
-        listViewAdapter = new ArrayAdapter<Todo>(
-                this, R.layout.layout_todoitem, todoList) {
-
-            @NonNull
-            @Override
-            public View getView(int position, @Nullable View existingView, @NonNull ViewGroup parent) {
-
-                Todo item = this.getItem(position);
-                View itemView = existingView;
-                ListItemViewHolder viewHolder;
-
-                if (itemView == null) {
-                    Log.i("OverviewActivity", "create new View for position " + position);
-                    itemView = getLayoutInflater().inflate(R.layout.layout_todoitem, null);
-                    viewHolder = new ListItemViewHolder(listViewAdapter, crudOperations, itemView);
-                    itemView.setTag(viewHolder);
-                    viewHolder.checkBox.setTag(position);
-                } else {
-                    Log.i("OverviewActivity", "recycle new View for position " + position);
-                    viewHolder = (ListItemViewHolder) itemView.getTag();
-                    viewHolder.checkBox.setTag(position);
-                }
-                // bind the data to the view
-                viewHolder.unbind();
-                viewHolder.bind(item);
-
-                return itemView;
-            }
-
-        };
     }
 
     private void instantiateTimePicker() {
@@ -453,7 +380,6 @@ public class OverviewActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-
     }       // onPause - end
 
     @Override
@@ -463,7 +389,6 @@ public class OverviewActivity extends AppCompatActivity {
         if (hasChanged){
             backgroundTask.summUpCheckBoxes(todoList);
         }
-//        myPrefs.loadSharedPrefs();
         myPrefs.applyPrefsToView(prefsCallbackListener);
     }
 
@@ -523,16 +448,84 @@ public class OverviewActivity extends AppCompatActivity {
 
     }   // onActivityResult
 
+    private void setUpListView() {
+        listView = findViewById(R.id.recycler_view_data);
+        listViewAdapter = new ArrayAdapter<Todo>(
+                this, R.layout.layout_todoitem, todoList) {
+
+            @NonNull
+            @Override
+            public View getView(int position, @Nullable View existingView, @NonNull ViewGroup parent) {
+
+                Todo item = this.getItem(position);
+                View itemView = existingView;
+                ListItemViewHolder viewHolder;
+
+                if (itemView == null) {
+                    Log.i("OverviewActivity", "create new View for position " + position);
+                    itemView = getLayoutInflater().inflate(R.layout.layout_todoitem, null);
+                    viewHolder = new ListItemViewHolder(listViewAdapter, crudOperations, itemView);
+                    itemView.setTag(viewHolder);
+                    viewHolder.checkBox.setTag(position);
+                } else {
+                    Log.i("OverviewActivity", "recycle new View for position " + position);
+                    viewHolder = (ListItemViewHolder) itemView.getTag();
+                    viewHolder.checkBox.setTag(position);
+                }
+                // bind the data to the view
+                viewHolder.unbind();
+                viewHolder.bind(item);
+
+                return itemView;
+            }
+
+        };
+    }
     protected void addItemToList(Todo item) {
         this.listViewAdapter.add(item);
         this.listView.setSelection(this.listViewAdapter.getPosition(item));
     }
-
     protected void updateList(Todo item) {
         crudOperations.readAllItems();
         listViewAdapter.addAll(crudOperations.readAllItems());
         this.listView.setSelection(this.listViewAdapter.getPosition(item));
     }
+    private void setItemListClickListener() {
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                Todo selectedItem = listViewAdapter.getItem(position);
+                Log.i("RD_Position: ", String.valueOf(position));
+                Log.i("RD_ViewID: ", String.valueOf(view.getId()));
+                showDetailViewForEdit(selectedItem);
+            }
+        });
+
+    }
+
+    //    @Override
+//    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+//        super.onCreateContextMenu(menu, v, menuInfo);
+//        getMenuInflater().inflate(R.menu.menu_long_item_clicked, menu);
+//    }
+//
+//
+//    @Override
+//    public boolean onContextItemSelected(MenuItem item) {
+//        switch (item.getItemId()) {
+//            case R.id.option_delete:
+//                crudOperations.deleteItem(selectedItemId);
+//                //recyclerViewAdapter.setNotifyOnChange(true);
+//                recyclerViewAdapter.notifyDataSetChanged();
+//                return true;
+//            case R.id.option_edit:
+//                selectedItem = recyclerViewAdapter.getItem((int) selectedItemId);
+//                showDetailViewForEdit(selectedItem);
+//                return true;
+//            default:
+//                return super.onContextItemSelected(item);
+//        }
+//    }
 
     private void setChallengeEndingTime() {
 
@@ -572,7 +565,6 @@ public class OverviewActivity extends AppCompatActivity {
     }
 
     private void createNotificationIntent(TimePicker timePicker) {
-
         long time;
         long hour = timePicker.getCurrentHour() * 60 * 60 * 1000;
         long min = timePicker.getCurrentMinute() * 60 * 1000;
@@ -585,10 +577,10 @@ public class OverviewActivity extends AppCompatActivity {
         long current_sec = Calendar.getInstance().get(Calendar.SECOND) * 1000;
         long passed_millis = current_hour + current_min + current_sec;
 
-        long alertTimeinMillis = timeInMillis - passed_millis + time;
+        long alertTimeInMillis = timeInMillis - passed_millis + time;
 
-        long dif = alertTimeinMillis - timeInMillis;
-        Log.i("notTime", String.valueOf(alertTimeinMillis));
+        long dif = alertTimeInMillis - timeInMillis;
+        Log.i("notTime", String.valueOf(alertTimeInMillis));
         Log.i("notTime", String.valueOf(timeInMillis));
 
         //Log.i("currentTime", String.valueOf(System.currentTimeMillis()));
@@ -598,7 +590,7 @@ public class OverviewActivity extends AppCompatActivity {
         PendingIntent pIntent = PendingIntent.getBroadcast(getApplicationContext(), CALL_NOTIFICATION_ALERT_TIME, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, alertTimeinMillis, AlarmManager.INTERVAL_DAY, pIntent);
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, alertTimeInMillis, AlarmManager.INTERVAL_DAY, pIntent);
     }
 
     private void showDetailViewForCreate() {
