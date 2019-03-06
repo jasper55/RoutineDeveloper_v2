@@ -4,14 +4,11 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 import android.widget.Toast;
-
 import com.example.app.jasper.routinedeveloper_v2.model.MySharedPrefs;
 import com.example.app.jasper.routinedeveloper_v2.model.SQLCRUDOperations;
 import com.example.app.jasper.routinedeveloper_v2.model.Todo;
-
 import java.util.Calendar;
 import java.util.List;
-
 import static android.content.Context.MODE_PRIVATE;
 
 public class BackgroundTasks {
@@ -40,19 +37,20 @@ public class BackgroundTasks {
 
     public void loadPrefs() {
         SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
-
         endingDate = sharedPreferences.getString(DATE, "");
         scorePlus = sharedPreferences.getString(SCOREPLUS, "0");
         scoreMinus = sharedPreferences.getString(SCOREMINUS, "0");
     }
 
-    public boolean checkIsDateChanged() {
-
+    public boolean checkHasDateChanged() {
         int currentday = Calendar.getInstance().DAY_OF_YEAR;
+        Log.i("RD_", String.valueOf(currentday));
         SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
         int lastday = sharedPreferences.getInt(STOREDDAY, 0);
 
+        Log.i("RD_", String.valueOf(lastday));
         if (currentday != lastday) {
+            MySharedPrefs.getInstance().saveCurrentDateToPrefs(context);
             return true;
         }
         else{
@@ -79,12 +77,12 @@ public class BackgroundTasks {
 
         if (done == todoListSize) {
             doneCounter = ++doneCounter;
-            //textViewPlus.setText(String.valueOf(doneCounter));
+            scorePlus = String.valueOf(doneCounter);
             callbackListener.updatePlusView(String.valueOf(doneCounter));
             Toast.makeText(context, "All Todos done yesterday", Toast.LENGTH_SHORT).show();
         } else {
             undoneCounter = ++undoneCounter;
-            //textViewMinus.setText(String.valueOf(undoneCounter));
+            scoreMinus = String.valueOf(undoneCounter);
             callbackListener.updateMinusView(String.valueOf(undoneCounter));
         }
 
@@ -104,7 +102,6 @@ public class BackgroundTasks {
         void updateMinusView(String data);
         void updatePlusView(String data);
     }
-
 
     private void resetCheckBoxes(List<Todo> todoList) {
         int size = todoList.size();

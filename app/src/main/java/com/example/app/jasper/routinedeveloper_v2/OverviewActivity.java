@@ -31,19 +31,14 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
-
-
 import com.example.app.jasper.routinedeveloper_v2.model.ListItemViewHolder;
 import com.example.app.jasper.routinedeveloper_v2.model.MySharedPrefs;
 import com.example.app.jasper.routinedeveloper_v2.model.RecyclerViewAdapter;
 import com.example.app.jasper.routinedeveloper_v2.model.SQLCRUDOperations;
 import com.example.app.jasper.routinedeveloper_v2.model.Todo;
-
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-
 import jp.wasabeef.blurry.Blurry;
 
 public class OverviewActivity extends AppCompatActivity {
@@ -67,9 +62,6 @@ public class OverviewActivity extends AppCompatActivity {
     private static final String CALL_MODE = "callMode";
     public static final String CALL_MODE_CREATE = "create";
     public static final Long EMPTY_ID = -99L;
-
-
-
 
     private Todo item;
     private SQLCRUDOperations crudOperations;
@@ -125,6 +117,7 @@ public class OverviewActivity extends AppCompatActivity {
 
         crudOperations = SQLCRUDOperations.getInstance(getApplicationContext());
         instantiateViewElements();
+        todoList = crudOperations.readAllItems();
 
         myPrefs = MySharedPrefs.getInstance();
         myPrefs.firstTimeStartingApp(this);
@@ -197,7 +190,6 @@ public class OverviewActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
         getSupportActionBar().setDisplayShowCustomEnabled(true);
         getSupportActionBar().setCustomView(R.layout.custom_action_bar_layout);
-        //View view =getSupportActionBar().getCustomView();
         initScoreContainer();
     }
 
@@ -207,9 +199,9 @@ public class OverviewActivity extends AppCompatActivity {
     }
 
     private void initRecyclerViewList() {
-
         recyclerView = findViewById(R.id.recycler_view_data);
         recyclerViewAdapter = new RecyclerViewAdapter(this, getItemList(), new RecyclerViewAdapter.CustomItemClickListener() {
+
             @Override
             public void onItemClick(int position) {
                 showDetailViewForEdit(recyclerViewAdapter.getItem(position));
@@ -386,12 +378,14 @@ public class OverviewActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
+        Log.i("RD_", "onPause");
     }       // onPause - end
 
     @Override
     protected void onRestart() {
         super.onRestart();
-        boolean hasChanged = backgroundTask.checkIsDateChanged();
+        Log.i("RD_", "onRestart");
+        boolean hasChanged = backgroundTask.checkHasDateChanged();
         if (hasChanged) {
             backgroundTask.summUpCheckBoxes(todoList);
         }
@@ -402,22 +396,24 @@ public class OverviewActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         myPrefs.saveSharedPrefs(this, challengeEndingDate.getText().toString(), textViewPlus.getText().toString(), textViewMinus.getText().toString());
+        Log.i("RD_", "onStop");
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         myPrefs.saveSharedPrefs(this, challengeEndingDate.getText().toString(), textViewPlus.getText().toString(), textViewMinus.getText().toString());
+        Log.i("RD_", "onDestroy");
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        boolean hasChanged = backgroundTask.checkIsDateChanged();
+        Log.i("RD_", "onResume");
+        boolean hasChanged = backgroundTask.checkHasDateChanged();
         if (hasChanged) {
             backgroundTask.summUpCheckBoxes(todoList);
         }
-//        myPrefs.loadSharedPrefs();
         myPrefs.applyPrefsToView(prefsCallbackListener);
     }       //onResume - end
 
@@ -425,7 +421,6 @@ public class OverviewActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent intent) {
 
         super.onActivityResult(requestCode, resultCode, intent);
-
 
         if (resultCode == RESULT_OK) {
             int position = recyclerViewAdapter.getPosition();
@@ -448,7 +443,6 @@ public class OverviewActivity extends AppCompatActivity {
                         recyclerViewAdapter.updateList(item, position);
                         Toast.makeText(this, "item updated", Toast.LENGTH_LONG).show();
                     } else {
-                        Log.i("onActivityResult", "No new item received");
                     }
                 }
             } catch (Exception e) {
@@ -595,13 +589,6 @@ public class OverviewActivity extends AppCompatActivity {
 
         long alertTimeInMillis = timeInMillis - passed_millis + time;
 
-        long dif = alertTimeInMillis - timeInMillis;
-        Log.i("notTime", String.valueOf(alertTimeInMillis));
-        Log.i("notTime", String.valueOf(timeInMillis));
-
-        //Log.i("currentTime", String.valueOf(System.currentTimeMillis()));
-        Log.i("dif", String.valueOf(dif));
-
         Intent notificationIntent = new Intent(getApplicationContext(), NotificationReceiver.class);
         PendingIntent pIntent = PendingIntent.getBroadcast(getApplicationContext(), CALL_NOTIFICATION_ALERT_TIME, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
@@ -647,7 +634,6 @@ public class OverviewActivity extends AppCompatActivity {
             myPrefs.applyPrefsToView(prefsCallbackListener);
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 

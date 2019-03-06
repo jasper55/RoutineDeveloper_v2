@@ -26,6 +26,15 @@ public class SQLCRUDOperations {
                     "NAME TEXT, " +
                     "DONE BOOLEAN)";
 
+    private static SQLCRUDOperations instance;
+
+    public static SQLCRUDOperations getInstance(Context applicationContext){
+        if(instance==null) {
+            instance=new SQLCRUDOperations(applicationContext);
+        }
+        return instance;
+    }
+
     // Im Konstrukter wird die SQLiteDAtenbank entweder geöffnet oder erstellt, wenn sie noch nicht exitiert
     public SQLCRUDOperations(Context applicationContext){
 
@@ -35,15 +44,6 @@ public class SQLCRUDOperations {
             db.setVersion(1);
             db.execSQL(CREATION_QUERY);
         }
-    }
-
-    private static SQLCRUDOperations instance;
-
-    public static SQLCRUDOperations getInstance(Context applicationContext){
-        if(instance==null) {
-            instance=new SQLCRUDOperations(applicationContext);
-        }
-        return instance;
     }
 
     //////////// CRUD Operations ///////////

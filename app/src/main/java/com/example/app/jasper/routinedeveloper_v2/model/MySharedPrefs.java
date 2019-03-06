@@ -2,11 +2,9 @@ package com.example.app.jasper.routinedeveloper_v2.model;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 import android.widget.Toast;
-
 import java.util.Calendar;
-
-
 import static android.content.Context.MODE_PRIVATE;
 
 public class MySharedPrefs {
@@ -22,7 +20,6 @@ public class MySharedPrefs {
     private String scoreMinus;
     PrefsCallbackListener prefsCallbackListener;
 
-
     private static MySharedPrefs instance;
 
     public static MySharedPrefs getInstance(){
@@ -36,9 +33,8 @@ public class MySharedPrefs {
     public void saveCurrentDateToPrefs(Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        Calendar calendar = Calendar.getInstance();
-        int currentDay = calendar.get(Calendar.DAY_OF_YEAR);
-        editor.putInt(STOREDDAY, currentDay);
+        int currentday = Calendar.getInstance().DAY_OF_YEAR;
+        editor.putInt(STOREDDAY, currentday);
         editor.apply();
     }
 
@@ -68,18 +64,18 @@ public class MySharedPrefs {
         prefsCallbackListener.callbackUpdateView(this.date, this.scorePlus, this.scoreMinus);
     }
 
-
     public void firstTimeStartingApp(Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
         boolean firstStart = sharedPreferences.getBoolean(FIRSTSTART, true);
 
         if (firstStart) {
 
-            Toast.makeText(context, "Welcome to Routine Developer!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context.getApplicationContext(), "Welcome to Routine Developer!", Toast.LENGTH_SHORT).show();
+
             saveCurrentDateToPrefs(context);
 
             SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putBoolean(FIRSTSTART, true);
+            editor.putBoolean(FIRSTSTART, false);
             editor.apply();
         }
     }
