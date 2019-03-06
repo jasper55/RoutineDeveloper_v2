@@ -79,6 +79,15 @@ public class MySharedPrefs {
             editor.apply();
         }
     }
+
+    public void updateScore(Context context, String s, String s1) {
+        saveSharedPrefs(context, date, s, s1);
+    }
+
+    public void clearDate(Context context, String scorePlus, String scoreMinus) {
+        saveSharedPrefs(context, null, scorePlus, scoreMinus);
+    }
+
     public interface PrefsCallbackListener {
         void callbackUpdateView(String date, String scorePlus, String scoreMinus);
     }

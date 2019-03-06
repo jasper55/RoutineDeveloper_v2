@@ -22,7 +22,7 @@ public class BackgroundTasks {
     private static final String SCOREMINUS = "scoreMinus";
     private static final String STOREDDAY = "storedDay";
     private static final String FIRSTSTART = "firstStart";
-    private String endingDate, scorePlus, scoreMinus;
+    private String scorePlus, scoreMinus;
     CallbackListener callbackListener;
 
     private static BackgroundTasks instance;
@@ -37,7 +37,6 @@ public class BackgroundTasks {
 
     public void loadPrefs() {
         SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
-        endingDate = sharedPreferences.getString(DATE, "");
         scorePlus = sharedPreferences.getString(SCOREPLUS, "0");
         scoreMinus = sharedPreferences.getString(SCOREMINUS, "0");
     }
@@ -86,13 +85,12 @@ public class BackgroundTasks {
             callbackListener.updateMinusView(String.valueOf(undoneCounter));
         }
 
-        MySharedPrefs.getInstance().saveSharedPrefs(context, endingDate, scorePlus, scoreMinus);
+        MySharedPrefs.getInstance().updateScore(context, scorePlus, scoreMinus);
         resetCheckBoxes(todoList);
     }
 
-    public void init(Context context, String endingDate, String scorePlus, String scoreMinus, CallbackListener backgroundtaskListener) {
+    public void init(Context context, String scorePlus, String scoreMinus, CallbackListener backgroundtaskListener) {
         this.context = context;
-        this.endingDate = endingDate;
         this.scorePlus = scorePlus;
         this.scoreMinus = scoreMinus;
         this.callbackListener = backgroundtaskListener;
@@ -116,10 +114,10 @@ public class BackgroundTasks {
     }
 
     public void clearScore() {
-        MySharedPrefs.getInstance().saveSharedPrefs(context, endingDate, "0", "0");
+        MySharedPrefs.getInstance().updateScore(context, "0", "0");
     }
 
     public void clearTargetDate() {
-        MySharedPrefs.getInstance().saveSharedPrefs(context, null, scorePlus, scoreMinus);
+        MySharedPrefs.getInstance().clearDate(context, scorePlus, scoreMinus);
     }
 }

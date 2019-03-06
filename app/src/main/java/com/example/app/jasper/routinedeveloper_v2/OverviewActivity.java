@@ -126,7 +126,6 @@ public class OverviewActivity extends AppCompatActivity {
 
         backgroundTask = BackgroundTasks.getInstance();
         backgroundTask.init(this,
-                challengeEndingDate.getText().toString(),
                 textViewPlus.getText().toString(), textViewMinus.getText().toString(),
                 backgroundtaskListener);
 
