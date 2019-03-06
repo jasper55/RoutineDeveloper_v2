@@ -11,7 +11,6 @@ import java.util.List;
 
 public class SQLCRUDOperations {
 
-
     /////////////////  SQL Data Base  //////////////////////
     private SQLiteDatabase db;
     private static final String TABLE_DATAITEM = "DATAITEMS";
@@ -109,7 +108,6 @@ public class SQLCRUDOperations {
         db.delete(TABLE_DATAITEM,ID + "=" + id,null);
     }
 
-
     ///////////   support methods   ////////////
     private Todo getItemValuesFromCursor(Cursor cursor) {
         Todo mockTodo = new Todo();
@@ -122,18 +120,6 @@ public class SQLCRUDOperations {
         mockTodo.setDone(done);
 
         return mockTodo;
-    }
-
-    private Todo updateDataItemFromCursor(Todo item, Cursor cursor) {
-
-        long id = cursor.getLong(cursor.getColumnIndex("ID"));
-        String name = cursor.getString(cursor.getColumnIndex("NAME"));
-        boolean done = cursor.getLong(cursor.getColumnIndex("DONE"))>0;
-
-        item.setId(id);
-        item.setName(name);
-        item.setDone(done);
-        return item;
     }
 }
 

@@ -64,6 +64,12 @@ public class OverviewActivity extends AppCompatActivity {
 
     private static final int CALL_EDIT_ITEM = 0;
     private static final int CALL_CREATE_ITEM = 1;
+    private static final String CALL_MODE = "callMode";
+    public static final String CALL_MODE_CREATE = "create";
+    public static final Long EMPTY_ID = -99L;
+
+
+
 
     private Todo item;
     private SQLCRUDOperations crudOperations;
@@ -187,7 +193,7 @@ public class OverviewActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
     }
 
-    private void initActionBar(){
+    private void initActionBar() {
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
         getSupportActionBar().setDisplayShowCustomEnabled(true);
         getSupportActionBar().setCustomView(R.layout.custom_action_bar_layout);
@@ -386,7 +392,7 @@ public class OverviewActivity extends AppCompatActivity {
     protected void onRestart() {
         super.onRestart();
         boolean hasChanged = backgroundTask.checkIsDateChanged();
-        if (hasChanged){
+        if (hasChanged) {
             backgroundTask.summUpCheckBoxes(todoList);
         }
         myPrefs.applyPrefsToView(prefsCallbackListener);
@@ -408,7 +414,7 @@ public class OverviewActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         boolean hasChanged = backgroundTask.checkIsDateChanged();
-        if (hasChanged){
+        if (hasChanged) {
             backgroundTask.summUpCheckBoxes(todoList);
         }
 //        myPrefs.loadSharedPrefs();
@@ -420,27 +426,34 @@ public class OverviewActivity extends AppCompatActivity {
 
         super.onActivityResult(requestCode, resultCode, intent);
 
+
         if (resultCode == RESULT_OK) {
             int position = recyclerViewAdapter.getPosition();
 
             try {
-                long id = intent.getLongExtra(DetailviewActivity.ARG_ITEM_ID, -99);
-                item = crudOperations.readItem(id);
-
-                if (requestCode == CALL_CREATE_ITEM) {
-                    Toast.makeText(this, "new item received", Toast.LENGTH_LONG).show();
-                    recyclerViewAdapter.addItem(item);
-                }
-
-                if (requestCode == CALL_EDIT_ITEM) {
-                    recyclerViewAdapter.updateList(item, position);
-                    Toast.makeText(this, "item updated", Toast.LENGTH_LONG).show();
+                long id = intent.getLongExtra(DetailviewActivity.ARG_ITEM_ID, -100);
+                Log.i("ID_", String.valueOf(id));
+                if (id == EMPTY_ID) {
+                    Toast.makeText(this, "no changes", Toast.LENGTH_LONG).show();
                 } else {
-                    Log.i("onActivityResult", "No new item received");
+
+                    item = crudOperations.readItem(id);
+
+                    if (requestCode == CALL_CREATE_ITEM) {
+                        Toast.makeText(this, "new item received", Toast.LENGTH_LONG).show();
+                        recyclerViewAdapter.addItem(item);
+                    }
+
+                    if (requestCode == CALL_EDIT_ITEM) {
+                        recyclerViewAdapter.updateList(item, position);
+                        Toast.makeText(this, "item updated", Toast.LENGTH_LONG).show();
+                    } else {
+                        Log.i("onActivityResult", "No new item received");
+                    }
                 }
             } catch (Exception e) {
                 recyclerViewAdapter.removeItem(position);
-                Toast.makeText(this, "item removed", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "item removed " + String.valueOf(position), Toast.LENGTH_LONG).show();
                 e.printStackTrace();
             }
 
@@ -481,15 +494,18 @@ public class OverviewActivity extends AppCompatActivity {
 
         };
     }
+
     protected void addItemToList(Todo item) {
         this.listViewAdapter.add(item);
         this.listView.setSelection(this.listViewAdapter.getPosition(item));
     }
+
     protected void updateList(Todo item) {
         crudOperations.readAllItems();
         listViewAdapter.addAll(crudOperations.readAllItems());
         this.listView.setSelection(this.listViewAdapter.getPosition(item));
     }
+
     private void setItemListClickListener() {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -595,6 +611,7 @@ public class OverviewActivity extends AppCompatActivity {
 
     private void showDetailViewForCreate() {
         Intent createIntent = new Intent(this, DetailviewActivity.class);
+        createIntent.putExtra(CALL_MODE,CALL_MODE_CREATE);
         startActivityForResult(createIntent, CALL_CREATE_ITEM);
     }
 
