@@ -80,8 +80,8 @@ public class MySharedPrefs {
         }
     }
 
-    public void updateScore(Context context, String s, String s1) {
-        saveSharedPrefs(context, date, s, s1);
+    public void updateScore(Context context, String scorePlus, String scoreMinus) {
+        saveSharedPrefs(context, date, scorePlus, scoreMinus);
     }
 
     public void clearDate(Context context, String scorePlus, String scoreMinus) {
