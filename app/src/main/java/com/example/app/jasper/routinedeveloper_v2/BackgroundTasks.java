@@ -1,5 +1,6 @@
 package com.example.app.jasper.routinedeveloper_v2;
 
+import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
@@ -7,6 +8,8 @@ import android.widget.Toast;
 import com.example.app.jasper.routinedeveloper_v2.model.MySharedPrefs;
 import com.example.app.jasper.routinedeveloper_v2.model.SQLCRUDOperations;
 import com.example.app.jasper.routinedeveloper_v2.model.Todo;
+import com.example.app.jasper.routinedeveloper_v2.viewmodel.MainActivityViewModel;
+
 import java.util.Calendar;
 import java.util.List;
 import static android.content.Context.MODE_PRIVATE;
@@ -23,7 +26,8 @@ public class BackgroundTasks {
     private static final String STOREDDAY = "storedDay";
     private static final String FIRSTSTART = "firstStart";
     private String scorePlus, scoreMinus;
-    CallbackListener callbackListener;
+    //CallbackListener callbackListener;
+    MainActivityViewModel mainActivityViewModel;
 
     private static BackgroundTasks instance;
 
@@ -57,17 +61,19 @@ public class BackgroundTasks {
         }
     }
 
-    protected void summUpCheckBoxes(List<Todo> todoList) {
+    protected void summUpCheckBoxes(MutableLiveData<List<Todo>> todoList) {
 
         loadPrefs();
         int doneCounter = Integer.parseInt(scorePlus);
         int undoneCounter = Integer.parseInt(scoreMinus);
 
-        int todoListSize = todoList.size();
+
+        int todoListSize = todoList.getValue().size();
         int done = 0;
+        List<Todo> mockList = todoList.getValue();
 
         for (int i = 0; i < todoListSize; i++) {
-            item = todoList.get(i);
+            item = mockList.get(i);
             Log.i("sumUpdone", String.valueOf(item.isDone()));
             if (item.isDone()) {
                 done++;
@@ -76,30 +82,32 @@ public class BackgroundTasks {
 
         if (done == todoListSize) {
             doneCounter = ++doneCounter;
-            scorePlus = String.valueOf(doneCounter);
-            callbackListener.updatePlusView(String.valueOf(doneCounter));
+            mainActivityViewModel.setScorePlus(String.valueOf(doneCounter));
+//            scorePlus = String.valueOf(doneCounter);
+//            callbackListener.updatePlusView(String.valueOf(doneCounter));
             Toast.makeText(context, "All Todos done yesterday", Toast.LENGTH_SHORT).show();
         } else {
             undoneCounter = ++undoneCounter;
-            scoreMinus = String.valueOf(undoneCounter);
-            callbackListener.updateMinusView(String.valueOf(undoneCounter));
+            mainActivityViewModel.setScoreMinus(String.valueOf(undoneCounter));
+//            scoreMinus = String.valueOf(undoneCounter);
+//            callbackListener.updateMinusView(String.valueOf(undoneCounter));
         }
 
         MySharedPrefs.getInstance().updateScore(context, scorePlus, scoreMinus);
-        resetCheckBoxes(todoList);
+        resetCheckBoxes(mockList);
     }
 
-    public void init(Context context, String scorePlus, String scoreMinus, CallbackListener backgroundtaskListener) {
+    public void init(Context context, String scorePlus, String scoreMinus) {
         this.context = context;
         this.scorePlus = scorePlus;
         this.scoreMinus = scoreMinus;
-        this.callbackListener = backgroundtaskListener;
+        //this.callbackListener = backgroundtaskListener;
     }
 
-    interface CallbackListener {
-        void updateMinusView(String data);
-        void updatePlusView(String data);
-    }
+//    interface CallbackListener {
+//        void updateMinusView(String data);
+//        void updatePlusView(String data);
+//    }
 
     private void resetCheckBoxes(List<Todo> todoList) {
         int size = todoList.size();
@@ -111,6 +119,8 @@ public class BackgroundTasks {
             item.setDone(false);
             SQLCRUDOperations.getInstance(context).updateItem(id, item);
         }
+
+        mainActivityViewModel.setTodoList(SQLCRUDOperations.getInstance(context).readAllItems());
     }
 
     public void clearScore() {

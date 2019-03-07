@@ -4,6 +4,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 import android.widget.Toast;
+
+import com.example.app.jasper.routinedeveloper_v2.viewmodel.MainActivityViewModel;
+
 import java.util.Calendar;
 import static android.content.Context.MODE_PRIVATE;
 
@@ -18,7 +21,7 @@ public class MySharedPrefs {
     public String date;
     private String scorePlus;
     private String scoreMinus;
-    PrefsCallbackListener prefsCallbackListener;
+    //PrefsCallbackListener prefsCallbackListener;
 
     private static MySharedPrefs instance;
 
@@ -41,8 +44,8 @@ public class MySharedPrefs {
     public void loadSharedPrefs(Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
 
-        date = sharedPreferences.getString(DATE, "");
-        scorePlus = sharedPreferences.getString(SCOREPLUS, "0");
+        this.date = sharedPreferences.getString(DATE, "");
+        this.scorePlus = sharedPreferences.getString(SCOREPLUS, "0");
         scoreMinus = sharedPreferences.getString(SCOREMINUS, "0");
     }
 
@@ -60,8 +63,10 @@ public class MySharedPrefs {
         editor.apply();
     }
 
-    public void applyPrefsToView(PrefsCallbackListener prefsCallbackListener) {
-        prefsCallbackListener.callbackUpdateView(this.date, this.scorePlus, this.scoreMinus);
+    public void applyPrefsToView(MainActivityViewModel mainActivityViewModel) {
+        mainActivityViewModel.setEndingDate(date);
+        mainActivityViewModel.setScorePlus(scorePlus);
+        mainActivityViewModel.setScoreMinus(scoreMinus);
     }
 
     public void firstTimeStartingApp(Context context) {
@@ -88,9 +93,9 @@ public class MySharedPrefs {
         saveSharedPrefs(context, null, scorePlus, scoreMinus);
     }
 
-    public interface PrefsCallbackListener {
-        void callbackUpdateView(String date, String scorePlus, String scoreMinus);
-    }
+//    public interface PrefsCallbackListener {
+//        void callbackUpdateView(String date, String scorePlus, String scoreMinus);
+//    }
 
     public String getDate() {
         return date;
