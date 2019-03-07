@@ -3,7 +3,6 @@ package com.example.app.jasper.routinedeveloper_v2.model;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,8 +50,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean b) {
                 boolean checked = viewHolder.checkBox.isChecked();
-                Log.i("Checkbox listener", String.valueOf(checked));
-                Log.i("Checkbox position", String.valueOf(position));
 
                 mockItem = todoList.get(position);
                 long id = mockItem.getId();

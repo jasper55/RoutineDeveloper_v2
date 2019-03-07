@@ -9,25 +9,20 @@ import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.LinearLayout;
@@ -36,7 +31,6 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import com.example.app.jasper.routinedeveloper_v2.model.ListItemViewHolder;
 import com.example.app.jasper.routinedeveloper_v2.model.MySharedPrefs;
 import com.example.app.jasper.routinedeveloper_v2.model.RecyclerViewAdapter;
 import com.example.app.jasper.routinedeveloper_v2.model.SQLCRUDOperations;
@@ -44,11 +38,8 @@ import com.example.app.jasper.routinedeveloper_v2.model.Todo;
 import com.example.app.jasper.routinedeveloper_v2.repository.TodoListRepository;
 import com.example.app.jasper.routinedeveloper_v2.viewmodel.MainActivityViewModel;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-
-import jp.wasabeef.blurry.Blurry;
 
 public class OverviewActivity extends AppCompatActivity {
 
@@ -143,11 +134,8 @@ public class OverviewActivity extends AppCompatActivity {
                 textViewPlus.getText().toString(), textViewMinus.getText().toString());
 
         setClickListenersToViewElements();
-
         instantiateTimePicker();
-
         instantiateFABMenu();
-//        registerForContextMenu(recyclerView);
     }       // onCreate() - end
 
 
@@ -233,13 +221,6 @@ public class OverviewActivity extends AppCompatActivity {
         initRecyclerViewList();
         challengeEndingDate = findViewById(R.id.tvDate);
         initActionBar();
-        //setUpListView();
-        //initStandartToolbar();
-    }
-
-    private void initStandartToolbar() {
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
     }
 
     private void initActionBar() {
@@ -269,11 +250,6 @@ public class OverviewActivity extends AppCompatActivity {
         });
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(recyclerViewAdapter);
-    }
-
-    private List<Todo> getItemList() {
-        List<Todo> itemList = SQLCRUDOperations.getInstance(getApplicationContext()).readAllItems();
-        return itemList;
     }
 
     private void instantiateTimePicker() {
@@ -404,22 +380,6 @@ public class OverviewActivity extends AppCompatActivity {
             public void onAnimationRepeat(Animator animator) {
             }
         });
-    }
-
-    private void applyBlurOnBackground() {
-        ViewGroup content_main = findViewById(R.id.content_main);
-        Blurry.with(content_main.getContext())
-                .radius(1).sampling(10)
-                .animate(500)
-                .onto(content_main);
-    }
-
-    private void removeBlurOnBackground() {
-        ViewGroup content_main = findViewById(R.id.content_main);
-        Blurry.with(getBaseContext())
-                .radius(0).sampling(0)
-                .animate(500)
-                .onto(content_main);
     }
 
     @Override

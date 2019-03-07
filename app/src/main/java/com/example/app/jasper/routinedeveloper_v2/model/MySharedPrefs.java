@@ -21,7 +21,6 @@ public class MySharedPrefs {
     public String date;
     private String scorePlus;
     private String scoreMinus;
-    //PrefsCallbackListener prefsCallbackListener;
 
     private static MySharedPrefs instance;
 
@@ -92,10 +91,6 @@ public class MySharedPrefs {
     public void clearDate(Context context, String scorePlus, String scoreMinus) {
         saveSharedPrefs(context, null, scorePlus, scoreMinus);
     }
-
-//    public interface PrefsCallbackListener {
-//        void callbackUpdateView(String date, String scorePlus, String scoreMinus);
-//    }
 
     public String getDate() {
         return date;

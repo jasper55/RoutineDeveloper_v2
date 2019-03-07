@@ -25,10 +25,4 @@ public class TodoListRepository {
         data.setValue(todoList);
         return data;
     }
-
-    // no-args constructor
-//    public TodoListRepository(SQLCRUDOperations crudOperations) {
-//    }
-
-
 }

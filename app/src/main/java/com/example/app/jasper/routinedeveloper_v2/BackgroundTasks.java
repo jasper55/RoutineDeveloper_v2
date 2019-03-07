@@ -20,13 +20,10 @@ public class BackgroundTasks {
     private Todo item;
 
     private static final String SHARED_PREFS = "sharedPrefs";
-    private static final String DATE = "endingDate";
     private static final String SCOREPLUS = "scorePlus";
     private static final String SCOREMINUS = "scoreMinus";
     private static final String STOREDDAY = "storedDay";
-    private static final String FIRSTSTART = "firstStart";
     private String scorePlus, scoreMinus;
-    //CallbackListener callbackListener;
     MainActivityViewModel mainActivityViewModel;
 
     private static BackgroundTasks instance;
@@ -83,14 +80,10 @@ public class BackgroundTasks {
         if (done == todoListSize) {
             doneCounter = ++doneCounter;
             mainActivityViewModel.setScorePlus(String.valueOf(doneCounter));
-//            scorePlus = String.valueOf(doneCounter);
-//            callbackListener.updatePlusView(String.valueOf(doneCounter));
             Toast.makeText(context, "All Todos done yesterday", Toast.LENGTH_SHORT).show();
         } else {
             undoneCounter = ++undoneCounter;
             mainActivityViewModel.setScoreMinus(String.valueOf(undoneCounter));
-//            scoreMinus = String.valueOf(undoneCounter);
-//            callbackListener.updateMinusView(String.valueOf(undoneCounter));
         }
 
         MySharedPrefs.getInstance().updateScore(context, scorePlus, scoreMinus);
@@ -101,13 +94,7 @@ public class BackgroundTasks {
         this.context = context;
         this.scorePlus = scorePlus;
         this.scoreMinus = scoreMinus;
-        //this.callbackListener = backgroundtaskListener;
     }
-
-//    interface CallbackListener {
-//        void updateMinusView(String data);
-//        void updatePlusView(String data);
-//    }
 
     private void resetCheckBoxes(List<Todo> todoList) {
         int size = todoList.size();
@@ -119,7 +106,6 @@ public class BackgroundTasks {
             item.setDone(false);
             SQLCRUDOperations.getInstance(context).updateItem(id, item);
         }
-
         mainActivityViewModel.setTodoList(SQLCRUDOperations.getInstance(context).readAllItems());
     }
 
