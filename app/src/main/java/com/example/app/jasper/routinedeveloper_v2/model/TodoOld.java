@@ -1,34 +1,24 @@
 package com.example.app.jasper.routinedeveloper_v2.model;
 
-import android.arch.persistence.room.ColumnInfo;
-import android.arch.persistence.room.Entity;
-import android.arch.persistence.room.PrimaryKey;
-
 import java.io.Serializable;
 
-@Entity(tableName = "Todos")
-public class Todo implements Serializable {
+public class TodoOld implements Serializable {
 
-    @PrimaryKey
-    private long id =-1;
+    long id =-1;
+    String name;
+    boolean done;
 
-    @ColumnInfo(name = "Todo_name")
-    private String name;
-
-    @ColumnInfo(name = "Todo_status")
-    private boolean done;
-
-    public Todo(long id, String name, boolean done) {
+    public TodoOld(long id, String name, boolean done) {
         this.id = id;
         this.name = name;
         this.done = done;
     }
 
-    public Todo(String name){
+    public TodoOld(String name){
         this.name = name;
     }
 
-    public Todo() {
+    public TodoOld() {
     }
 
     public long getId() {
