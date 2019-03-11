@@ -2,7 +2,6 @@ package com.example.app.jasper.routinedeveloper_v2.model;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.example.app.jasper.routinedeveloper_v2.viewmodel.MainActivityViewModel;
@@ -21,18 +20,25 @@ public class MySharedPrefs {
     public String date;
     private String scorePlus;
     private String scoreMinus;
+    private static Context context;
+    static MainActivityViewModel mainActivityViewModel;
 
     private static MySharedPrefs instance;
+    private SharedPreferences.Editor prefEdidtor;
 
-    public static MySharedPrefs getInstance(){
+    public static MySharedPrefs getInstance(Context context){
 
         if(instance==null) {
-            instance=new MySharedPrefs();
+            instance=new MySharedPrefs(context);
         }
         return instance;
     }
 
-    public void saveCurrentDateToPrefs(Context context) {
+    public MySharedPrefs(Context context) {
+        this.context = context;
+    }
+
+    public void updateDate() {
         SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         int currentday = Calendar.getInstance().DAY_OF_YEAR;
@@ -40,19 +46,23 @@ public class MySharedPrefs {
         editor.apply();
     }
 
-    public void loadSharedPrefs(Context context) {
+    public void loadSharedPrefs() {
         SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
 
-        this.date = sharedPreferences.getString(DATE, "");
-        this.scorePlus = sharedPreferences.getString(SCOREPLUS, "0");
+        date = sharedPreferences.getString(DATE, "");
+        scorePlus = sharedPreferences.getString(SCOREPLUS, "10");
         scoreMinus = sharedPreferences.getString(SCOREMINUS, "0");
     }
 
-    public void saveSharedPrefs(Context context, String endingDate, String scorePlus, String scoreMinus) {
+    public void saveSharedPrefs() {
         SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
-        this.date = endingDate;
+        String endingDate = mainActivityViewModel.getEndingDate().toString();
+        String scorePlus = mainActivityViewModel.getScorePlus().toString();
+        String scoreMinus = mainActivityViewModel.getScoreMinus().toString();
+
+        date = endingDate;
         this.scorePlus = scorePlus;
         this.scoreMinus = scoreMinus;
 
@@ -76,7 +86,7 @@ public class MySharedPrefs {
 
             Toast.makeText(context.getApplicationContext(), "Welcome to Routine Developer!", Toast.LENGTH_SHORT).show();
 
-            saveCurrentDateToPrefs(context);
+            updateDate();
 
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putBoolean(FIRSTSTART, false);
@@ -84,21 +94,33 @@ public class MySharedPrefs {
         }
     }
 
-    public void updateScore(Context context, String scorePlus, String scoreMinus) {
-        saveSharedPrefs(context, date, scorePlus, scoreMinus);
+    public void updateScore() {
+        saveSharedPrefs();
     }
 
-    public void clearDate(Context context, String scorePlus, String scoreMinus) {
-        saveSharedPrefs(context, null, scorePlus, scoreMinus);
+    public void clearDate(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        String endingDate = null;
+
+        editor.putString(DATE, endingDate);
+        editor.apply();
     }
 
     public String getDate() {
-        return date;
+        return this.date;
     }
     public String getScorePlus() {
         return scorePlus;
     }
     public String getScoreMinus() {
-        return scoreMinus;
+        return this.scoreMinus;
+    }
+
+    public void connectViewModel(MainActivityViewModel mainActivityViewModel) {
+        mainActivityViewModel.setEndingDate(date);
+        mainActivityViewModel.setScorePlus(scorePlus);
+        mainActivityViewModel.setScoreMinus(scoreMinus);
     }
 }

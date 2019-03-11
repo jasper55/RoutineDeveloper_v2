@@ -7,7 +7,6 @@ import android.app.AlarmManager;
 import android.app.DatePickerDialog;
 import android.app.PendingIntent;
 import android.app.TimePickerDialog;
-import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
@@ -23,10 +22,8 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -35,7 +32,6 @@ import com.example.app.jasper.routinedeveloper_v2.model.MySharedPrefs;
 import com.example.app.jasper.routinedeveloper_v2.model.RecyclerViewAdapter;
 import com.example.app.jasper.routinedeveloper_v2.model.SQLCRUDOperations;
 import com.example.app.jasper.routinedeveloper_v2.model.Todo;
-import com.example.app.jasper.routinedeveloper_v2.repository.TodoListRepository;
 import com.example.app.jasper.routinedeveloper_v2.viewmodel.MainActivityViewModel;
 
 import java.util.Calendar;
@@ -47,11 +43,8 @@ public class OverviewActivity extends AppCompatActivity {
     private TimePickerDialog.OnTimeSetListener alertTimeListener;
     private static final int CALL_NOTIFICATION_ALERT_TIME = 100;
 
-    private ListView listView;
     private RecyclerView recyclerView;
     private RecyclerViewAdapter recyclerViewAdapter;
-    private ArrayAdapter<Todo> listViewAdapter;
-    private MutableLiveData<List<Todo>> todoList = new MutableLiveData<>();
 
     private TextView challengeEndingDate;
     private DatePickerDialog.OnDateSetListener challengeEndingDateSetListener;
@@ -72,45 +65,7 @@ public class OverviewActivity extends AppCompatActivity {
     View fabOverlay;
     private MySharedPrefs myPrefs;
     private BackgroundTasks backgroundTask;
-
-//    BackgroundTasks.CallbackListener backgroundtaskListener = new BackgroundTasks.CallbackListener() {
-//        @Override
-//        public void updateMinusView(final String data) {
-//            runOnUiThread(new Runnable() {
-//                @Override
-//                public void run() {
-//                    textViewMinus.setText(data);
-//                }
-//            });
-//
-//        }
-//
-//        @Override
-//        public void updatePlusView(final String data) {
-//            runOnUiThread(new Runnable() {
-//                @Override
-//                public void run() {
-//                    textViewPlus.setText(data);
-//                }
-//            });
-//        }
-//    };
-//    MySharedPrefs.PrefsCallbackListener prefsCallbackListener = new MySharedPrefs.PrefsCallbackListener() {
-//        @Override
-//        public void callbackUpdateView(final String date, final String scorePlus, final String scoreMinus) {
-//            runOnUiThread(new Runnable() {
-//                @Override
-//                public void run() {
-//                    challengeEndingDate.setText(date);
-//                    textViewPlus.setText(scorePlus);
-//                    textViewMinus.setText(scoreMinus);
-//                }
-//            });
-//        }
-//    };
-
     MainActivityViewModel mainActivityViewModel;
-    TodoListRepository todoListRepo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,20 +73,25 @@ public class OverviewActivity extends AppCompatActivity {
 
         setContentView(R.layout.layout_overview);
 
+
         crudOperations = SQLCRUDOperations.getInstance(getApplicationContext());
-        myPrefs = MySharedPrefs.getInstance();
+
+        myPrefs = MySharedPrefs.getInstance(this);
         myPrefs.firstTimeStartingApp(this);
-        myPrefs.loadSharedPrefs(this);
+        myPrefs.loadSharedPrefs();
+
 
         initViewModel();
+        //myPrefs.connectViewModel(mainActivityViewModel);
         observeChangestoUiElements();
         instantiateViewElements();
 
         myPrefs.applyPrefsToView(mainActivityViewModel);
 
-        backgroundTask = BackgroundTasks.getInstance();
-        backgroundTask.init(this,
-                textViewPlus.getText().toString(), textViewMinus.getText().toString());
+        backgroundTask = BackgroundTasks.getInstance(this,mainActivityViewModel);
+//        backgroundTask.init(this,
+//                mainActivityViewModel.getScorePlus().toString(),
+//                mainActivityViewModel.getScoreMinus().toString());
 
         setClickListenersToViewElements();
         instantiateTimePicker();
@@ -181,7 +141,6 @@ public class OverviewActivity extends AppCompatActivity {
         });
     }
 
-
     private void setClickListenersToViewElements() {
         //setItemListClickListener();
         setEndingDateListener();
@@ -212,7 +171,7 @@ public class OverviewActivity extends AppCompatActivity {
                 month = month + 1;
                 String date = day + "." + month + "." + year;
                 challengeEndingDate.setText(date);
-                myPrefs.saveSharedPrefs(getApplicationContext(), challengeEndingDate.getText().toString(), textViewPlus.getText().toString(), textViewMinus.getText().toString());
+                myPrefs.saveSharedPrefs();
             }
         };
     }
@@ -380,6 +339,7 @@ public class OverviewActivity extends AppCompatActivity {
             public void onAnimationRepeat(Animator animator) {
             }
         });
+        backgroundTask.changeDate();
     }
 
     @Override
@@ -401,9 +361,8 @@ public class OverviewActivity extends AppCompatActivity {
     protected void onRestart() {
         super.onRestart();
         Log.i("RD_", "onRestart");
-        boolean hasChanged = backgroundTask.checkHasDateChanged();
-        if (hasChanged) {
-            backgroundTask.summUpCheckBoxes(todoList);
+        if (backgroundTask.checkHasDateChanged()) {
+            backgroundTask.summUpCheckBoxes();
         }
         myPrefs.applyPrefsToView(mainActivityViewModel);
     }
@@ -411,14 +370,14 @@ public class OverviewActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        myPrefs.saveSharedPrefs(this, challengeEndingDate.getText().toString(), textViewPlus.getText().toString(), textViewMinus.getText().toString());
+        myPrefs.saveSharedPrefs();
         Log.i("RD_", "onStop");
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        myPrefs.saveSharedPrefs(this, challengeEndingDate.getText().toString(), textViewPlus.getText().toString(), textViewMinus.getText().toString());
+        myPrefs.saveSharedPrefs();
         Log.i("RD_", "onDestroy");
     }
 
@@ -426,9 +385,8 @@ public class OverviewActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         Log.i("RD_", "onResume");
-        boolean hasChanged = backgroundTask.checkHasDateChanged();
-        if (hasChanged) {
-            backgroundTask.summUpCheckBoxes(todoList);
+        if (backgroundTask.checkHasDateChanged()) {
+            backgroundTask.summUpCheckBoxes();
         }
         myPrefs.applyPrefsToView(mainActivityViewModel);
     }       //onResume - end

@@ -36,19 +36,10 @@ public class MainActivityViewModel extends ViewModel {
     }
 
     public void initUiElements(MySharedPrefs prefs){
-        if (scorePlus != null){
-            return;
-        }
         scorePlus.setValue(prefs.getScorePlus());
 
-        if (scoreMinus != null){
-            return;
-        }
         scoreMinus.setValue(prefs.getScoreMinus());
 
-        if (endingDate != null){
-            return;
-        }
         endingDate.setValue(prefs.getDate());
     }
 

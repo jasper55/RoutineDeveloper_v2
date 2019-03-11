@@ -16,7 +16,7 @@ import java.util.List;
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
 
     CustomItemClickListener customItemClickListener;
-    int currentPosition;
+    private int currentPosition;
     private Context context;
     private List<Todo> todoList;
 
