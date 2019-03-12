@@ -30,6 +30,8 @@ public class MySharedPrefs {
 
         if(instance==null) {
             instance=new MySharedPrefs(context);
+            instance.scoreMinus = "0";
+            instance.scorePlus = "0";
         }
         return instance;
     }
@@ -50,7 +52,7 @@ public class MySharedPrefs {
         SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
 
         date = sharedPreferences.getString(DATE, "");
-        scorePlus = sharedPreferences.getString(SCOREPLUS, "10");
+        scorePlus = sharedPreferences.getString(SCOREPLUS, "0");
         scoreMinus = sharedPreferences.getString(SCOREMINUS, "0");
     }
 

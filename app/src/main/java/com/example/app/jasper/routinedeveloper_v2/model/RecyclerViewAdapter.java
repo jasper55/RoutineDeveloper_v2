@@ -62,6 +62,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     // Methode auch wichtig, da wenn default 0 gelassen wird, wird nichts angezeigt
     @Override
     public int getItemCount() {
+        if (todoList == null){
+            return 0;
+        }
         return todoList.size();
     }
 

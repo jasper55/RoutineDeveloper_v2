@@ -12,6 +12,7 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -30,8 +31,9 @@ import android.widget.Toast;
 
 import com.example.app.jasper.routinedeveloper_v2.model.MySharedPrefs;
 import com.example.app.jasper.routinedeveloper_v2.model.RecyclerViewAdapter;
-import com.example.app.jasper.routinedeveloper_v2.model.SQLCRUDOperations;
 import com.example.app.jasper.routinedeveloper_v2.model.Todo;
+import com.example.app.jasper.routinedeveloper_v2.model.TodoRoomDatabase;
+import com.example.app.jasper.routinedeveloper_v2.repository.TodoListRepository;
 import com.example.app.jasper.routinedeveloper_v2.viewmodel.MainActivityViewModel;
 
 import java.util.Calendar;
@@ -57,7 +59,9 @@ public class OverviewActivity extends AppCompatActivity {
     public static final Long EMPTY_ID = -99L;
 
     private Todo item;
-    private SQLCRUDOperations crudOperations;
+    //    private SQLCRUDOperations crudOperations;
+    private TodoListRepository repository;
+    private TodoRoomDatabase roomDatabase;
 
     private boolean isFABOpen = false;
     private FloatingActionButton fab_add, fab_timer, fab_notification, fab_menu;
@@ -74,7 +78,8 @@ public class OverviewActivity extends AppCompatActivity {
         setContentView(R.layout.layout_overview);
 
 
-        crudOperations = SQLCRUDOperations.getInstance(getApplicationContext());
+        initDB();
+//        crudOperations = SQLCRUDOperations.getInstance(getApplicationContext());
 
         myPrefs = MySharedPrefs.getInstance(this);
         myPrefs.firstTimeStartingApp(this);
@@ -88,7 +93,7 @@ public class OverviewActivity extends AppCompatActivity {
 
         myPrefs.applyPrefsToView(mainActivityViewModel);
 
-        backgroundTask = BackgroundTasks.getInstance(this,mainActivityViewModel);
+        backgroundTask = BackgroundTasks.getInstance(this, mainActivityViewModel);
 //        backgroundTask.init(this,
 //                mainActivityViewModel.getScorePlus().toString(),
 //                mainActivityViewModel.getScoreMinus().toString());
@@ -98,10 +103,29 @@ public class OverviewActivity extends AppCompatActivity {
         instantiateFABMenu();
     }       // onCreate() - end
 
+    private void initDB() {
+        roomDatabase = TodoRoomDatabase.getInstance(getApplicationContext());
+        repository = new TodoListRepository(getApplicationContext());
+//        roomDatabase = Room.databaseBuilder(getApplicationContext(),
+//                TodoRoomDatabase.class, "todoDB")
+//                .allowMainThreadQueries().build();
+
+//        new AsyncTask<Void, Void, TodoListRepository>(){
+//            @Override
+//            protected TodoListRepository doInBackground(Void... voids) {
+//                repository = new TodoListRepository(getApplicationContext());
+//                return repository;
+//            }
+//        }.execute();
+
+
+
+    }
+
 
     private void initViewModel() {
         mainActivityViewModel = ViewModelProviders.of(this).get(MainActivityViewModel.class);
-        mainActivityViewModel.initTodoListRepo(crudOperations);
+        mainActivityViewModel.receiveDataFromRepo(repository);
         mainActivityViewModel.initUiElements(myPrefs);
     }
 
@@ -110,6 +134,7 @@ public class OverviewActivity extends AppCompatActivity {
         observeScoreCounter();
         observeEndingDate();
     }
+
     public void observeTodoList() {
         mainActivityViewModel.getTodoList().observe(this, new Observer<List<Todo>>() {
             @Override
@@ -118,6 +143,7 @@ public class OverviewActivity extends AppCompatActivity {
             }
         });
     }
+
     public void observeScoreCounter() {
         mainActivityViewModel.getScorePlus().observe(this, new Observer<String>() {
             @Override
@@ -132,6 +158,7 @@ public class OverviewActivity extends AppCompatActivity {
             }
         });
     }
+
     public void observeEndingDate() {
         mainActivityViewModel.getEndingDate().observe(this, new Observer<String>() {
             @Override
@@ -406,7 +433,8 @@ public class OverviewActivity extends AppCompatActivity {
                     Toast.makeText(this, "no changes", Toast.LENGTH_LONG).show();
                 } else {
 
-                    item = crudOperations.readItem(id);
+//                    item = crudOperations.readItem(id);
+                    item = repository.readItem(id);
 
                     if (requestCode == CALL_CREATE_ITEM) {
                         Toast.makeText(this, "new item received", Toast.LENGTH_LONG).show();

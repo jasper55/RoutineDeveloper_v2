@@ -1,36 +1,32 @@
 package com.example.app.jasper.routinedeveloper_v2.model;
 
-import android.arch.persistence.room.Database;
-import android.arch.persistence.room.RoomDatabase;
+import android.arch.lifecycle.MutableLiveData;
+import android.arch.persistence.room.Dao;
+import android.arch.persistence.room.Delete;
+import android.arch.persistence.room.Insert;
+import android.arch.persistence.room.Query;
+import android.arch.persistence.room.Update;
+
+import java.util.List;
+
+@Dao
+public interface RoomCRUDOperations {
+
+    @Insert
+    long createItem(Todo todo);
+
+    @Query("select * from Todos")  // Todos ist aus TodoKlasse @Entity (tableName)
+    List<Todo> getAllItems();
+
+    @Update
+    void updateItem(Todo item);
+
+    @Query("SELECT * FROM Todos WHERE id=:id")
+    Todo readItem(long id);
+
+    @Delete
+    void deleteItem(Todo item);
 
 
-@Database(entities = {Todo.class}, version = 1)
-public abstract class RoomCRUDOperations extends RoomDatabase {
-
-//    private static RoomCRUDOperations instance;
-//
-//    public static RoomCRUDOperations getInstance(){
-//        if (instance == null){
-//            instance = new RoomCRUDOperations();
-//        }
-//        return instance;
-//    }
-
-
-//    @Override
-//    protected SupportSQLiteOpenHelper createOpenHelper(DatabaseConfiguration config) {
-//        return null;
-//    }
-//
-//    @Override
-//    protected InvalidationTracker createInvalidationTracker() {
-//        return null;
-//    }
-
-
-    public abstract RoomAccessObject myRDao();
-
+//    All of the parameters of these CRUD annotated methods must either be classes annotated with Entity or collections/array of it.
 }
-
-
-

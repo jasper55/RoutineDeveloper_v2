@@ -2,9 +2,10 @@ package com.example.app.jasper.routinedeveloper_v2.viewmodel;
 
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
+import android.content.Context;
+import android.util.Log;
 
 import com.example.app.jasper.routinedeveloper_v2.model.MySharedPrefs;
-import com.example.app.jasper.routinedeveloper_v2.model.SQLCRUDOperations;
 import com.example.app.jasper.routinedeveloper_v2.model.Todo;
 import com.example.app.jasper.routinedeveloper_v2.repository.TodoListRepository;
 
@@ -24,12 +25,12 @@ public class MainActivityViewModel extends ViewModel {
         return todoList;
     }
 
-    public void initTodoListRepo(SQLCRUDOperations crudOperations) {
-        if (todoList != null){
+    public void receiveDataFromRepo(TodoListRepository todoListRepo) {
+        if (todoListRepo == null){
+            Log.i("Repo", "Repo is null");
             return;
         }
-        todoListRepo = TodoListRepository.getInstance();
-        todoList = todoListRepo.getTodoList(crudOperations);
+        todoList = todoListRepo.getAllItems();
         scorePlus = new MutableLiveData<>();
         scoreMinus = new MutableLiveData<>();
         endingDate = new MutableLiveData<>();
