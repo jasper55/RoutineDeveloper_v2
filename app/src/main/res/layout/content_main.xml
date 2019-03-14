@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:padding="10dp"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.example.app.jasper.routinedeveloper_v2.OverviewActivity"
+    tools:context="com.example.app.jasper.routinedeveloperv2.OverviewActivity"
     tools:showIn="@layout/layout_overview">
 
     <LinearLayout

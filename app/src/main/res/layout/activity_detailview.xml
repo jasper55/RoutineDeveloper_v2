@@ -8,10 +8,10 @@
     <data>
         <variable
             name="todo"
-            type="com.example.app.jasper.routinedeveloper_v2.model.Todo"/>
+            type="com.example.app.jasper.routinedeveloperv2.model.Todo"/>
         <variable
             name="actions"
-            type="com.example.app.jasper.routinedeveloper_v2.view.DetailviewActions"/>
+            type="com.example.app.jasper.routinedeveloperv2.view.DetailviewActions"/>
     </data>
 
     <android.support.constraint.ConstraintLayout
