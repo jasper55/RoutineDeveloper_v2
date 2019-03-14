@@ -12,10 +12,10 @@ import java.util.List;
 
 public class MainActivityViewModel extends ViewModel {
 
-    private MutableLiveData<List<Todo>> todoList;
-    private MutableLiveData<String> scorePlus;
-    private MutableLiveData<String> scoreMinus;
-    private MutableLiveData<String> endingDate;
+    private MutableLiveData<List<Todo>> todoList = new MutableLiveData<>();
+    private MutableLiveData<String> scorePlus = new MutableLiveData<>();
+    private MutableLiveData<String> scoreMinus = new MutableLiveData<>();
+    private MutableLiveData<String> endingDate = new MutableLiveData<>();
     private MutableLiveData<Boolean> vmIsUpdating; // falls Daten von einem remoteServer geholt werden -> Progressbar implementieren
 
     private TodoListRepository todoListRepo;
@@ -27,20 +27,16 @@ public class MainActivityViewModel extends ViewModel {
     public void receiveDataFromRepo(TodoListRepository todoListRepo) {
         if (todoListRepo == null){
             Log.i("Repo", "Repo is null");
+            todoList.postValue(null);
             return;
         }
-        todoList = todoListRepo.getAllItems();
-        scorePlus = new MutableLiveData<>();
-        scoreMinus = new MutableLiveData<>();
-        endingDate = new MutableLiveData<>();
+        todoList.postValue(todoListRepo.getAllItems().getValue());
     }
 
     public void initUiElements(MySharedPrefs prefs){
-        scorePlus.setValue(prefs.getScorePlus());
-
-        scoreMinus.setValue(prefs.getScoreMinus());
-
-        endingDate.setValue(prefs.getDate());
+        scorePlus.postValue(prefs.getScorePlus());
+        scoreMinus.postValue(prefs.getScoreMinus());
+        endingDate.postValue(prefs.getEndingDate());
     }
 
     public MutableLiveData<String> getScorePlus() {
@@ -55,16 +51,16 @@ public class MainActivityViewModel extends ViewModel {
         return endingDate;
     }
 
-    public void setScorePlus(String scorePlus) {
-        this.scorePlus.setValue(scorePlus);
+    public void postScorePlus(String scorePlus) {
+        this.scorePlus.postValue(scorePlus);
     }
 
-    public void setScoreMinus(String scoreMinus) {
-        this.scoreMinus.setValue(scoreMinus);
+    public void postScoreMinus(String scoreMinus) {
+        this.scoreMinus.postValue(scoreMinus);
     }
 
-    public void setEndingDate(String endingDate) {
-        this.endingDate.setValue(endingDate);
+    public void postEndingDate(String endingDate) {
+        this.endingDate.postValue(endingDate);
     }
 
     public void setTodoList(List<Todo> list){
@@ -73,4 +69,5 @@ public class MainActivityViewModel extends ViewModel {
     public void setVmIsUpdating(MutableLiveData<Boolean> vmIsUpdating) {
         this.vmIsUpdating = vmIsUpdating;
     }
+
 }

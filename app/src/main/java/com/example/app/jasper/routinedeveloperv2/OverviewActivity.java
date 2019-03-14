@@ -83,19 +83,17 @@ public class OverviewActivity extends AppCompatActivity {
         myPrefs = MySharedPrefs.getInstance(this);
         myPrefs.firstTimeStartingApp(this);
         myPrefs.loadSharedPrefs();
-
-
         initViewModel();
+        myPrefs.applyPrefsToViewModel();
+
+
         //myPrefs.connectViewModel(mainActivityViewModel);
-        observeChangestoUiElements();
         instantiateViewElements();
+        observeChangestoUiElements();
 
-        myPrefs.applyPrefsToView(mainActivityViewModel);
 
-        backgroundTask = BackgroundTasks.getInstance(this, mainActivityViewModel);
-//        backgroundTask.init(this,
-//                mainActivityViewModel.getScorePlus().toString(),
-//                mainActivityViewModel.getScoreMinus().toString());
+
+        backgroundTask = BackgroundTasks.getInstance(this, myPrefs);
 
         setClickListenersToViewElements();
         instantiateTimePicker();
@@ -105,20 +103,6 @@ public class OverviewActivity extends AppCompatActivity {
     private void initDB() {
         roomDatabase = TodoRoomDatabase.getInstance(getApplicationContext());
         repository = new TodoListRepository(getApplicationContext());
-//        roomDatabase = Room.databaseBuilder(getApplicationContext(),
-//                TodoRoomDatabase.class, "todoDB")
-//                .allowMainThreadQueries().build();
-
-//        new AsyncTask<Void, Void, TodoListRepository>(){
-//            @Override
-//            protected TodoListRepository doInBackground(Void... voids) {
-//                repository = new TodoListRepository(getApplicationContext());
-//                return repository;
-//            }
-//        }.execute();
-
-
-
     }
 
 
@@ -197,7 +181,7 @@ public class OverviewActivity extends AppCompatActivity {
                 month = month + 1;
                 String date = day + "." + month + "." + year;
                 challengeEndingDate.setText(date);
-                myPrefs.saveSharedPrefs();
+                myPrefs.saveEndingDate(date);
             }
         };
     }
@@ -365,7 +349,7 @@ public class OverviewActivity extends AppCompatActivity {
             public void onAnimationRepeat(Animator animator) {
             }
         });
-        backgroundTask.changeDate();
+        backgroundTask.changeDate(mainActivityViewModel);
     }
 
     @Override
@@ -388,22 +372,19 @@ public class OverviewActivity extends AppCompatActivity {
         super.onRestart();
         Log.i("RD_", "onRestart");
         if (backgroundTask.checkHasDateChanged()) {
-            backgroundTask.summUpCheckBoxes();
+            backgroundTask.summUpCheckBoxes(mainActivityViewModel);
         }
-        myPrefs.applyPrefsToView(mainActivityViewModel);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        myPrefs.saveSharedPrefs();
         Log.i("RD_", "onStop");
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        myPrefs.saveSharedPrefs();
         Log.i("RD_", "onDestroy");
     }
 
@@ -412,9 +393,8 @@ public class OverviewActivity extends AppCompatActivity {
         super.onResume();
         Log.i("RD_", "onResume");
         if (backgroundTask.checkHasDateChanged()) {
-            backgroundTask.summUpCheckBoxes();
+            backgroundTask.summUpCheckBoxes(mainActivityViewModel);
         }
-        myPrefs.applyPrefsToView(mainActivityViewModel);
     }       //onResume - end
 
     @Override
@@ -545,12 +525,10 @@ public class OverviewActivity extends AppCompatActivity {
 
         if (id == R.id.clearScore) {
             backgroundTask.clearScore();
-            myPrefs.applyPrefsToView(mainActivityViewModel);
             return true;
         }
         if (id == R.id.clearTarget) {
             backgroundTask.clearTargetDate();
-            myPrefs.applyPrefsToView(mainActivityViewModel);
             return true;
         }
         return super.onOptionsItemSelected(item);

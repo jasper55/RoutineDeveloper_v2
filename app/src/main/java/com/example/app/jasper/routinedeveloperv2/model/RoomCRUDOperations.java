@@ -18,7 +18,7 @@ public interface RoomCRUDOperations {
     List<Todo> getAllItems();
 
     @Update
-    void updateItem(Todo item);
+    void updateItem(long id, Todo item);
 
     @Query("SELECT * FROM Todos WHERE id=:id")
     Todo readItem(long id);

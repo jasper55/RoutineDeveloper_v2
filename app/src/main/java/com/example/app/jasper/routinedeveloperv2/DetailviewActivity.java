@@ -72,7 +72,7 @@ public class DetailviewActivity extends AppCompatActivity implements DetailviewA
 //            this.item.setId(id);
 //
 //        } else {
-        repository.updateItem(item);
+        repository.updateItem(id, item);
 //            roomDatabase.roomCRUDOperations().updateItem(item);
 //        }
 

@@ -11,6 +11,8 @@ import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.example.app.jasper.routinedeveloperv2.R;
+import com.example.app.jasper.routinedeveloperv2.repository.TodoListRepository;
+
 import java.util.List;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
@@ -54,6 +56,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 mockItem = todoList.get(position);
                 long id = mockItem.getId();
                 mockItem.setDone(checked);
+                TodoListRepository.getInstance(context).updateItem(id, mockItem);
                 SQLCRUDOperations.getInstance(context.getApplicationContext()).updateItem(id, mockItem);
             }
         });
@@ -73,13 +76,16 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
     public void addItem(Todo item) {
-        SQLCRUDOperations.getInstance(context.getApplicationContext()).updateItem(item.getId(), item);
+        TodoListRepository.getInstance(context).updateItem(item.getId(), item);
+//        SQLCRUDOperations.getInstance(context.getApplicationContext()).updateItem(item.getId(), item);
         todoList.add(item);
         this.notifyDataSetChanged();
     }
 
     public void updateList(Todo item, int position) {
-        todoList.set(position, SQLCRUDOperations.getInstance(context.getApplicationContext()).readItem(item.getId()));
+        todoList.set(position,TodoListRepository.getInstance(context).readItem(item.getId()));
+
+//        todoList.set(position, SQLCRUDOperations.getInstance(context.getApplicationContext()).readItem(item.getId()));
         this.notifyDataSetChanged();
     }
 

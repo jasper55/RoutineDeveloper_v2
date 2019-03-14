@@ -4,6 +4,7 @@ import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.os.AsyncTask;
 
+import com.example.app.jasper.routinedeveloperv2.model.MySharedPrefs;
 import com.example.app.jasper.routinedeveloperv2.model.TodoRoomDatabase;
 import com.example.app.jasper.routinedeveloperv2.model.SQLCRUDOperations;
 import com.example.app.jasper.routinedeveloperv2.model.Todo;
@@ -12,12 +13,16 @@ import java.util.List;
 
 public class TodoListRepository {
 
-
     private TodoRoomDatabase roomDatabase;
     private static TodoListRepository instance;
+    private MutableLiveData<String> scorePlus;
+    private MutableLiveData<String> scoreMinus;
+    private MutableLiveData<String> endingDate;
+    private MutableLiveData<List<Todo>> todoList;
 
     public TodoListRepository(Context context) {
-        roomDatabase = TodoRoomDatabase.getInstance(context);
+        initLiveData();
+        setValues(context);
     }
 
     public static TodoListRepository getInstance(Context context){
@@ -26,50 +31,27 @@ public class TodoListRepository {
         }
         return instance;
     }
-//    private static TodoRoomDatabase init(final Context context) {
-//        instance = Room.databaseBuilder(context,
-//                TodoRoomDatabase.class, DATABASE_NAME)
-//                .allowMainThreadQueries().build();
-//        return instance;
-//    }
 
+    public void initLiveData(){
+        todoList = new MutableLiveData<>();
+        scorePlus = new MutableLiveData<>();
+        scoreMinus = new MutableLiveData<>();
+        endingDate = new MutableLiveData<>();
+    }
 
-//    private static TodoListRepository instance = null;
-//
-//    public static TodoListRepository getInstance() {
-//        if (instance == null) {
-//            instance = new TodoListRepository();
-//        }
-//        return instance;
-//    }
+    public void setValues(Context context){
+        roomDatabase = TodoRoomDatabase.getInstance(context);
+        List<Todo> list = roomDatabase.roomCRUDOperations().getAllItems();
+        MySharedPrefs prefs = MySharedPrefs.getInstance(context);
 
-
-
-//    public MutableLiveData<List<Todo>> getAllItems(Context context, TodoRoomDatabase TodoRoomDatabase) {
-//        todoList = TodoRoomDatabase.getInstance(context).roomCRUDOperations().getTodolist();
-//        MutableLiveData<List<Todo>> data = new MutableLiveData<>();
-//        data.setValue(todoList);
-//        return data;
-//    }
+        todoList.setValue(list);
+        scorePlus.setValue(prefs.getScorePlus());
+        scoreMinus.setValue(prefs.getScoreMinus());
+        endingDate.setValue(prefs.getEndingDate());
+    }
 
     public MutableLiveData<List<Todo>> getAllItems() {
-
-        final MutableLiveData<List<Todo>> data = new MutableLiveData<>();
-
-        new AsyncTask<Void, Void, List<Todo>>(){
-
-            @Override
-            protected List<Todo> doInBackground(Void... voids) {
-                List<Todo> todoList = roomDatabase.roomCRUDOperations().getAllItems();
-                return todoList;
-            }
-
-            @Override
-            protected void onPostExecute(List<Todo> todoList) {
-                data.setValue(todoList);
-            }
-        }.execute();
-        return data;
+        return todoList;
     }
 
     public Todo readItem(long id){
@@ -77,12 +59,12 @@ public class TodoListRepository {
         return todo;
     }
 
-    public void updateItem(final Todo item){
+    public void updateItem(final long id, final Todo item){
         new AsyncTask<Void, Void, Void>(){
 
             @Override
             protected Void doInBackground(Void... voids) {
-                roomDatabase.roomCRUDOperations().updateItem(item);
+                roomDatabase.roomCRUDOperations().updateItem(id,item);
                 return null;
             }
         }.execute();
@@ -110,6 +92,9 @@ public class TodoListRepository {
         }.execute();
     }
 
+
+
+
     public MutableLiveData<List<Todo>> getTodoListOld(SQLCRUDOperations crudOperations) {
         List<Todo> todoList;
         todoList = crudOperations.readAllItems();
@@ -117,23 +102,6 @@ public class TodoListRepository {
         data.setValue(todoList);
         return data;
     }
-
-
-
-//    private static volatile TodoListRepository instance = null;
-
-//    public static synchronized TodoListRepository getInstance(Context context) {
-//
-//        if (instance == null){
-//            init(context);
-//        }
-//        return instance;
-//    }
-//
-//    public static boolean isInited() {
-//        return instance != null;
-//    }
-
 
 
 
