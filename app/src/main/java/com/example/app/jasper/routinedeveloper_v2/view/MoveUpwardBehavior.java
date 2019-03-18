@@ -1,4 +1,4 @@
-package com.example.app.jasper.routinedeveloperv2.view;
+package com.example.app.jasper.routinedeveloper_v2.view;
 
 import android.content.Context;
 import android.support.design.widget.CoordinatorLayout;

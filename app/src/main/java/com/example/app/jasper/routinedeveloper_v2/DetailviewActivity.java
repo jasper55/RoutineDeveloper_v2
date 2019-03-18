@@ -1,14 +1,14 @@
-package com.example.app.jasper.routinedeveloperv2;
+package com.example.app.jasper.routinedeveloper_v2;
 
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.databinding.DataBindingUtil;
-import com.example.app.jasper.routinedeveloperv2.databinding.ActivityDetailviewBinding;
-import com.example.app.jasper.routinedeveloperv2.model.SQLCRUDOperations;
-import com.example.app.jasper.routinedeveloperv2.model.Todo;
-import com.example.app.jasper.routinedeveloperv2.repository.TodoListRepository;
-import com.example.app.jasper.routinedeveloperv2.view.DetailviewActions;
+import com.example.app.jasper.routinedeveloper_v2.databinding.ActivityDetailviewBinding;
+import com.example.app.jasper.routinedeveloper_v2.model.SQLCRUDOperations;
+import com.example.app.jasper.routinedeveloper_v2.model.Todo;
+import com.example.app.jasper.routinedeveloper_v2.repository.TodoListRepository;
+import com.example.app.jasper.routinedeveloper_v2.view.DetailviewActions;
 
 
 public class DetailviewActivity extends AppCompatActivity implements DetailviewActions {
@@ -55,8 +55,9 @@ public class DetailviewActivity extends AppCompatActivity implements DetailviewA
 
         long itemId = getIntent().getLongExtra(ARG_ITEM_ID, -1);
 
-        if (itemId != -1) item = repository.readItem(itemId);
-        else {
+        if (itemId != -1) {
+//            item = repository.readItem(itemId);
+        } else {
             this.item = new Todo();
             repository.createItem(item);
             //roomDatabase.roomCRUDOperations().createItem(item);
@@ -72,7 +73,7 @@ public class DetailviewActivity extends AppCompatActivity implements DetailviewA
 //            this.item.setId(id);
 //
 //        } else {
-        repository.updateItem(id, item);
+        repository.updateItem(item);
 //            roomDatabase.roomCRUDOperations().updateItem(item);
 //        }
 

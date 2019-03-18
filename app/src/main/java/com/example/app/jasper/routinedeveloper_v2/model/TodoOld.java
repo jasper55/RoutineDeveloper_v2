@@ -1,4 +1,4 @@
-package com.example.app.jasper.routinedeveloperv2.model;
+package com.example.app.jasper.routinedeveloper_v2.model;
 
 import java.io.Serializable;
 

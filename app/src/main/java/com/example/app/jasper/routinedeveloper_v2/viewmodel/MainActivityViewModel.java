@@ -1,12 +1,12 @@
-package com.example.app.jasper.routinedeveloperv2.viewmodel;
+package com.example.app.jasper.routinedeveloper_v2.viewmodel;
 
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 import android.util.Log;
 
-import com.example.app.jasper.routinedeveloperv2.model.MySharedPrefs;
-import com.example.app.jasper.routinedeveloperv2.model.Todo;
-import com.example.app.jasper.routinedeveloperv2.repository.TodoListRepository;
+import com.example.app.jasper.routinedeveloper_v2.model.MySharedPrefs;
+import com.example.app.jasper.routinedeveloper_v2.model.Todo;
+import com.example.app.jasper.routinedeveloper_v2.repository.TodoListRepository;
 
 import java.util.List;
 

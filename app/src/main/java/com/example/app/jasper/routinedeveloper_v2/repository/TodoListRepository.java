@@ -1,13 +1,13 @@
-package com.example.app.jasper.routinedeveloperv2.repository;
+package com.example.app.jasper.routinedeveloper_v2.repository;
 
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.os.AsyncTask;
 
-import com.example.app.jasper.routinedeveloperv2.model.MySharedPrefs;
-import com.example.app.jasper.routinedeveloperv2.model.TodoRoomDatabase;
-import com.example.app.jasper.routinedeveloperv2.model.SQLCRUDOperations;
-import com.example.app.jasper.routinedeveloperv2.model.Todo;
+import com.example.app.jasper.routinedeveloper_v2.model.MySharedPrefs;
+import com.example.app.jasper.routinedeveloper_v2.model.TodoRoomDatabase;
+import com.example.app.jasper.routinedeveloper_v2.model.SQLCRUDOperations;
+import com.example.app.jasper.routinedeveloper_v2.model.Todo;
 
 import java.util.List;
 
@@ -54,17 +54,17 @@ public class TodoListRepository {
         return todoList;
     }
 
-    public Todo readItem(long id){
-        Todo todo = roomDatabase.roomCRUDOperations().readItem(id);
-        return todo;
-    }
+//    public Todo readItem(long id){
+//        Todo todo = roomDatabase.roomCRUDOperations().readItem(id);
+//        return todo;
+//    }
 
-    public void updateItem(final long id, final Todo item){
+    public void updateItem(final Todo item){
         new AsyncTask<Void, Void, Void>(){
 
             @Override
             protected Void doInBackground(Void... voids) {
-                roomDatabase.roomCRUDOperations().updateItem(id,item);
+                roomDatabase.roomCRUDOperations().updateItem(item);
                 return null;
             }
         }.execute();

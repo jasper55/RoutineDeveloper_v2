@@ -1,4 +1,4 @@
-package com.example.app.jasper.routinedeveloperv2.model;
+package com.example.app.jasper.routinedeveloper_v2.model;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -10,8 +10,8 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import com.example.app.jasper.routinedeveloperv2.R;
-import com.example.app.jasper.routinedeveloperv2.repository.TodoListRepository;
+import com.example.app.jasper.routinedeveloper_v2.R;
+import com.example.app.jasper.routinedeveloper_v2.repository.TodoListRepository;
 
 import java.util.List;
 

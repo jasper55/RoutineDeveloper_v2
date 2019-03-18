@@ -1,4 +1,4 @@
-package com.example.app.jasper.routinedeveloperv2;
+package com.example.app.jasper.routinedeveloper_v2;
 
 import android.animation.Animator;
 import android.annotation.SuppressLint;
@@ -28,12 +28,12 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import com.example.app.jasper.routinedeveloperv2.model.MySharedPrefs;
-import com.example.app.jasper.routinedeveloperv2.model.RecyclerViewAdapter;
-import com.example.app.jasper.routinedeveloperv2.model.Todo;
-import com.example.app.jasper.routinedeveloperv2.model.TodoRoomDatabase;
-import com.example.app.jasper.routinedeveloperv2.repository.TodoListRepository;
-import com.example.app.jasper.routinedeveloperv2.viewmodel.MainActivityViewModel;
+import com.example.app.jasper.routinedeveloper_v2.model.MySharedPrefs;
+import com.example.app.jasper.routinedeveloper_v2.model.RecyclerViewAdapter;
+import com.example.app.jasper.routinedeveloper_v2.model.Todo;
+import com.example.app.jasper.routinedeveloper_v2.model.TodoRoomDatabase;
+import com.example.app.jasper.routinedeveloper_v2.repository.TodoListRepository;
+import com.example.app.jasper.routinedeveloper_v2.viewmodel.MainActivityViewModel;
 
 import java.util.Calendar;
 import java.util.List;
@@ -413,7 +413,7 @@ public class OverviewActivity extends AppCompatActivity {
                 } else {
 
 //                    item = crudOperations.readItem(id);
-                    item = repository.readItem(id);
+//                    item = repository.readItem(id);
 
                     if (requestCode == CALL_CREATE_ITEM) {
                         Toast.makeText(this, "new item received", Toast.LENGTH_LONG).show();

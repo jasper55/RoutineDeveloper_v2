@@ -1,4 +1,4 @@
-package com.example.app.jasper.routinedeveloperv2.model;
+package com.example.app.jasper.routinedeveloper_v2.model;
 
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
@@ -18,10 +18,10 @@ public interface RoomCRUDOperations {
     List<Todo> getAllItems();
 
     @Update
-    void updateItem(long id, Todo item);
+    void updateItem(Todo item);
 
-    @Query("SELECT * FROM Todos WHERE id=:id")
-    Todo readItem(long id);
+//    @Query("SELECT * FROM Todos WHERE id=:id")
+//    Todo readItem(long id);
 
     @Delete
     void deleteItem(Todo item);

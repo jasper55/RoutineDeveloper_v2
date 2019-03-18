@@ -1,10 +1,10 @@
-package com.example.app.jasper.routinedeveloperv2.model;
+package com.example.app.jasper.routinedeveloper_v2.model;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.widget.Toast;
 
-import com.example.app.jasper.routinedeveloperv2.viewmodel.MainActivityViewModel;
+import com.example.app.jasper.routinedeveloper_v2.viewmodel.MainActivityViewModel;
 
 import java.util.Calendar;
 

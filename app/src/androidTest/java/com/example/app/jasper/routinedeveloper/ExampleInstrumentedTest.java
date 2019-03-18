@@ -1,4 +1,4 @@
-package com.example.app.jasper.routinedeveloperv2;
+package com.example.app.jasper.routinedeveloper_v2;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
