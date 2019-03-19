@@ -11,6 +11,8 @@ import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.example.app.jasper.routinedeveloper_v2.R;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
@@ -18,7 +20,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     CustomItemClickListener customItemClickListener;
     private int currentPosition;
     private Context context;
-    private List<Todo> todoList;
+    private List<Todo> todoList=new ArrayList<>();
 
     // Its similar to what your code in the ListView does (checking if convertView is null)
     @NonNull
@@ -62,6 +64,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     // Methode auch wichtig, da wenn default 0 gelassen wird, wird nichts angezeigt
     @Override
     public int getItemCount() {
+        if (todoList == null) return 0;
         return todoList.size();
     }
 
@@ -89,6 +92,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         return currentPosition;
     }
 
+    public void updateList() {
+        todoList.addAll(SQLCRUDOperations.getInstance(context.getApplicationContext()).readAllItems());
+        this.notifyDataSetChanged();
+    }
+
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
@@ -106,10 +114,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         }
     }
 
-    public RecyclerViewAdapter(Context context, List<Todo> todoList,  CustomItemClickListener listener) {
+    public RecyclerViewAdapter(Context context,   CustomItemClickListener listener) {
         this.customItemClickListener = listener;
         this.context = context;
-        this.todoList = todoList;
+
     }
 
     public interface CustomItemClickListener {

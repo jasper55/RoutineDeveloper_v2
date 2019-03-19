@@ -76,17 +76,19 @@ public class OverviewActivity extends AppCompatActivity {
 
         crudOperations = SQLCRUDOperations.getInstance(getApplicationContext());
 
-        myPrefs = MySharedPrefs.getInstance(this);
-        myPrefs.firstTimeStartingApp(this);
+        myPrefs = MySharedPrefs.getInstance(getApplication());
+        myPrefs.firstTimeStartingApp(getApplication());
         myPrefs.loadSharedPrefs();
 
 
         initViewModel();
-        //myPrefs.connectViewModel(mainActivityViewModel);
-        observeChangestoUiElements();
         instantiateViewElements();
 
-        myPrefs.applyPrefsToView(mainActivityViewModel);
+        //myPrefs.connectViewModel(mainActivityViewModel);
+        observeChangestoUiElements();
+
+
+//        myPrefs.applyPrefsToView(mainActivityViewModel);
 
         backgroundTask = BackgroundTasks.getInstance(this,mainActivityViewModel);
 //        backgroundTask.init(this,
@@ -101,8 +103,8 @@ public class OverviewActivity extends AppCompatActivity {
 
     private void initViewModel() {
         mainActivityViewModel = ViewModelProviders.of(this).get(MainActivityViewModel.class);
-        mainActivityViewModel.initTodoListRepo(crudOperations);
-        mainActivityViewModel.initUiElements(myPrefs);
+        mainActivityViewModel.receiveDateFromRepo(this);
+
     }
 
     private void observeChangestoUiElements() {
@@ -114,7 +116,7 @@ public class OverviewActivity extends AppCompatActivity {
         mainActivityViewModel.getTodoList().observe(this, new Observer<List<Todo>>() {
             @Override
             public void onChanged(@Nullable List<Todo> todos) {
-                recyclerViewAdapter.notifyDataSetChanged();
+                recyclerViewAdapter.updateList();
             }
         });
     }
@@ -170,7 +172,8 @@ public class OverviewActivity extends AppCompatActivity {
             public void onDateSet(DatePicker datePicker, int year, int month, int day) {
                 month = month + 1;
                 String date = day + "." + month + "." + year;
-                challengeEndingDate.setText(date);
+               // challengeEndingDate.setText(date);
+                mainActivityViewModel.getEndingDate().postValue(date);
                 myPrefs.saveSharedPrefs();
             }
         };
@@ -179,6 +182,8 @@ public class OverviewActivity extends AppCompatActivity {
     private void instantiateViewElements() {
         initRecyclerViewList();
         challengeEndingDate = findViewById(R.id.tvDate);
+
+      //  challengeEndingDate.setText(mainActivityViewModel.getEndingDate().getValue());
         initActionBar();
     }
 
@@ -196,7 +201,7 @@ public class OverviewActivity extends AppCompatActivity {
 
     private void initRecyclerViewList() {
         recyclerView = findViewById(R.id.recycler_view_data);
-        recyclerViewAdapter = new RecyclerViewAdapter(this, mainActivityViewModel.getTodoList().getValue(), new RecyclerViewAdapter.CustomItemClickListener() {
+        recyclerViewAdapter = new RecyclerViewAdapter(this, new RecyclerViewAdapter.CustomItemClickListener() {
 
             @Override
             public void onItemClick(int position) {
@@ -362,9 +367,9 @@ public class OverviewActivity extends AppCompatActivity {
         super.onRestart();
         Log.i("RD_", "onRestart");
         if (backgroundTask.checkHasDateChanged()) {
-            backgroundTask.summUpCheckBoxes();
+//            backgroundTask.summUpCheckBoxes();
         }
-        myPrefs.applyPrefsToView(mainActivityViewModel);
+//        myPrefs.applyPrefsToView(mainActivityViewModel);
     }
 
     @Override
@@ -386,9 +391,9 @@ public class OverviewActivity extends AppCompatActivity {
         super.onResume();
         Log.i("RD_", "onResume");
         if (backgroundTask.checkHasDateChanged()) {
-            backgroundTask.summUpCheckBoxes();
+//            backgroundTask.summUpCheckBoxes();
         }
-        myPrefs.applyPrefsToView(mainActivityViewModel);
+//        myPrefs.applyPrefsToView(mainActivityViewModel);
     }       //onResume - end
 
     @Override
@@ -518,12 +523,12 @@ public class OverviewActivity extends AppCompatActivity {
 
         if (id == R.id.clearScore) {
             backgroundTask.clearScore();
-            myPrefs.applyPrefsToView(mainActivityViewModel);
+//            myPrefs.applyPrefsToView(mainActivityViewModel);
             return true;
         }
         if (id == R.id.clearTarget) {
             backgroundTask.clearTargetDate();
-            myPrefs.applyPrefsToView(mainActivityViewModel);
+//            myPrefs.applyPrefsToView(mainActivityViewModel);
             return true;
         }
         return super.onOptionsItemSelected(item);

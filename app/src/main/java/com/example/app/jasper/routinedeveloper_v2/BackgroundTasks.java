@@ -57,7 +57,7 @@ public class BackgroundTasks {
 
         Log.i("RD_", String.valueOf(lastday));
         if (currentday != lastday) {
-            summUpCheckBoxes();
+//            summUpCheckBoxes();
         }
     }
 
@@ -84,7 +84,7 @@ public class BackgroundTasks {
         MutableLiveData<List<Todo>> todoList = mainActivityViewModel.getTodoList();
 
         String scorePlus = mainActivityViewModel.getScorePlus().toString();
-        String scoreMinus = mainActivityViewModel.getScoreMinus().toString();
+        String scoreMinus = mainActivityViewModel.getScoreMinus().getValue();
         int doneCounter = Integer.parseInt(scorePlus);
         int undoneCounter = Integer.parseInt(scoreMinus);
 
