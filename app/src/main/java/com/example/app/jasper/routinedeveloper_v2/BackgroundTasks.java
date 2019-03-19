@@ -142,6 +142,6 @@ public class BackgroundTasks {
     }
 
     public void clearTargetDate() {
-        MySharedPrefs.getInstance(context).clearDate(context);
+        MySharedPrefs.getInstance(context).clearDate();
     }
 }

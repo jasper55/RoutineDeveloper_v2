@@ -25,7 +25,8 @@ public class MySharedPrefs {
     private TodoListRepository repo;
 
     private static MySharedPrefs instance;
-    private SharedPreferences.Editor prefEdidtor;
+    private SharedPreferences prefs;
+    private SharedPreferences.Editor editor;
 
     public static MySharedPrefs getInstance(Context context){
 
@@ -37,33 +38,26 @@ public class MySharedPrefs {
 
     public MySharedPrefs(Context context) {
         this.context = context;
-//        repo = TodoListRepository.getInstance(context);
+        prefs = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
+        editor = prefs.edit();
     }
 
     public void updateDate() {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
         int currentday = Calendar.getInstance().DAY_OF_YEAR;
         editor.putInt(STOREDDAY, currentday);
         editor.apply();
     }
 
     public void loadSharedPrefs() {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
-
-        endingDate = sharedPreferences.getString(DATE, "");
-        scorePlus = sharedPreferences.getString(SCOREPLUS, "0");
-        scoreMinus = sharedPreferences.getString(SCOREMINUS, "0");
+        endingDate = prefs.getString(DATE, "");
+        scorePlus = prefs.getString(SCOREPLUS, "0");
+        scoreMinus = prefs.getString(SCOREMINUS, "0");
     }
 
     public void saveSharedPrefs() {
-        TodoListRepository repo = TodoListRepository.getInstance(context);
-        SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
 
         if( getEndingDate() != null) {String endingDate = repo.getEndingDate().getValue();
         this.endingDate = endingDate;}
-
 
         if( repo.getScorePlus() != null) {
             String scorePlus = repo.getScorePlus().getValue();
@@ -85,16 +79,11 @@ public class MySharedPrefs {
     }
 
     public void firstTimeStartingApp(Context context) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
-        boolean firstStart = sharedPreferences.getBoolean(FIRSTSTART, true);
+        boolean firstStart = prefs.getBoolean(FIRSTSTART, true);
 
         if (firstStart) {
-
             Toast.makeText(context.getApplicationContext(), "Welcome to Routine Developer!", Toast.LENGTH_SHORT).show();
-
             updateDate();
-
-            SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putBoolean(FIRSTSTART, false);
             editor.apply();
         }
@@ -104,13 +93,8 @@ public class MySharedPrefs {
         saveSharedPrefs();
     }
 
-    public void clearDate(Context context) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-
-        String endingDate = null;
-
-        editor.putString(DATE, endingDate);
+    public void clearDate() {
+        editor.putString(DATE, null);
         editor.apply();
     }
 
