@@ -7,39 +7,35 @@ import android.app.AlarmManager;
 import android.app.DatePickerDialog;
 import android.app.PendingIntent;
 import android.app.TimePickerDialog;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
-import com.example.app.jasper.routinedeveloper_v2.model.ListItemViewHolder;
+
 import com.example.app.jasper.routinedeveloper_v2.model.MySharedPrefs;
 import com.example.app.jasper.routinedeveloper_v2.model.RecyclerViewAdapter;
 import com.example.app.jasper.routinedeveloper_v2.model.SQLCRUDOperations;
 import com.example.app.jasper.routinedeveloper_v2.model.Todo;
-import java.util.ArrayList;
+import com.example.app.jasper.routinedeveloper_v2.viewmodel.MainActivityViewModel;
+
 import java.util.Calendar;
 import java.util.List;
-import jp.wasabeef.blurry.Blurry;
 
 public class OverviewActivity extends AppCompatActivity {
 
@@ -47,11 +43,8 @@ public class OverviewActivity extends AppCompatActivity {
     private TimePickerDialog.OnTimeSetListener alertTimeListener;
     private static final int CALL_NOTIFICATION_ALERT_TIME = 100;
 
-    private ListView listView;
     private RecyclerView recyclerView;
     private RecyclerViewAdapter recyclerViewAdapter;
-    private ArrayAdapter<Todo> listViewAdapter;
-    private List<Todo> todoList = new ArrayList<>();
 
     private TextView challengeEndingDate;
     private DatePickerDialog.OnDateSetListener challengeEndingDateSetListener;
@@ -72,42 +65,7 @@ public class OverviewActivity extends AppCompatActivity {
     View fabOverlay;
     private MySharedPrefs myPrefs;
     private BackgroundTasks backgroundTask;
-
-    BackgroundTasks.CallbackListener backgroundtaskListener = new BackgroundTasks.CallbackListener() {
-        @Override
-        public void updateMinusView(final String data) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    textViewMinus.setText(data);
-                }
-            });
-
-        }
-
-        @Override
-        public void updatePlusView(final String data) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    textViewPlus.setText(data);
-                }
-            });
-        }
-    };
-    MySharedPrefs.PrefsCallbackListener prefsCallbackListener = new MySharedPrefs.PrefsCallbackListener() {
-        @Override
-        public void callbackUpdateView(final String date, final String scorePlus, final String scoreMinus) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    challengeEndingDate.setText(date);
-                    textViewPlus.setText(scorePlus);
-                    textViewMinus.setText(scoreMinus);
-                }
-            });
-        }
-    };
+    MainActivityViewModel mainActivityViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,27 +73,75 @@ public class OverviewActivity extends AppCompatActivity {
 
         setContentView(R.layout.layout_overview);
 
+
         crudOperations = SQLCRUDOperations.getInstance(getApplicationContext());
+
+        myPrefs = MySharedPrefs.getInstance(getApplication());
+        myPrefs.firstTimeStartingApp(getApplication());
+        myPrefs.loadSharedPrefs();
+
+
+        initViewModel();
         instantiateViewElements();
-        todoList = crudOperations.readAllItems();
 
-        myPrefs = MySharedPrefs.getInstance();
-        myPrefs.firstTimeStartingApp(this);
-        myPrefs.loadSharedPrefs(this);
-        myPrefs.applyPrefsToView(prefsCallbackListener);
+        //myPrefs.connectViewModel(mainActivityViewModel);
+        observeChangestoUiElements();
 
-        backgroundTask = BackgroundTasks.getInstance();
-        backgroundTask.init(this,
-                textViewPlus.getText().toString(), textViewMinus.getText().toString(),
-                backgroundtaskListener);
+
+//        myPrefs.applyPrefsToView(mainActivityViewModel);
+
+        backgroundTask = BackgroundTasks.getInstance(this,mainActivityViewModel);
+//        backgroundTask.init(this,
+//                mainActivityViewModel.getScorePlus().toString(),
+//                mainActivityViewModel.getScoreMinus().toString());
 
         setClickListenersToViewElements();
-
         instantiateTimePicker();
-
         instantiateFABMenu();
-//        registerForContextMenu(recyclerView);
     }       // onCreate() - end
+
+
+    private void initViewModel() {
+        mainActivityViewModel = ViewModelProviders.of(this).get(MainActivityViewModel.class);
+        mainActivityViewModel.receiveDateFromRepo(this);
+
+    }
+
+    private void observeChangestoUiElements() {
+        observeTodoList();
+        observeScoreCounter();
+        observeEndingDate();
+    }
+    public void observeTodoList() {
+        mainActivityViewModel.getTodoList().observe(this, new Observer<List<Todo>>() {
+            @Override
+            public void onChanged(@Nullable List<Todo> todos) {
+                recyclerViewAdapter.updateList();
+            }
+        });
+    }
+    public void observeScoreCounter() {
+        mainActivityViewModel.getScorePlus().observe(this, new Observer<String>() {
+            @Override
+            public void onChanged(@Nullable String s) {
+                textViewPlus.setText(s);
+            }
+        });
+        mainActivityViewModel.getScoreMinus().observe(this, new Observer<String>() {
+            @Override
+            public void onChanged(@Nullable String s) {
+                textViewMinus.setText(s);
+            }
+        });
+    }
+    public void observeEndingDate() {
+        mainActivityViewModel.getEndingDate().observe(this, new Observer<String>() {
+            @Override
+            public void onChanged(@Nullable String s) {
+                challengeEndingDate.setText(s);
+            }
+        });
+    }
 
     private void setClickListenersToViewElements() {
         //setItemListClickListener();
@@ -166,8 +172,9 @@ public class OverviewActivity extends AppCompatActivity {
             public void onDateSet(DatePicker datePicker, int year, int month, int day) {
                 month = month + 1;
                 String date = day + "." + month + "." + year;
-                challengeEndingDate.setText(date);
-                myPrefs.saveSharedPrefs(getApplicationContext(), challengeEndingDate.getText().toString(), textViewPlus.getText().toString(), textViewMinus.getText().toString());
+               // challengeEndingDate.setText(date);
+                mainActivityViewModel.getEndingDate().postValue(date);
+                myPrefs.saveSharedPrefs();
             }
         };
     }
@@ -175,14 +182,9 @@ public class OverviewActivity extends AppCompatActivity {
     private void instantiateViewElements() {
         initRecyclerViewList();
         challengeEndingDate = findViewById(R.id.tvDate);
-        initActionBar();
-        //setUpListView();
-        //initStandartToolbar();
-    }
 
-    private void initStandartToolbar() {
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+      //  challengeEndingDate.setText(mainActivityViewModel.getEndingDate().getValue());
+        initActionBar();
     }
 
     private void initActionBar() {
@@ -199,7 +201,7 @@ public class OverviewActivity extends AppCompatActivity {
 
     private void initRecyclerViewList() {
         recyclerView = findViewById(R.id.recycler_view_data);
-        recyclerViewAdapter = new RecyclerViewAdapter(this, getItemList(), new RecyclerViewAdapter.CustomItemClickListener() {
+        recyclerViewAdapter = new RecyclerViewAdapter(this, new RecyclerViewAdapter.CustomItemClickListener() {
 
             @Override
             public void onItemClick(int position) {
@@ -212,11 +214,6 @@ public class OverviewActivity extends AppCompatActivity {
         });
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(recyclerViewAdapter);
-    }
-
-    private List<Todo> getItemList() {
-        List<Todo> itemList = SQLCRUDOperations.getInstance(getApplicationContext()).readAllItems();
-        return itemList;
     }
 
     private void instantiateTimePicker() {
@@ -347,22 +344,7 @@ public class OverviewActivity extends AppCompatActivity {
             public void onAnimationRepeat(Animator animator) {
             }
         });
-    }
-
-    private void applyBlurOnBackground() {
-        ViewGroup content_main = findViewById(R.id.content_main);
-        Blurry.with(content_main.getContext())
-                .radius(1).sampling(10)
-                .animate(500)
-                .onto(content_main);
-    }
-
-    private void removeBlurOnBackground() {
-        ViewGroup content_main = findViewById(R.id.content_main);
-        Blurry.with(getBaseContext())
-                .radius(0).sampling(0)
-                .animate(500)
-                .onto(content_main);
+        backgroundTask.changeDate(recyclerViewAdapter);
     }
 
     @Override
@@ -384,24 +366,20 @@ public class OverviewActivity extends AppCompatActivity {
     protected void onRestart() {
         super.onRestart();
         Log.i("RD_", "onRestart");
-        boolean hasChanged = backgroundTask.checkHasDateChanged();
-        if (hasChanged) {
-            backgroundTask.summUpCheckBoxes(todoList);
+        if (backgroundTask.checkHasDateChanged()) {
+//            backgroundTask.summUpCheckBoxes();
         }
-        myPrefs.applyPrefsToView(prefsCallbackListener);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        myPrefs.saveSharedPrefs(this, challengeEndingDate.getText().toString(), textViewPlus.getText().toString(), textViewMinus.getText().toString());
         Log.i("RD_", "onStop");
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        myPrefs.saveSharedPrefs(this, challengeEndingDate.getText().toString(), textViewPlus.getText().toString(), textViewMinus.getText().toString());
         Log.i("RD_", "onDestroy");
     }
 
@@ -409,11 +387,10 @@ public class OverviewActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         Log.i("RD_", "onResume");
-        boolean hasChanged = backgroundTask.checkHasDateChanged();
-        if (hasChanged) {
-            backgroundTask.summUpCheckBoxes(todoList);
+        if (backgroundTask.checkHasDateChanged()) {
+            backgroundTask.summUpCheckBoxes(recyclerViewAdapter);
         }
-        myPrefs.applyPrefsToView(prefsCallbackListener);
+//        myPrefs.applyPrefsToView(mainActivityViewModel);
     }       //onResume - end
 
     @Override
@@ -453,88 +430,6 @@ public class OverviewActivity extends AppCompatActivity {
         } // if resultCode
 
     }   // onActivityResult
-
-    private void setUpListView() {
-        listView = findViewById(R.id.recycler_view_data);
-        listViewAdapter = new ArrayAdapter<Todo>(
-                this, R.layout.layout_todoitem, todoList) {
-
-            @NonNull
-            @Override
-            public View getView(int position, @Nullable View existingView, @NonNull ViewGroup parent) {
-
-                Todo item = this.getItem(position);
-                View itemView = existingView;
-                ListItemViewHolder viewHolder;
-
-                if (itemView == null) {
-                    Log.i("OverviewActivity", "create new View for position " + position);
-                    itemView = getLayoutInflater().inflate(R.layout.layout_todoitem, null);
-                    viewHolder = new ListItemViewHolder(listViewAdapter, crudOperations, itemView);
-                    itemView.setTag(viewHolder);
-                    viewHolder.checkBox.setTag(position);
-                } else {
-                    Log.i("OverviewActivity", "recycle new View for position " + position);
-                    viewHolder = (ListItemViewHolder) itemView.getTag();
-                    viewHolder.checkBox.setTag(position);
-                }
-                // bind the data to the view
-                viewHolder.unbind();
-                viewHolder.bind(item);
-
-                return itemView;
-            }
-
-        };
-    }
-
-    protected void addItemToList(Todo item) {
-        this.listViewAdapter.add(item);
-        this.listView.setSelection(this.listViewAdapter.getPosition(item));
-    }
-
-    protected void updateList(Todo item) {
-        crudOperations.readAllItems();
-        listViewAdapter.addAll(crudOperations.readAllItems());
-        this.listView.setSelection(this.listViewAdapter.getPosition(item));
-    }
-
-    private void setItemListClickListener() {
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                Todo selectedItem = listViewAdapter.getItem(position);
-                Log.i("RD_Position: ", String.valueOf(position));
-                Log.i("RD_ViewID: ", String.valueOf(view.getId()));
-                showDetailViewForEdit(selectedItem);
-            }
-        });
-
-    }
-
-    //    @Override
-//    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-//        super.onCreateContextMenu(menu, v, menuInfo);
-//        getMenuInflater().inflate(R.menu.menu_long_item_clicked, menu);
-//    }
-//
-//
-//    @Override
-//    public boolean onContextItemSelected(MenuItem item) {
-//        switch (item.getItemId()) {
-//            case R.id.option_delete:
-//                crudOperations.deleteItem(selectedItemId);
-//                //recyclerViewAdapter.setNotifyOnChange(true);
-//                recyclerViewAdapter.notifyDataSetChanged();
-//                return true;
-//            case R.id.option_edit:
-//                selectedItem = recyclerViewAdapter.getItem((int) selectedItemId);
-//                showDetailViewForEdit(selectedItem);
-//                return true;
-//            default:
-//                return super.onContextItemSelected(item);
-//        }
-//    }
 
     private void setChallengeEndingTime() {
 
@@ -597,7 +492,7 @@ public class OverviewActivity extends AppCompatActivity {
 
     private void showDetailViewForCreate() {
         Intent createIntent = new Intent(this, DetailviewActivity.class);
-        createIntent.putExtra(CALL_MODE,CALL_MODE_CREATE);
+        createIntent.putExtra(CALL_MODE, CALL_MODE_CREATE);
         startActivityForResult(createIntent, CALL_CREATE_ITEM);
     }
 
@@ -625,12 +520,12 @@ public class OverviewActivity extends AppCompatActivity {
 
         if (id == R.id.clearScore) {
             backgroundTask.clearScore();
-            myPrefs.applyPrefsToView(prefsCallbackListener);
+//            myPrefs.applyPrefsToView(mainActivityViewModel);
             return true;
         }
         if (id == R.id.clearTarget) {
             backgroundTask.clearTargetDate();
-            myPrefs.applyPrefsToView(prefsCallbackListener);
+//            myPrefs.applyPrefsToView(mainActivityViewModel);
             return true;
         }
         return super.onOptionsItemSelected(item);

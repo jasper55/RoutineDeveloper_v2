@@ -1,5 +1,6 @@
 package com.example.app.jasper.routinedeveloper_v2;
 
+import android.arch.lifecycle.MutableLiveData;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -18,6 +19,7 @@ public class DetailviewActivity extends AppCompatActivity implements DetailviewA
     public static final Long EMPTY_ID = -99L;
 
     private Todo item;
+    private MutableLiveData<Todo> mutTodo = new MutableLiveData<>();
     private SQLCRUDOperations crudOperations;
 
     @Override
@@ -30,12 +32,17 @@ public class DetailviewActivity extends AppCompatActivity implements DetailviewA
 
         long itemId = getIntent().getLongExtra(ARG_ITEM_ID, -1);
 
-        if (itemId != -1) item = crudOperations.readItem(itemId);
-        else {
+        if (itemId != -1) {
+            item = crudOperations.readItem(itemId);
+            mutTodo.postValue(item);
+        } else {
             this.item = new Todo();
+            mutTodo.postValue(item);
+
         }
 
-        bindingMediator.setTodo(item);         // verbindet den bindingMediator mit dem erstellten item, sodass die Daten auch auf der OverviewActivity landet
+        bindingMediator.setLifecycleOwner(this);
+        bindingMediator.setTodo(mutTodo);         // verbindet den bindingMediator mit dem erstellten item, sodass die Daten auch auf der OverviewActivity landet
         bindingMediator.setActions(this);
     }
 

@@ -2,8 +2,11 @@ package com.example.app.jasper.routinedeveloper_v2.model;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 import android.widget.Toast;
+
+import com.example.app.jasper.routinedeveloper_v2.repository.TodoListRepository;
+import com.example.app.jasper.routinedeveloper_v2.viewmodel.MainActivityViewModel;
+
 import java.util.Calendar;
 import static android.content.Context.MODE_PRIVATE;
 
@@ -15,44 +18,53 @@ public class MySharedPrefs {
     private static final String SCOREMINUS = "scoreMinus";
     private static final String STOREDDAY = "storedDay";
     private static final String FIRSTSTART = "firstStart";
-    public String date;
+    public String endingDate;
     private String scorePlus;
     private String scoreMinus;
-    PrefsCallbackListener prefsCallbackListener;
+    private static Context context;
+    private TodoListRepository repo;
 
     private static MySharedPrefs instance;
+    private SharedPreferences prefs;
+    private SharedPreferences.Editor editor;
 
-    public static MySharedPrefs getInstance(){
+    public static MySharedPrefs getInstance(Context context){
 
         if(instance==null) {
-            instance=new MySharedPrefs();
+            instance=new MySharedPrefs(context);
         }
         return instance;
     }
 
-    public void saveCurrentDateToPrefs(Context context) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
+    public MySharedPrefs(Context context) {
+        this.context = context;
+        prefs = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
+        editor = prefs.edit();
+    }
+
+    public void updateDate() {
         int currentday = Calendar.getInstance().DAY_OF_YEAR;
         editor.putInt(STOREDDAY, currentday);
         editor.apply();
     }
 
-    public void loadSharedPrefs(Context context) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
-
-        date = sharedPreferences.getString(DATE, "");
-        scorePlus = sharedPreferences.getString(SCOREPLUS, "0");
-        scoreMinus = sharedPreferences.getString(SCOREMINUS, "0");
+    public void loadSharedPrefs() {
+        endingDate = prefs.getString(DATE, "");
+        scorePlus = prefs.getString(SCOREPLUS, "0");
+        scoreMinus = prefs.getString(SCOREMINUS, "0");
     }
 
-    public void saveSharedPrefs(Context context, String endingDate, String scorePlus, String scoreMinus) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
+    public void saveSharedPrefs() {
 
-        this.date = endingDate;
-        this.scorePlus = scorePlus;
-        this.scoreMinus = scoreMinus;
+        if( getEndingDate() != null) {String endingDate = repo.getEndingDate().getValue();
+        this.endingDate = endingDate;}
+
+        if( repo.getScorePlus() != null) {
+            String scorePlus = repo.getScorePlus().getValue();
+            String scoreMinus = repo.getScoreMinus().getValue();
+            this.scorePlus = scorePlus;
+            this.scoreMinus = scoreMinus;
+        }
 
         editor.putString(DATE, endingDate);
         editor.putString(SCOREPLUS, scorePlus);
@@ -60,45 +72,49 @@ public class MySharedPrefs {
         editor.apply();
     }
 
-    public void applyPrefsToView(PrefsCallbackListener prefsCallbackListener) {
-        prefsCallbackListener.callbackUpdateView(this.date, this.scorePlus, this.scoreMinus);
+    public void setScoreplus(String plus){
+        editor.putString(SCOREPLUS, plus);
+        editor.apply();
+    }
+
+    public void setScorepMinus(String minus){
+        editor.putString(SCOREMINUS, minus);
+        editor.apply();
+    }
+
+    public void applyPrefsToView(MainActivityViewModel mainActivityViewModel) {
+        mainActivityViewModel.setEndingDate(endingDate);
+        mainActivityViewModel.setScorePlus(scorePlus);
+        mainActivityViewModel.setScoreMinus(scoreMinus);
     }
 
     public void firstTimeStartingApp(Context context) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
-        boolean firstStart = sharedPreferences.getBoolean(FIRSTSTART, true);
+        boolean firstStart = prefs.getBoolean(FIRSTSTART, true);
 
         if (firstStart) {
-
             Toast.makeText(context.getApplicationContext(), "Welcome to Routine Developer!", Toast.LENGTH_SHORT).show();
-
-            saveCurrentDateToPrefs(context);
-
-            SharedPreferences.Editor editor = sharedPreferences.edit();
+            updateDate();
             editor.putBoolean(FIRSTSTART, false);
             editor.apply();
         }
     }
 
-    public void updateScore(Context context, String scorePlus, String scoreMinus) {
-        saveSharedPrefs(context, date, scorePlus, scoreMinus);
+    public void updateScore() {
+        saveSharedPrefs();
     }
 
-    public void clearDate(Context context, String scorePlus, String scoreMinus) {
-        saveSharedPrefs(context, null, scorePlus, scoreMinus);
+    public void clearDate() {
+        editor.putString(DATE, null);
+        editor.apply();
     }
 
-    public interface PrefsCallbackListener {
-        void callbackUpdateView(String date, String scorePlus, String scoreMinus);
-    }
-
-    public String getDate() {
-        return date;
+    public String getEndingDate() {
+        return this.endingDate;
     }
     public String getScorePlus() {
         return scorePlus;
     }
     public String getScoreMinus() {
-        return scoreMinus;
+        return this.scoreMinus;
     }
 }

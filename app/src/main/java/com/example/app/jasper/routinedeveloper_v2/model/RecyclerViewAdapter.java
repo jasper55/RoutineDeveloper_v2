@@ -3,7 +3,6 @@ package com.example.app.jasper.routinedeveloper_v2.model;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,14 +11,16 @@ import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.example.app.jasper.routinedeveloper_v2.R;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
 
     CustomItemClickListener customItemClickListener;
-    int currentPosition;
+    private int currentPosition;
     private Context context;
-    private List<Todo> todoList;
+    private List<Todo> todoList=new ArrayList<>();
 
     // Its similar to what your code in the ListView does (checking if convertView is null)
     @NonNull
@@ -51,8 +52,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean b) {
                 boolean checked = viewHolder.checkBox.isChecked();
-                Log.i("Checkbox listener", String.valueOf(checked));
-                Log.i("Checkbox position", String.valueOf(position));
 
                 mockItem = todoList.get(position);
                 long id = mockItem.getId();
@@ -65,6 +64,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     // Methode auch wichtig, da wenn default 0 gelassen wird, wird nichts angezeigt
     @Override
     public int getItemCount() {
+        if (todoList == null) return 0;
         return todoList.size();
     }
 
@@ -92,6 +92,16 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         return currentPosition;
     }
 
+    public void updateList() {
+        todoList.addAll(SQLCRUDOperations.getInstance(context.getApplicationContext()).readAllItems());
+        this.notifyDataSetChanged();
+    }
+
+    public void restList(List<Todo> todos) {
+        todoList.addAll(todos);
+        this.notifyDataSetChanged();
+    }
+
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
@@ -109,10 +119,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         }
     }
 
-    public RecyclerViewAdapter(Context context, List<Todo> todoList,  CustomItemClickListener listener) {
+    public RecyclerViewAdapter(Context context,   CustomItemClickListener listener) {
         this.customItemClickListener = listener;
         this.context = context;
-        this.todoList = todoList;
+
     }
 
     public interface CustomItemClickListener {
