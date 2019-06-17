@@ -6,8 +6,10 @@ import android.content.SharedPreferences;
 import android.util.Log;
 import android.widget.Toast;
 import com.example.app.jasper.routinedeveloper_v2.model.MySharedPrefs;
+import com.example.app.jasper.routinedeveloper_v2.model.RecyclerViewAdapter;
 import com.example.app.jasper.routinedeveloper_v2.model.SQLCRUDOperations;
 import com.example.app.jasper.routinedeveloper_v2.model.Todo;
+import com.example.app.jasper.routinedeveloper_v2.repository.TodoListRepository;
 import com.example.app.jasper.routinedeveloper_v2.viewmodel.MainActivityViewModel;
 
 import java.util.Calendar;
@@ -50,14 +52,14 @@ public class BackgroundTasks {
         mainActivityViewModel.setScoreMinus(scoreMinus);
     }
 
-    public void changeDate(){
+    public void changeDate(RecyclerViewAdapter adapter){
         int currentday = Calendar.getInstance().DAY_OF_YEAR +1;
         SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
         int lastday = sharedPreferences.getInt(STOREDDAY, 0);
 
         Log.i("RD_", String.valueOf(lastday));
         if (currentday != lastday) {
-//            summUpCheckBoxes();
+            summUpCheckBoxes(adapter);
         }
     }
 
@@ -79,12 +81,13 @@ public class BackgroundTasks {
         }
     }
 
-    protected void summUpCheckBoxes() {
+    protected void summUpCheckBoxes(RecyclerViewAdapter adapter) {
 
-        MutableLiveData<List<Todo>> todoList = mainActivityViewModel.getTodoList();
+        MutableLiveData<List<Todo>> todoList = TodoListRepository.getInstance(context).getAllItems();
+        MySharedPrefs prefs = MySharedPrefs.getInstance(context);
 
-        String scorePlus = mainActivityViewModel.getScorePlus().toString();
-        String scoreMinus = mainActivityViewModel.getScoreMinus().getValue();
+        String scorePlus = prefs.getScorePlus();
+        String scoreMinus = prefs.getScoreMinus();
         int doneCounter = Integer.parseInt(scorePlus);
         int undoneCounter = Integer.parseInt(scoreMinus);
 
@@ -103,15 +106,15 @@ public class BackgroundTasks {
 
         if (done == todoListSize) {
             doneCounter = ++doneCounter;
-            mainActivityViewModel.setScorePlus(String.valueOf(doneCounter));
+            prefs.setScoreplus(String.valueOf(doneCounter));
             Toast.makeText(context, "All Todos done yesterday", Toast.LENGTH_SHORT).show();
         } else {
             undoneCounter = ++undoneCounter;
-            mainActivityViewModel.setScoreMinus(String.valueOf(undoneCounter));
+            prefs.setScorepMinus(String.valueOf(undoneCounter));
         }
-
-        MySharedPrefs.getInstance(context).updateScore();
         resetCheckBoxes(mockList);
+        adapter.restList(mockList);
+        adapter.notifyDataSetChanged();
     }
 
 //    public void init(Context context, String scorePlus, String scoreMinus) {
@@ -130,15 +133,12 @@ public class BackgroundTasks {
             item.setDone(false);
             SQLCRUDOperations.getInstance(context).updateItem(id, item);
         }
-        mainActivityViewModel.setTodoList(SQLCRUDOperations.getInstance(context).readAllItems());
     }
 
     public void clearScore() {
         mainActivityViewModel.setScorePlus("0");
-        String plus = mainActivityViewModel.getScorePlus().toString();
         mainActivityViewModel.setScoreMinus("0");
-        String minus = mainActivityViewModel.getScoreMinus().toString();
-        MySharedPrefs.getInstance(context).updateScore();
+//        MySharedPrefs.getInstance(context).updateScore();
     }
 
     public void clearTargetDate() {

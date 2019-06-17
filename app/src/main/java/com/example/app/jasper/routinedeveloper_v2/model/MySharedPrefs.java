@@ -72,6 +72,16 @@ public class MySharedPrefs {
         editor.apply();
     }
 
+    public void setScoreplus(String plus){
+        editor.putString(SCOREPLUS, plus);
+        editor.apply();
+    }
+
+    public void setScorepMinus(String minus){
+        editor.putString(SCOREMINUS, minus);
+        editor.apply();
+    }
+
     public void applyPrefsToView(MainActivityViewModel mainActivityViewModel) {
         mainActivityViewModel.setEndingDate(endingDate);
         mainActivityViewModel.setScorePlus(scorePlus);

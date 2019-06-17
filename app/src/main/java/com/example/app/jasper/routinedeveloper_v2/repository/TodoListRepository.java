@@ -16,6 +16,7 @@ public class TodoListRepository {
     private MutableLiveData<String> scorePlus = new MutableLiveData<>();
     private MutableLiveData<String> scoreMinus = new MutableLiveData<>();
     private MutableLiveData<String> endingDate = new MutableLiveData<>();
+    private Context context;
 
     public static TodoListRepository getInstance(Context context) {
         if (instance == null) {
@@ -34,7 +35,7 @@ public class TodoListRepository {
         endingDate.postValue(prefs.getEndingDate());
     }
 
-        public MutableLiveData<List<Todo>> getAllItems (Context context){
+        public MutableLiveData<List<Todo>> getAllItems (){
             todoList.postValue(SQLCRUDOperations.getInstance(context).readAllItems());
             return todoList;
         }
@@ -53,6 +54,7 @@ public class TodoListRepository {
 
 
     public TodoListRepository(Context context) {
+        this.context = context;
         bindData(context);
     }
 }

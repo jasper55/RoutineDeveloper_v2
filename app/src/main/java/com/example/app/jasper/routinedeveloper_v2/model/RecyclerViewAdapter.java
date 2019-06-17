@@ -97,6 +97,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         this.notifyDataSetChanged();
     }
 
+    public void restList(List<Todo> todos) {
+        todoList.addAll(todos);
+        this.notifyDataSetChanged();
+    }
+
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 

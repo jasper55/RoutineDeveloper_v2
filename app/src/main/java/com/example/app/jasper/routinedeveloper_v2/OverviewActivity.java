@@ -344,7 +344,7 @@ public class OverviewActivity extends AppCompatActivity {
             public void onAnimationRepeat(Animator animator) {
             }
         });
-        backgroundTask.changeDate();
+        backgroundTask.changeDate(recyclerViewAdapter);
     }
 
     @Override
@@ -369,20 +369,17 @@ public class OverviewActivity extends AppCompatActivity {
         if (backgroundTask.checkHasDateChanged()) {
 //            backgroundTask.summUpCheckBoxes();
         }
-//        myPrefs.applyPrefsToView(mainActivityViewModel);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        myPrefs.saveSharedPrefs();
         Log.i("RD_", "onStop");
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        myPrefs.saveSharedPrefs();
         Log.i("RD_", "onDestroy");
     }
 
@@ -391,7 +388,7 @@ public class OverviewActivity extends AppCompatActivity {
         super.onResume();
         Log.i("RD_", "onResume");
         if (backgroundTask.checkHasDateChanged()) {
-//            backgroundTask.summUpCheckBoxes();
+            backgroundTask.summUpCheckBoxes(recyclerViewAdapter);
         }
 //        myPrefs.applyPrefsToView(mainActivityViewModel);
     }       //onResume - end

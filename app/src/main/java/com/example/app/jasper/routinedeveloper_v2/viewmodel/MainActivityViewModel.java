@@ -28,7 +28,7 @@ public class MainActivityViewModel extends ViewModel {
 //            return;
 //        }
         repository = TodoListRepository.getInstance(context);
-        todoList = repository.getAllItems(context);
+        todoList = repository.getAllItems();
         scorePlus = repository.getScorePlus();
         scoreMinus = repository.getScoreMinus();
         endingDate = repository.getEndingDate();
