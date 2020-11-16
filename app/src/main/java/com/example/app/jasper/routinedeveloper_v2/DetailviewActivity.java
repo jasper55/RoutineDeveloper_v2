@@ -1,15 +1,16 @@
 package com.example.app.jasper.routinedeveloper_v2;
 
-import android.arch.lifecycle.MutableLiveData;
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.databinding.DataBindingUtil;
 import android.util.Log;
 import com.example.app.jasper.routinedeveloper_v2.databinding.ActivityDetailviewBinding;
 import com.example.app.jasper.routinedeveloper_v2.model.SQLCRUDOperations;
 import com.example.app.jasper.routinedeveloper_v2.model.Todo;
 import com.example.app.jasper.routinedeveloper_v2.view.DetailviewActions;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.MutableLiveData;
 
 public class DetailviewActivity extends AppCompatActivity implements DetailviewActions {
 

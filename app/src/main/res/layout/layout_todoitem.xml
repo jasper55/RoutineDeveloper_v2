@@ -14,7 +14,6 @@
             app:layout_behavior="@string/appbar_scrolling_view_behavior"
             tools:context=".OverviewActivity"
             tools:showIn="@layout/layout_overview">
-            >
 
             <TextView
                 android:id="@+id/list_item_id"
@@ -45,8 +44,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
                 <!--android:onClick="onCheckboxClicked"-->
-
-            />
 
         </LinearLayout>
     </layout>

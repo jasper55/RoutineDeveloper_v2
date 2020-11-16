@@ -2,22 +2,14 @@ package com.example.app.jasper.routinedeveloper_v2;
 
 import android.animation.Animator;
 import android.annotation.SuppressLint;
-import android.app.ActionBar;
 import android.app.AlarmManager;
 import android.app.DatePickerDialog;
 import android.app.PendingIntent;
 import android.app.TimePickerDialog;
-import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.view.Menu;
@@ -33,9 +25,18 @@ import com.example.app.jasper.routinedeveloper_v2.model.RecyclerViewAdapter;
 import com.example.app.jasper.routinedeveloper_v2.model.SQLCRUDOperations;
 import com.example.app.jasper.routinedeveloper_v2.model.Todo;
 import com.example.app.jasper.routinedeveloper_v2.viewmodel.MainActivityViewModel;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.Calendar;
-import java.util.List;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 public class OverviewActivity extends AppCompatActivity {
 
@@ -80,7 +81,6 @@ public class OverviewActivity extends AppCompatActivity {
         myPrefs.firstTimeStartingApp(getApplication());
         myPrefs.loadSharedPrefs();
 
-
         initViewModel();
         instantiateViewElements();
 
@@ -102,7 +102,7 @@ public class OverviewActivity extends AppCompatActivity {
 
 
     private void initViewModel() {
-        mainActivityViewModel = ViewModelProviders.of(this).get(MainActivityViewModel.class);
+        mainActivityViewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
         mainActivityViewModel.receiveDateFromRepo(this);
 
     }
@@ -113,33 +113,37 @@ public class OverviewActivity extends AppCompatActivity {
         observeEndingDate();
     }
     public void observeTodoList() {
-        mainActivityViewModel.getTodoList().observe(this, new Observer<List<Todo>>() {
-            @Override
-            public void onChanged(@Nullable List<Todo> todos) {
-                recyclerViewAdapter.updateList();
-            }
+        mainActivityViewModel.getTodoList().observe(this, todos -> {
+            recyclerViewAdapter.updateList();
+            // update UI
         });
+//                , new Observer<List<Todo>>() {
+//            @Override
+//            public void onChanged(@Nullable List<Todo> todos) {
+//                recyclerViewAdapter.updateList();
+//            }
+//        });
     }
     public void observeScoreCounter() {
-        mainActivityViewModel.getScorePlus().observe(this, new Observer<String>() {
-            @Override
-            public void onChanged(@Nullable String s) {
-                textViewPlus.setText(s);
-            }
+        mainActivityViewModel.getScorePlus().observe(this, it -> {
+//            @Override
+//            public void onChanged(@Nullable String s) {
+                textViewPlus.setText(it);
+//            }
         });
-        mainActivityViewModel.getScoreMinus().observe(this, new Observer<String>() {
-            @Override
-            public void onChanged(@Nullable String s) {
-                textViewMinus.setText(s);
-            }
+        mainActivityViewModel.getScoreMinus().observe(this, it -> {
+//            @Override
+//            public void onChanged(@Nullable String s) {
+                textViewMinus.setText(it);
+//            }
         });
     }
     public void observeEndingDate() {
-        mainActivityViewModel.getEndingDate().observe(this, new Observer<String>() {
-            @Override
-            public void onChanged(@Nullable String s) {
-                challengeEndingDate.setText(s);
-            }
+        mainActivityViewModel.getEndingDate().observe(this, it -> {
+//            @Override
+//            public void onChanged(@Nullable String s) {
+                challengeEndingDate.setText(it);
+//            }
         });
     }
 

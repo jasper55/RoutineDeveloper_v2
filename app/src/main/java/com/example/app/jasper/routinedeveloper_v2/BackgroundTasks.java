@@ -1,6 +1,5 @@
 package com.example.app.jasper.routinedeveloper_v2;
 
-import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
@@ -14,6 +13,9 @@ import com.example.app.jasper.routinedeveloper_v2.viewmodel.MainActivityViewMode
 
 import java.util.Calendar;
 import java.util.List;
+
+import androidx.lifecycle.MutableLiveData;
+
 import static android.content.Context.MODE_PRIVATE;
 
 public class BackgroundTasks {

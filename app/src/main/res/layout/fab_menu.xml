@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
@@ -32,7 +32,7 @@
             android:layout_height="wrap_content"
             android:text="@string/fabLabelAdd" />
 
-        <android.support.design.widget.FloatingActionButton
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_add"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -59,7 +59,7 @@
             android:layout_height="wrap_content"
             android:text="@string/LabelNotification" />
 
-        <android.support.design.widget.FloatingActionButton
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_notification"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -87,7 +87,7 @@
             android:layout_height="wrap_content"
             android:text="@string/LabelTimer" />
 
-        <android.support.design.widget.FloatingActionButton
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_timer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -109,7 +109,7 @@
         app:layout_behavior="com.example.app.jasper.routinedeveloper_v2.view.MoveUpwardBehavior">
 
 
-        <android.support.design.widget.FloatingActionButton
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_menu"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -120,4 +120,4 @@
             app:srcCompat="@drawable/icon_menu" />
     </LinearLayout>
 
-</android.support.design.widget.CoordinatorLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

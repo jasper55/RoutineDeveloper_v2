@@ -1,13 +1,15 @@
 package com.example.app.jasper.routinedeveloper_v2.viewmodel;
 
-import android.arch.lifecycle.MutableLiveData;
-import android.arch.lifecycle.ViewModel;
+import android.app.Application;
 import android.content.Context;
 
 import com.example.app.jasper.routinedeveloper_v2.model.Todo;
 import com.example.app.jasper.routinedeveloper_v2.repository.TodoListRepository;
 
 import java.util.List;
+
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
 
 public class MainActivityViewModel extends ViewModel {
 
@@ -18,6 +20,7 @@ public class MainActivityViewModel extends ViewModel {
     private MutableLiveData<Boolean> vmIsUpdating; // falls Daten von einem remoteServer geholt werden -> Progressbar implementieren
 
     private TodoListRepository repository;
+
 
     public MutableLiveData<List<Todo>> getTodoList() {
         return todoList;

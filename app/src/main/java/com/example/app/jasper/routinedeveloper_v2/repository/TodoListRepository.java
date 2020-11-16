@@ -1,6 +1,5 @@
 package com.example.app.jasper.routinedeveloper_v2.repository;
 
-import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 
 import com.example.app.jasper.routinedeveloper_v2.model.MySharedPrefs;
@@ -8,6 +7,8 @@ import com.example.app.jasper.routinedeveloper_v2.model.SQLCRUDOperations;
 import com.example.app.jasper.routinedeveloper_v2.model.Todo;
 
 import java.util.List;
+
+import androidx.lifecycle.MutableLiveData;
 
 public class TodoListRepository {
 
