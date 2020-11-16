@@ -4,7 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import com.example.app.jasper.routinedeveloper_v2.databinding.ActivityDetailviewBinding;
-import com.example.app.jasper.routinedeveloper_v2.model.SQLCRUDOperations;
+import com.example.app.jasper.routinedeveloper_v2.model.SQLDatabaseHelper;
 import com.example.app.jasper.routinedeveloper_v2.model.Todo;
 import com.example.app.jasper.routinedeveloper_v2.view.DetailviewActions;
 
@@ -21,7 +21,7 @@ public class DetailviewActivity extends AppCompatActivity implements DetailviewA
 
     private Todo item;
     private MutableLiveData<Todo> mutTodo = new MutableLiveData<>();
-    private SQLCRUDOperations crudOperations;
+    private SQLDatabaseHelper crudOperations;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,7 +29,7 @@ public class DetailviewActivity extends AppCompatActivity implements DetailviewA
         Log.i("RD_", "DetailView");
         final ActivityDetailviewBinding bindingMediator = DataBindingUtil.setContentView(this, R.layout.activity_detailview);
 
-        this.crudOperations = new SQLCRUDOperations(this);
+        this.crudOperations = new SQLDatabaseHelper(this);
 
         long itemId = getIntent().getLongExtra(ARG_ITEM_ID, -1);
 

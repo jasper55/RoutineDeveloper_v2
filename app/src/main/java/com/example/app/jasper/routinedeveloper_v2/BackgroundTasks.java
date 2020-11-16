@@ -6,17 +6,18 @@ import android.util.Log;
 import android.widget.Toast;
 import com.example.app.jasper.routinedeveloper_v2.model.MySharedPrefs;
 import com.example.app.jasper.routinedeveloper_v2.model.RecyclerViewAdapter;
-import com.example.app.jasper.routinedeveloper_v2.model.SQLCRUDOperations;
+import com.example.app.jasper.routinedeveloper_v2.model.SQLDatabaseHelper;
 import com.example.app.jasper.routinedeveloper_v2.model.Todo;
+import com.example.app.jasper.routinedeveloper_v2.repository.SharedPreferenceHelper;
 import com.example.app.jasper.routinedeveloper_v2.repository.TodoListRepository;
 import com.example.app.jasper.routinedeveloper_v2.viewmodel.MainActivityViewModel;
 
 import java.util.Calendar;
 import java.util.List;
 
-import androidx.lifecycle.MutableLiveData;
-
 import static android.content.Context.MODE_PRIVATE;
+import static com.example.app.jasper.routinedeveloper_v2.repository.SharedPreferenceHelper.SHARED_PREFS;
+import static com.example.app.jasper.routinedeveloper_v2.repository.SharedPreferenceHelper.STORED_DAY;
 
 public class BackgroundTasks {
 
@@ -24,10 +25,6 @@ public class BackgroundTasks {
     static MainActivityViewModel mainActivityViewModel;
     private Todo item;
 
-    private static final String SHARED_PREFS = "sharedPrefs";
-    private static final String SCOREPLUS = "scorePlus";
-    private static final String SCOREMINUS = "scoreMinus";
-    private static final String STOREDDAY = "storedDay";
 
     private static BackgroundTasks instance;
 
@@ -44,20 +41,10 @@ public class BackgroundTasks {
         return instance;
     }
 
-    public void loadPrefs() {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
-
-        String scorePlus = sharedPreferences.getString(SCOREPLUS, "0");
-        String scoreMinus = sharedPreferences.getString(SCOREMINUS, "0");
-
-        mainActivityViewModel.setScorePlus(scorePlus);
-        mainActivityViewModel.setScoreMinus(scoreMinus);
-    }
-
     public void changeDate(RecyclerViewAdapter adapter){
         int currentday = Calendar.getInstance().DAY_OF_YEAR +1;
         SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
-        int lastday = sharedPreferences.getInt(STOREDDAY, 0);
+        int lastday = sharedPreferences.getInt(STORED_DAY, 0);
 
         Log.i("RD_", String.valueOf(lastday));
         if (currentday != lastday) {
@@ -67,39 +54,36 @@ public class BackgroundTasks {
 
 
     public boolean checkHasDateChanged() {
+        boolean hasChanged;
         int currentday = Calendar.getInstance().DAY_OF_YEAR;
         Log.i("RD_", String.valueOf(currentday));
 
         SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
-        int lastday = sharedPreferences.getInt(STOREDDAY, 0);
+        int lastday = sharedPreferences.getInt(STORED_DAY, 0);
 
         Log.i("RD_", String.valueOf(lastday));
         if (currentday != lastday) {
             MySharedPrefs.getInstance(context).updateDate();
-            return true;
+            hasChanged = true;
         }
         else{
-            return false;
+            hasChanged = false;
         }
+        return hasChanged;
     }
 
     protected void summUpCheckBoxes(RecyclerViewAdapter adapter) {
+        List<Todo> todoList = TodoListRepository.getInstance(context).getAllItems();
 
-        MutableLiveData<List<Todo>> todoList = TodoListRepository.getInstance(context).getAllItems();
-        MySharedPrefs prefs = MySharedPrefs.getInstance(context);
-
-        String scorePlus = prefs.getScorePlus();
-        String scoreMinus = prefs.getScoreMinus();
-        int doneCounter = Integer.parseInt(scorePlus);
-        int undoneCounter = Integer.parseInt(scoreMinus);
+        int doneCounter = SharedPreferenceHelper.INSTANCE.getDoneCount();
+        int undoneCounter = SharedPreferenceHelper.INSTANCE.getUndoneCount();
 
 
-        int todoListSize = todoList.getValue().size();
+        int todoListSize = todoList.size();
         int done = 0;
-        List<Todo> mockList = todoList.getValue();
 
         for (int i = 0; i < todoListSize; i++) {
-            item = mockList.get(i);
+            item = todoList.get(i);
             Log.i("sumUpdone", String.valueOf(item.isDone()));
             if (item.isDone()) {
                 done++;
@@ -107,25 +91,18 @@ public class BackgroundTasks {
         }
 
         if (done == todoListSize) {
-            doneCounter = ++doneCounter;
-            prefs.setScoreplus(String.valueOf(doneCounter));
+            doneCounter += 1;
+            SharedPreferenceHelper.INSTANCE.setDoneCount(doneCounter);
             Toast.makeText(context, "All Todos done yesterday", Toast.LENGTH_SHORT).show();
         } else {
-            undoneCounter = ++undoneCounter;
-            prefs.setScorepMinus(String.valueOf(undoneCounter));
+            undoneCounter += 1;
+            SharedPreferenceHelper.INSTANCE.setUndoneCount(undoneCounter);
         }
-        resetCheckBoxes(mockList);
-        adapter.restList(mockList);
-        adapter.notifyDataSetChanged();
+        unCheckAllItems(todoList);
+        adapter.loadListFromDB();
     }
 
-//    public void init(Context context, String scorePlus, String scoreMinus) {
-//        this.context = context;
-//        this.scorePlus = scorePlus;
-//        this.scoreMinus = scoreMinus;
-//    }
-
-    private void resetCheckBoxes(List<Todo> todoList) {
+    private void unCheckAllItems(List<Todo> todoList) {
         int size = todoList.size();
         Todo item;
 
@@ -133,17 +110,19 @@ public class BackgroundTasks {
             item = todoList.get(i);
             long id = item.getId();
             item.setDone(false);
-            SQLCRUDOperations.getInstance(context).updateItem(id, item);
+            SQLDatabaseHelper.getInstance(context).updateItem(id, item);
         }
     }
 
     public void clearScore() {
-        mainActivityViewModel.setScorePlus("0");
-        mainActivityViewModel.setScoreMinus("0");
-//        MySharedPrefs.getInstance(context).updateScore();
+        mainActivityViewModel.setDoneCounter("0");
+        mainActivityViewModel.setUndoneCounter("0");
+        SharedPreferenceHelper.INSTANCE.setUndoneCount(0);
+        SharedPreferenceHelper.INSTANCE.setDoneCount(0);
     }
 
     public void clearTargetDate() {
-        MySharedPrefs.getInstance(context).clearDate();
+        SharedPreferenceHelper.INSTANCE.setChallengeEndingDate("");
+        mainActivityViewModel.setChallengeEndingDate("");
     }
 }

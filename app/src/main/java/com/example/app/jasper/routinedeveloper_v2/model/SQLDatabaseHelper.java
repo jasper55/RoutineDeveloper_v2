@@ -9,7 +9,7 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SQLCRUDOperations {
+public class SQLDatabaseHelper {
 
     /////////////////  SQL Data Base  //////////////////////
     private SQLiteDatabase db;
@@ -26,17 +26,17 @@ public class SQLCRUDOperations {
                     "NAME TEXT, " +
                     "DONE BOOLEAN)";
 
-    private static SQLCRUDOperations instance;
+    private static SQLDatabaseHelper instance;
 
-    public static SQLCRUDOperations getInstance(Context applicationContext){
+    public static SQLDatabaseHelper getInstance(Context applicationContext){
         if(instance==null) {
-            instance=new SQLCRUDOperations(applicationContext);
+            instance=new SQLDatabaseHelper(applicationContext);
         }
         return instance;
     }
 
     // Im Konstrukter wird die SQLiteDAtenbank entweder geöffnet oder erstellt, wenn sie noch nicht exitiert
-    public SQLCRUDOperations(Context applicationContext){
+    public SQLDatabaseHelper(Context applicationContext){
 
         //Mode_PRIVATE: Ist eine vor-implementierte Konstante von Klasse Context
         this.db = applicationContext.openOrCreateDatabase("myToDoDB.sqlite", Context.MODE_PRIVATE, null);
@@ -68,6 +68,7 @@ public class SQLCRUDOperations {
         }
         return getItemValuesFromCursor(cursor);
     }
+
 
     public List<Todo> readAllItems(){
         List<Todo> items = new ArrayList<Todo>();
@@ -104,9 +105,12 @@ public class SQLCRUDOperations {
         return true;
     }
 
+
+
     public void deleteItem(long id){
         db.delete(TABLE_DATAITEM,ID + "=" + id,null);
     }
+
 
     ///////////   support methods   ////////////
     private Todo getItemValuesFromCursor(Cursor cursor) {

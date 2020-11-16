@@ -57,7 +57,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 mockItem = todoList.get(position);
                 long id = mockItem.getId();
                 mockItem.setDone(checked);
-                SQLCRUDOperations.getInstance(context.getApplicationContext()).updateItem(id, mockItem);
+                SQLDatabaseHelper.getInstance(context.getApplicationContext()).updateItem(id, mockItem);
             }
         });
     }
@@ -74,14 +74,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
     public void addItem(Todo item) {
-        SQLCRUDOperations.getInstance(context.getApplicationContext()).updateItem(item.getId(), item);
+        SQLDatabaseHelper.getInstance(context.getApplicationContext()).updateItem(item.getId(), item);
         todoList.add(item);
-        this.notifyDataSetChanged();
+//        this.notifyDataSetChanged();
     }
 
-    public void updateList(Todo item, int position) {
-        todoList.set(position, SQLCRUDOperations.getInstance(context.getApplicationContext()).readItem(item.getId()));
-        this.notifyDataSetChanged();
+    public void loadListFromDB(Todo item, int position) {
+        todoList.set(position, SQLDatabaseHelper.getInstance(context.getApplicationContext()).readItem(item.getId()));
+//        this.notifyDataSetChanged();
     }
 
     public void removeItem(int position) {
@@ -93,16 +93,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         return currentPosition;
     }
 
-    public void updateList() {
-        todoList.addAll(SQLCRUDOperations.getInstance(context.getApplicationContext()).readAllItems());
+    public void loadListFromDB() {
+        todoList.clear();
+        todoList.addAll(SQLDatabaseHelper.getInstance(context.getApplicationContext()).readAllItems());
         this.notifyDataSetChanged();
     }
-
-    public void restList(List<Todo> todos) {
-        todoList.addAll(todos);
-        this.notifyDataSetChanged();
-    }
-
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 

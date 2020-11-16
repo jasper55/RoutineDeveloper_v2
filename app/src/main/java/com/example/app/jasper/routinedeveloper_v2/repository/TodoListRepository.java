@@ -1,9 +1,10 @@
 package com.example.app.jasper.routinedeveloper_v2.repository;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 
 import com.example.app.jasper.routinedeveloper_v2.model.MySharedPrefs;
-import com.example.app.jasper.routinedeveloper_v2.model.SQLCRUDOperations;
+import com.example.app.jasper.routinedeveloper_v2.model.SQLDatabaseHelper;
 import com.example.app.jasper.routinedeveloper_v2.model.Todo;
 
 import java.util.List;
@@ -12,12 +13,9 @@ import androidx.lifecycle.MutableLiveData;
 
 public class TodoListRepository {
 
-    private MutableLiveData<List<Todo>> todoList = new MutableLiveData<>();
     private static TodoListRepository instance;
-    private MutableLiveData<String> scorePlus = new MutableLiveData<>();
-    private MutableLiveData<String> scoreMinus = new MutableLiveData<>();
-    private MutableLiveData<String> endingDate = new MutableLiveData<>();
     private Context context;
+    private SQLDatabaseHelper dataBase;
 
     public static TodoListRepository getInstance(Context context) {
         if (instance == null) {
@@ -26,36 +24,34 @@ public class TodoListRepository {
         return instance;
     }
 
+    public List<Todo> getAllItems (){
+            return dataBase.readAllItems();
+        }
 
-    public void bindData(Context context) {
-        MySharedPrefs prefs = MySharedPrefs.getInstance(context);
-        todoList.postValue(SQLCRUDOperations.getInstance(context).readAllItems());
-
-        scorePlus.postValue(prefs.getScorePlus());
-        scoreMinus.postValue(prefs.getScoreMinus());
-        endingDate.postValue(prefs.getEndingDate());
+    public long createItem(Todo item) {
+        return dataBase.createItem(item);
+    }
+    public void updateItem(long id, Todo item) {
+        dataBase.updateItem(id, item);
+    }
+    public void deleteItem(long id) {
+        dataBase.deleteItem(id);
+    }
+    public List<Todo> readAllItems() {
+        return dataBase.readAllItems();
+    }
+    public Todo readItem(long id) {
+        return dataBase.readItem(id);
     }
 
-        public MutableLiveData<List<Todo>> getAllItems (){
-            todoList.postValue(SQLCRUDOperations.getInstance(context).readAllItems());
-            return todoList;
-        }
+//    public void saveScorePlus(String score) {
+//        SharedPreferenceHelper.INSTANCE.setScorePlus(score);
+//    }
 
-        public MutableLiveData<String> getScorePlus(){
-            return scorePlus;
-        }
-
-        public MutableLiveData<String> getScoreMinus(){
-            return scoreMinus;
-        }
-
-        public MutableLiveData<String> getEndingDate(){
-            return endingDate;
-        }
-
+//    public void saveScoreMinus(String score) { SharedPreferenceHelper.INSTANCE.setScoreMinus(score); }
 
     public TodoListRepository(Context context) {
         this.context = context;
-        bindData(context);
+        dataBase = SQLDatabaseHelper.getInstance(context);
     }
 }
