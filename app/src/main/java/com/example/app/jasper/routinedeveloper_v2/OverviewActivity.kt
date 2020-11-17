@@ -29,7 +29,7 @@ import com.example.app.jasper.routinedeveloper_v2.model.RecyclerViewAdapter.Cust
 import com.example.app.jasper.routinedeveloper_v2.model.Todo
 import com.example.app.jasper.routinedeveloper_v2.repository.SharedPreferenceHelper
 import com.example.app.jasper.routinedeveloper_v2.repository.TodoListRepository
-import com.example.app.jasper.routinedeveloper_v2.viewmodel.MainActivityViewModel
+import com.example.app.jasper.routinedeveloper_v2.viewmodel.ViewModel
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.util.*
 
@@ -56,49 +56,28 @@ class OverviewActivity : AppCompatActivity() {
     private lateinit var fab_container_timer: LinearLayout
     private lateinit var fabOverlay: View
     private lateinit var repository: TodoListRepository
-    private lateinit var backgroundTask: BackgroundTasks
-    private lateinit var mainActivityViewModel: MainActivityViewModel
+    private lateinit var viewModel: ViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.layout_overview)
         SharedPreferenceHelper.initWith(applicationContext)
 
-        if (SharedPreferenceHelper.firstStart) {
-            Toast.makeText(this, "Welcome to Routine Developer!", Toast.LENGTH_SHORT).show()
-        } else {
-            SharedPreferenceHelper.firstStart = false
-        }
-//        myPrefs.firstTimeStartingApp(application)
-//        myPrefs.loadSharedPrefs()
-        mainActivityViewModel = ViewModelProvider(this).get(MainActivityViewModel::class.java)
+        checkIfFirstStart()
+
+        viewModel = ViewModelProvider(this).get(ViewModel::class.java)
         initRespository(this)
         initView()
 
-        //myPrefs.connectViewModel(mainActivityViewModel);
         observeLiveData()
         loadDataFromPrefs()
-
-
-//        myPrefs.applyPrefsToView(mainActivityViewModel);
-        backgroundTask = BackgroundTasks.getInstance(this, mainActivityViewModel)
-        //        backgroundTask.init(this,
-//                mainActivityViewModel.getScorePlus().toString(),
-//                mainActivityViewModel.getScoreMinus().toString());
-        setClickListenersToViewElements()
-
     } // onCreate() - end
 
     private fun observeLiveData() {
-        mainActivityViewModel.todoList.observe(this, Observer { todos: List<Todo?>? -> recyclerViewAdapter!!.loadListFromDB() })
-        mainActivityViewModel.doneCounter.observe(this, Observer { it: String? -> textViewPlus!!.text = it })
-        mainActivityViewModel.undoneCounter.observe(this, Observer { it: String? -> textViewMinus!!.text = it })
-        mainActivityViewModel.challengeEndingDate.observe(this, Observer { it: String? -> challengeEndingDate!!.text = it })
-    }
-
-    private fun setClickListenersToViewElements() {
-        //setItemListClickListener();
-        setEndingDateListener()
+        viewModel.todoList.observe(this, Observer { todos: List<Todo?>? -> recyclerViewAdapter.loadListFromDB() })
+        viewModel.doneCounter.observe(this, Observer { textViewPlus.text = it.toString() })
+        viewModel.undoneCounter.observe(this, Observer { textViewMinus.text = it.toString() })
+        viewModel.challengeEndingDate.observe(this, Observer { challengeEndingDate.text = it })
     }
 
     private fun initRespository(context: Context) {
@@ -107,6 +86,7 @@ class OverviewActivity : AppCompatActivity() {
 
 
     private fun setEndingDateListener() {
+        challengeEndingDate = findViewById(R.id.tvDate)
         challengeEndingDate.setOnClickListener {
             val calender = Calendar.getInstance()
             val year = calender[Calendar.YEAR]
@@ -124,11 +104,7 @@ class OverviewActivity : AppCompatActivity() {
             var month = month
             month += 1
             val date = "$day.$month.$year"
-            // challengeEndingDate.setText(date);
-            mainActivityViewModel.challengeEndingDate.value = date
-//                    .postValue(date)
-            SharedPreferenceHelper.challengeEndingDate = date
-//            myPrefs!!.saveSharedPrefs()
+            viewModel.setChallengeEndingDate(date)
         }
     }
 
@@ -136,15 +112,15 @@ class OverviewActivity : AppCompatActivity() {
         initRecyclerViewList()
         instantiateTimePicker()
         instantiateFABMenu()
-        challengeEndingDate = findViewById(R.id.tvDate)
+        setEndingDateListener()
         initActionBar()
     }
 
     private fun loadDataFromPrefs() {
-        mainActivityViewModel.challengeEndingDate.value = SharedPreferenceHelper.challengeEndingDate
-        mainActivityViewModel.undoneCounter.value = SharedPreferenceHelper.doneCount.toString()
-        mainActivityViewModel.doneCounter.value = SharedPreferenceHelper.undoneCount.toString()
-        mainActivityViewModel.todoList.value = repository.getAllItems()
+        viewModel.challengeEndingDate.value = SharedPreferenceHelper.challengeEndingDate
+        viewModel.undoneCounter.value = SharedPreferenceHelper.doneCount
+        viewModel.doneCounter.value = SharedPreferenceHelper.undoneCount
+        viewModel.todoList.value = repository.getAllItems()
     }
 
     private fun initActionBar() {
@@ -172,7 +148,7 @@ class OverviewActivity : AppCompatActivity() {
         alertTimeListener = OnTimeSetListener { timePicker, hour, min ->
             timepicker.currentHour = hour
             timepicker.currentMinute = min
-            createNotificationIntent(timepicker)
+            viewModel.createNotificationIntent(hour, min)
         }
     }
 
@@ -202,8 +178,6 @@ class OverviewActivity : AppCompatActivity() {
         }
         fab_notification = findViewById(R.id.fab_notification)
         fab_notification.setOnClickListener {
-            setNotificationTime()
-            createNotificationIntent(timepicker)
             closeFABMenu()
         }
     }
@@ -248,7 +222,8 @@ class OverviewActivity : AppCompatActivity() {
             override fun onAnimationCancel(animator: Animator) {}
             override fun onAnimationRepeat(animator: Animator) {}
         })
-        backgroundTask.changeDate(recyclerViewAdapter)
+//        mainActivityViewModel.incrementDate()
+//        backgroundTask.changeDate(recyclerViewAdapter)
     }
 
     override fun onBackPressed() {
@@ -267,8 +242,9 @@ class OverviewActivity : AppCompatActivity() {
     override fun onRestart() {
         super.onRestart()
         Log.i("RD_", "onRestart")
-        if (backgroundTask.checkHasDateChanged()) {
+        if (viewModel.checkHasDateChanged()) {
 //            backgroundTask.summUpCheckBoxes();
+            viewModel.summUpCheckBoxes()
         }
     }
 
@@ -285,8 +261,8 @@ class OverviewActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         Log.i("RD_", "onResume")
-        if (backgroundTask.checkHasDateChanged()) {
-            backgroundTask.summUpCheckBoxes(recyclerViewAdapter)
+        if (viewModel.checkHasDateChanged()) {
+            viewModel.summUpCheckBoxes()
         }
     } //onResume - end
 
@@ -334,7 +310,7 @@ class OverviewActivity : AppCompatActivity() {
         closeFABMenu()
     }
 
-    private fun setNotificationTime() {
+    private fun showTimePicker() {
         val calender = Calendar.getInstance()
         val hour = calender[Calendar.HOUR_OF_DAY]
         val minute = calender[Calendar.MINUTE]
@@ -351,22 +327,7 @@ class OverviewActivity : AppCompatActivity() {
         timepicker.setIs24HourView(true)
     }
 
-    private fun createNotificationIntent(timePicker: TimePicker?) {
-        val time: Long
-        val hour = timePicker!!.currentHour * 60 * 60 * 1000.toLong()
-        val min = timePicker.currentMinute * 60 * 1000.toLong()
-        time = hour + min
-        val timeInMillis = Calendar.getInstance().timeInMillis
-        val current_hour = (Calendar.getInstance()[Calendar.HOUR] + 12) * 60 * 60 * 1000.toLong()
-        val current_min = (Calendar.getInstance()[Calendar.MINUTE] - 1) * 60 * 1000.toLong()
-        val current_sec = Calendar.getInstance()[Calendar.SECOND] * 1000.toLong()
-        val passed_millis = current_hour + current_min + current_sec
-        val alertTimeInMillis = timeInMillis - passed_millis + time
-        val notificationIntent = Intent(applicationContext, NotificationReceiver::class.java)
-        val pIntent = PendingIntent.getBroadcast(applicationContext, CALL_NOTIFICATION_ALERT_TIME, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, alertTimeInMillis, AlarmManager.INTERVAL_DAY, pIntent)
-    }
+
 
     private fun showDetailViewForCreate() {
         val createIntent = Intent(this, DetailviewActivity::class.java)
@@ -388,25 +349,29 @@ class OverviewActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val id = item.itemId
         if (id == R.id.alertTime) {
-            setNotificationTime()
-            createNotificationIntent(timepicker)
+            showTimePicker()
             return true
         }
         if (id == R.id.clearScore) {
-            backgroundTask.clearScore()
-            //            myPrefs.applyPrefsToView(mainActivityViewModel);
+            viewModel.clearScore()
             return true
         }
         if (id == R.id.clearTarget) {
-            backgroundTask.clearTargetDate()
-            //            myPrefs.applyPrefsToView(mainActivityViewModel);
+            viewModel.clearTargetDate()
             return true
         }
         return super.onOptionsItemSelected(item)
     }
 
+    private fun checkIfFirstStart() {
+        if (SharedPreferenceHelper.firstStart) {
+            Toast.makeText(this, "Welcome to Routine Developer!", Toast.LENGTH_SHORT).show()
+        } else {
+            SharedPreferenceHelper.firstStart = false
+        }
+    }
+
     companion object {
-        private const val CALL_NOTIFICATION_ALERT_TIME = 100
         private const val CALL_EDIT_ITEM = 0
         private const val CALL_CREATE_ITEM = 1
         private const val CALL_MODE = "callMode"

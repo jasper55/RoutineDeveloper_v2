@@ -11,7 +11,6 @@ import androidx.core.app.NotificationCompat;
 public class NotificationReceiver extends BroadcastReceiver {
 
     private static final int CALL_NOTIFICATION_ALERT_TIME = 100;
-    private static final int CHECKBOX_ON_BACKGROUND = 17301520;
 
     @Override
     public void onReceive(Context context, Intent intent) {

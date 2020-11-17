@@ -44,8 +44,8 @@ object SharedPreferenceHelper {
         prefs?.edit()?.clear()?.apply()
     }
 
-    fun updateDate() {
-        storedDay = Calendar.DAY_OF_YEAR
+    fun updateDate(currentDay: Int) {
+        storedDay = currentDay
     }
 
 

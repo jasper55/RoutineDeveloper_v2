@@ -1,21 +1,18 @@
 package com.example.app.jasper.routinedeveloper_v2.repository;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-
-import com.example.app.jasper.routinedeveloper_v2.model.MySharedPrefs;
 import com.example.app.jasper.routinedeveloper_v2.model.SQLDatabaseHelper;
 import com.example.app.jasper.routinedeveloper_v2.model.Todo;
 
-import java.util.List;
+import org.jetbrains.annotations.NotNull;
 
-import androidx.lifecycle.MutableLiveData;
+import java.util.List;
 
 public class TodoListRepository {
 
     private static TodoListRepository instance;
-    private Context context;
     private SQLDatabaseHelper dataBase;
+    private SharedPreferenceHelper prefs;
 
     public static TodoListRepository getInstance(Context context) {
         if (instance == null) {
@@ -44,14 +41,41 @@ public class TodoListRepository {
         return dataBase.readItem(id);
     }
 
-//    public void saveScorePlus(String score) {
-//        SharedPreferenceHelper.INSTANCE.setScorePlus(score);
-//    }
-
-//    public void saveScoreMinus(String score) { SharedPreferenceHelper.INSTANCE.setScoreMinus(score); }
-
     public TodoListRepository(Context context) {
-        this.context = context;
         dataBase = SQLDatabaseHelper.getInstance(context);
+        prefs = SharedPreferenceHelper.INSTANCE;
+    }
+
+    public void clearTargetDate() {
+        prefs.setChallengeEndingDate("");
+    }
+
+    public void clearScore() {
+        prefs.setUndoneCount(0);
+        prefs.setDoneCount(0);
+    }
+
+    public int getStoredDay() {
+        return prefs.getStoredDay();
+    }
+
+    public void setCurrentDay(int currentDay) {
+        prefs.updateDate(currentDay);
+    }
+
+    public void incrementDoneCounter() {
+        int doneCount = prefs.getDoneCount();
+        doneCount += 1;
+        prefs.setDoneCount(doneCount);
+    }
+
+    public void incrementUndoneCounter() {
+        int undoneCount = prefs.getUndoneCount();
+        undoneCount += 1;
+        prefs.setDoneCount(undoneCount);
+    }
+
+    public void setChallengeEndingDate(@NotNull String endingDate) {
+        prefs.setChallengeEndingDate(endingDate);
     }
 }
