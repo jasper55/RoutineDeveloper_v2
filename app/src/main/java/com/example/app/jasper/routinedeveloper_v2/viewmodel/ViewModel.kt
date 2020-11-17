@@ -5,12 +5,12 @@ import android.app.Application
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.widget.TimePicker
-import androidx.core.content.ContextCompat.getSystemService
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import com.example.app.jasper.routinedeveloper_v2.NotificationReceiver
-import com.example.app.jasper.routinedeveloper_v2.OverviewActivity
+import com.example.app.jasper.routinedeveloper_v2.NotificationReceiver.Companion.CALL_NOTIFICATION_ALERT_TIME
+import com.example.app.jasper.routinedeveloper_v2.model.SQLDatabaseHelper
 import com.example.app.jasper.routinedeveloper_v2.model.Todo
 import com.example.app.jasper.routinedeveloper_v2.repository.TodoListRepository
 import java.util.*
@@ -59,7 +59,7 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
         return dateHasChanged
     }
 
-    fun summUpCheckBoxes() {
+    fun sumUpCheckBoxes() {
         val list = todoList.value!!
         val itemCount = list.size
         var itemCheckCount = 0
@@ -69,11 +69,13 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
         if (itemCheckCount == itemCount) {
+            doneCounter.value = doneCounter.value!!.plus(1)
             repository.incrementDoneCounter()
         } else {
+            undoneCounter.value = undoneCounter.value!!.plus(1)
             repository.incrementUndoneCounter()
-
         }
+        Log.d("COUNTER","itemCOunt: $itemCount, checks: $itemCheckCount")
     }
 
     fun clearScore() {
@@ -88,6 +90,7 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun createNotificationIntent(hour: Int, min: Int) {
+        Log.d("ALERT_TIME", "hour: $hour, min: $min")
         val time: Long
         val hour = hour * 60 * 60 * 1000.toLong()
         val min = min * 60 * 1000.toLong()
@@ -104,7 +107,16 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
         alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, alertTimeInMillis, AlarmManager.INTERVAL_DAY, pIntent)
     }
 
-    companion object {
-        private const val CALL_NOTIFICATION_ALERT_TIME = 100
+    fun setFirstStart(b: Boolean) {
+        repository.setFirstStart(b)
     }
+
+    fun saveList(todos: List<Todo?>?) {
+        repository.saveList(todos)
+    }
+
+    fun addItem(item: Todo) {
+        repository.addItem(item)
+    }
+
 }

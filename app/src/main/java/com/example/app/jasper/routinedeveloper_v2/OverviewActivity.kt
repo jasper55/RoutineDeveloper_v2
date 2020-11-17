@@ -37,7 +37,7 @@ class OverviewActivity : AppCompatActivity() {
 
     private var isFABOpen = false
 
-    private lateinit  var timepicker: TimePicker
+    private lateinit var timepicker: TimePicker
     private lateinit var alertTimeListener: OnTimeSetListener
     private lateinit var recyclerView: RecyclerView
     private lateinit var recyclerViewAdapter: RecyclerViewAdapter
@@ -61,27 +61,30 @@ class OverviewActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.layout_overview)
+
         SharedPreferenceHelper.initWith(applicationContext)
-
-        checkIfFirstStart()
-
         viewModel = ViewModelProvider(this).get(ViewModel::class.java)
-        initRespository(this)
+
+        initRepository(this)
         initView()
 
+        checkIfFirstStart()
         observeLiveData()
         loadDataFromPrefs()
-    } // onCreate() - end
+    }
 
     private fun observeLiveData() {
-        viewModel.todoList.observe(this, Observer { todos: List<Todo?>? -> recyclerViewAdapter.loadListFromDB() })
+        viewModel.todoList.observe(this, Observer { todos: List<Todo?>? ->
+            viewModel.saveList(todos)
+            recyclerViewAdapter.updateList()
+        })
         viewModel.doneCounter.observe(this, Observer { textViewPlus.text = it.toString() })
         viewModel.undoneCounter.observe(this, Observer { textViewMinus.text = it.toString() })
         viewModel.challengeEndingDate.observe(this, Observer { challengeEndingDate.text = it })
     }
 
-    private fun initRespository(context: Context) {
-        repository = TodoListRepository.getInstance(context);
+    private fun initRepository(context: Context) {
+        repository = TodoListRepository.getInstance(context)
     }
 
 
@@ -96,7 +99,6 @@ class OverviewActivity : AppCompatActivity() {
                     android.R.style.Theme_Holo_Light_Dialog_MinWidth,
                     challengeEndingDateSetListener,
                     year, month, day)
-            // Hintergrund transparent machen
             datePickerDialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
             datePickerDialog.show()
         }
@@ -137,7 +139,10 @@ class OverviewActivity : AppCompatActivity() {
             override fun onItemClick(position: Int) {
                 showDetailViewForEdit(recyclerViewAdapter.getItem(position))
             }
-            override fun onLongItemClick(position: Int) {}
+
+            override fun onLongItemClick(position: Int) {
+                Toast.makeText(applicationContext, "Long Pressed", Toast.LENGTH_SHORT).show()
+            }
         })
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = recyclerViewAdapter
@@ -241,10 +246,10 @@ class OverviewActivity : AppCompatActivity() {
 
     override fun onRestart() {
         super.onRestart()
-        Log.i("RD_", "onRestart")
+        Log.i("DATE", "onRestart")
+        Log.d("DATE", "${viewModel.checkHasDateChanged()}")
         if (viewModel.checkHasDateChanged()) {
-//            backgroundTask.summUpCheckBoxes();
-            viewModel.summUpCheckBoxes()
+            viewModel.sumUpCheckBoxes()
         }
     }
 
@@ -260,16 +265,16 @@ class OverviewActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        Log.i("RD_", "onResume")
-        if (viewModel.checkHasDateChanged()) {
-            viewModel.summUpCheckBoxes()
-        }
+        Log.i("DATE", "onResume")
+        Log.d("DATE", "${viewModel.checkHasDateChanged()}")
+//        if (viewModel.checkHasDateChanged()) {
+        viewModel.sumUpCheckBoxes()
+//        }
     } //onResume - end
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
         super.onActivityResult(requestCode, resultCode, intent)
         if (resultCode == Activity.RESULT_OK) {
-            val position = recyclerViewAdapter.position
             try {
                 val id = intent!!.getLongExtra(DetailviewActivity.ARG_ITEM_ID, -100)
                 Log.i("ID_", id.toString())
@@ -278,18 +283,18 @@ class OverviewActivity : AppCompatActivity() {
                 } else {
                     item = repository.readItem(id)
                     if (requestCode == CALL_CREATE_ITEM) {
-                        Toast.makeText(this, "new item received", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this, "item created", Toast.LENGTH_LONG).show()
                         recyclerViewAdapter.addItem(item)
+                        viewModel.addItem(item)
                     }
                     if (requestCode == CALL_EDIT_ITEM) {
-                        recyclerViewAdapter.loadListFromDB(item, position)
+                        recyclerViewAdapter.updateList()
                         Toast.makeText(this, "item updated", Toast.LENGTH_LONG).show()
-                    } else {
                     }
                 }
             } catch (e: Exception) {
-                recyclerViewAdapter.removeItem(position)
-                Toast.makeText(this, "item removed $position", Toast.LENGTH_LONG).show()
+                recyclerViewAdapter.updateList()
+                Toast.makeText(this, "item removed", Toast.LENGTH_LONG).show()
                 e.printStackTrace()
             }
         } // if resultCode
@@ -326,7 +331,6 @@ class OverviewActivity : AppCompatActivity() {
         timepicker.currentMinute = minute
         timepicker.setIs24HourView(true)
     }
-
 
 
     private fun showDetailViewForCreate() {
@@ -366,8 +370,7 @@ class OverviewActivity : AppCompatActivity() {
     private fun checkIfFirstStart() {
         if (SharedPreferenceHelper.firstStart) {
             Toast.makeText(this, "Welcome to Routine Developer!", Toast.LENGTH_SHORT).show()
-        } else {
-            SharedPreferenceHelper.firstStart = false
+            viewModel.setFirstStart(false)
         }
     }
 

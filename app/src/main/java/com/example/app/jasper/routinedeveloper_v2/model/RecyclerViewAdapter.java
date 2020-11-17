@@ -10,6 +10,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.example.app.jasper.routinedeveloper_v2.R;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,6 +48,13 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 currentPosition = position;
             }
         });
+        viewHolder.itemListContainer.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                customItemClickListener.onLongItemClick(position);
+                return true;
+            }
+        });
 
         viewHolder.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             Todo mockItem = null;
@@ -57,6 +66,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 mockItem = todoList.get(position);
                 long id = mockItem.getId();
                 mockItem.setDone(checked);
+
+                todoList.get(position).setDone(checked);
                 SQLDatabaseHelper.getInstance(context.getApplicationContext()).updateItem(id, mockItem);
             }
         });
@@ -74,7 +85,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
     public void addItem(Todo item) {
-        SQLDatabaseHelper.getInstance(context.getApplicationContext()).updateItem(item.getId(), item);
         todoList.add(item);
 //        this.notifyDataSetChanged();
     }
@@ -99,6 +109,12 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         this.notifyDataSetChanged();
     }
 
+    public void updateList() {
+        todoList.clear();
+        todoList.addAll(SQLDatabaseHelper.getInstance(context.getApplicationContext()).readAllItems());
+        this.notifyDataSetChanged();
+    }
+
     public class ViewHolder extends RecyclerView.ViewHolder {
 
         public TextView todoId, todoName;
@@ -118,7 +134,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public RecyclerViewAdapter(Context context,   CustomItemClickListener listener) {
         this.customItemClickListener = listener;
         this.context = context;
-
     }
 
     public interface CustomItemClickListener {
