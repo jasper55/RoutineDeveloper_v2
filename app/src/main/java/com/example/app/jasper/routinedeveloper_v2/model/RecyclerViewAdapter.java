@@ -8,13 +8,12 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import com.example.app.jasper.routinedeveloper_v2.R;
-import com.example.app.jasper.routinedeveloper_v2.viewmodel.ViewModel;
 
-import org.jetbrains.annotations.Nullable;
+import com.example.app.jasper.routinedeveloper_v2.R;
 
 import java.util.ArrayList;
 import java.util.List;
+
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -22,10 +21,9 @@ import androidx.recyclerview.widget.RecyclerView;
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
 
     CustomItemClickListener customItemClickListener;
-    private ViewModel viewmodel;
     private int currentPosition;
     private Context context;
-    private List<Todo> todoList=new ArrayList<>();
+    private List<Todo> todoList = new ArrayList<>();
 
     // Its similar to what your code in the ListView does (checking if convertView is null)
     @NonNull
@@ -50,13 +48,13 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 currentPosition = position;
             }
         });
-        viewHolder.itemListContainer.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                customItemClickListener.onLongItemClick(position);
-                return true;
-            }
-        });
+//        viewHolder.itemListContainer.setOnLongClickListener(new View.OnLongClickListener() {
+//            @Override
+//            public boolean onLongClick(View view) {
+//                customItemClickListener.onLongItemClick(position);
+//                return true;
+//            }
+//        });
 
         viewHolder.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             Todo mockItem = null;
@@ -65,14 +63,16 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             public void onCheckedChanged(CompoundButton buttonView, boolean b) {
                 boolean checked = viewHolder.checkBox.isChecked();
 
-                mockItem = todoList.get(position);
-                long id = mockItem.getId();
-                mockItem.setDone(checked);
-                viewmodel.updateItem(mockItem,todoList);
-//                todoList.get(position).setDone(checked);
+//                mockItem = todoList.get(position);
+//                long id = mockItem.getId();
+//                mockItem.setDone(checked);
+                customItemClickListener.onCheckedChanged(position,checked);
+//
             }
         });
     }
+
+
 
     // Methode auch wichtig, da wenn default 0 gelassen wird, wird nichts angezeigt
     @Override
@@ -87,7 +87,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     public void addItem(Todo item) {
         todoList.add(item);
-//        this.notifyDataSetChanged();
+//        viewmodel.setTodoList(todoList);
+        this.notifyDataSetChanged();
     }
 
     public void loadListFromDB(Todo item, int position) {
@@ -110,9 +111,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         this.notifyDataSetChanged();
     }
 
-    public void updateList() {
+    public void updateList(List<Todo> todos) {
         todoList.clear();
-        todoList.addAll(SQLDatabaseHelper.getInstance(context.getApplicationContext()).readAllItems());
+        todoList.addAll(todos);
         this.notifyDataSetChanged();
     }
 
@@ -132,14 +133,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         }
     }
 
-    public RecyclerViewAdapter(Context context,   ViewModel viewModel, CustomItemClickListener listener) {
-        this.viewmodel = viewModel;
+    public RecyclerViewAdapter(Context context, CustomItemClickListener listener) {
         this.customItemClickListener = listener;
         this.context = context;
     }
 
     public interface CustomItemClickListener {
         void onItemClick(int position);
+        void onCheckedChanged(int position, boolean isChecked);
         void onLongItemClick(int position);
     }
 }

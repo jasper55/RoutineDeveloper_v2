@@ -108,6 +108,7 @@ public class SQLDatabaseHelper {
 
 
     public void deleteItem(long id){
+        Log.d("DATABASE", "item deleted");
         db.delete(TABLE_DATAITEM,ID + "=" + id,null);
     }
 

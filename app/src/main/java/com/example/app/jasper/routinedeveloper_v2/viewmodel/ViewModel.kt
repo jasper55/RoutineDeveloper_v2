@@ -51,7 +51,7 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     fun checkHasDateChanged(): Boolean {
         val currentday = Calendar.getInstance().get(Calendar.DAY_OF_YEAR)
         var dateHasChanged = false
-        if(repository.storedDay != currentday) {
+        if (repository.storedDay != currentday) {
             dateHasChanged = true
             repository.setCurrentDay(currentday)
         } else {
@@ -76,7 +76,7 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
             undoneCounter.value = undoneCounter.value!!.plus(1)
             repository.incrementUndoneCounter()
         }
-        Log.d("COUNTER","itemCOunt: $itemCount, checks: $itemCheckCount")
+        Log.d("COUNTER", "itemCOunt: $itemCount, checks: $itemCheckCount")
     }
 
     fun clearScore() {
@@ -121,7 +121,7 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun updateItem(item: Todo, list: List<Todo>) {
-        repository.updateItem(item.id,item)
+        repository.updateItem(item.id, item)
         todoList.value = list
     }
 
@@ -131,8 +131,17 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
         doneCounter.value = repository.doneCount
         todoList.value = repository.allItems
 
-        Log.d("COUNTER","done: ${repository.doneCount}")
-        Log.d("COUNTER","undone: ${repository.undoneCount}")
+        Log.d("COUNTER", "done: ${repository.doneCount}")
+        Log.d("COUNTER", "undone: ${repository.undoneCount}")
+    }
+
+    fun deleteItem(id: Long) {
+        val list = ArrayList<Todo>()
+        for (item in todoList.value!!)
+            if (item.id != id) {
+                list.add(item)
+            }
+        todoList.value = list
     }
 
 }
