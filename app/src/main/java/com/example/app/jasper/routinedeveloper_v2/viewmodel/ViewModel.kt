@@ -119,4 +119,9 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
         repository.addItem(item)
     }
 
+    fun updateItem(item: Todo, list: List<Todo>) {
+        repository.updateItem(item.id,item)
+        todoList.value = list
+    }
+
 }

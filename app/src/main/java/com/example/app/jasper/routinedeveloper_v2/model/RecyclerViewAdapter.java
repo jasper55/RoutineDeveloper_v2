@@ -9,6 +9,7 @@ import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.example.app.jasper.routinedeveloper_v2.R;
+import com.example.app.jasper.routinedeveloper_v2.viewmodel.ViewModel;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -21,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView;
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
 
     CustomItemClickListener customItemClickListener;
+    private ViewModel viewmodel;
     private int currentPosition;
     private Context context;
     private List<Todo> todoList=new ArrayList<>();
@@ -66,9 +68,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 mockItem = todoList.get(position);
                 long id = mockItem.getId();
                 mockItem.setDone(checked);
-
-                todoList.get(position).setDone(checked);
-                SQLDatabaseHelper.getInstance(context.getApplicationContext()).updateItem(id, mockItem);
+                viewmodel.updateItem(mockItem,todoList);
+//                todoList.get(position).setDone(checked);
             }
         });
     }
@@ -131,7 +132,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         }
     }
 
-    public RecyclerViewAdapter(Context context,   CustomItemClickListener listener) {
+    public RecyclerViewAdapter(Context context,   ViewModel viewModel, CustomItemClickListener listener) {
+        this.viewmodel = viewModel;
         this.customItemClickListener = listener;
         this.context = context;
     }

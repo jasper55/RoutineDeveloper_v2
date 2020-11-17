@@ -135,7 +135,7 @@ class OverviewActivity : AppCompatActivity() {
 
     private fun initRecyclerViewList() {
         recyclerView = findViewById(R.id.recycler_view_data)
-        recyclerViewAdapter = RecyclerViewAdapter(this, object : CustomItemClickListener {
+        recyclerViewAdapter = RecyclerViewAdapter(this, viewModel, object : CustomItemClickListener {
             override fun onItemClick(position: Int) {
                 showDetailViewForEdit(recyclerViewAdapter.getItem(position))
             }
