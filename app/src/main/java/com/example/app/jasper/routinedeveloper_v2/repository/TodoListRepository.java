@@ -24,6 +24,11 @@ public class TodoListRepository {
         return instance;
     }
 
+    public TodoListRepository(Context context) {
+        dataBase = SQLDatabaseHelper.getInstance(context);
+        prefs = SharedPreferenceHelper.INSTANCE;
+    }
+
     public List<Todo> getAllItems() {
         return dataBase.readAllItems();
     }
@@ -48,10 +53,7 @@ public class TodoListRepository {
         return dataBase.readItem(id);
     }
 
-    public TodoListRepository(Context context) {
-        dataBase = SQLDatabaseHelper.getInstance(context);
-        prefs = SharedPreferenceHelper.INSTANCE;
-    }
+
 
     public void clearTargetDate() {
         prefs.setChallengeEndingDate("");
@@ -76,13 +78,21 @@ public class TodoListRepository {
         prefs.setDoneCount(doneCount);
         Log.d("COUNTER", "doneCount incremented");
 
+
+        int done = prefs.getDoneCount();
+        Log.d("COUNTER", "new done value: " + String.valueOf(done));
+
     }
 
     public void incrementUndoneCounter() {
         int undoneCount = prefs.getUndoneCount();
         undoneCount += 1;
-        prefs.setDoneCount(undoneCount);
+        prefs.setUndoneCount(undoneCount);
         Log.d("COUNTER", "undoneCount incremented");
+
+
+        int undone = prefs.getUndoneCount();
+        Log.d("COUNTER", "new undone value: " + undone);
     }
 
     public void setChallengeEndingDate(@NotNull String endingDate) {

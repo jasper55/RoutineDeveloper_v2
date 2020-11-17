@@ -120,9 +120,12 @@ class OverviewActivity : AppCompatActivity() {
 
     private fun loadDataFromPrefs() {
         viewModel.challengeEndingDate.value = SharedPreferenceHelper.challengeEndingDate
-        viewModel.undoneCounter.value = SharedPreferenceHelper.doneCount
-        viewModel.doneCounter.value = SharedPreferenceHelper.undoneCount
+        viewModel.undoneCounter.value = SharedPreferenceHelper.undoneCount
+        viewModel.doneCounter.value = SharedPreferenceHelper.doneCount
         viewModel.todoList.value = repository.getAllItems()
+
+        Log.d("COUNTER","done: ${SharedPreferenceHelper.doneCount}")
+        Log.d("COUNTER","undone: ${SharedPreferenceHelper.undoneCount}")
     }
 
     private fun initActionBar() {
@@ -265,6 +268,7 @@ class OverviewActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        loadDataFromPrefs()
         Log.i("DATE", "onResume")
         Log.d("DATE", "${viewModel.checkHasDateChanged()}")
 //        if (viewModel.checkHasDateChanged()) {

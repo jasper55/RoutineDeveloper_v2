@@ -2,7 +2,6 @@ package com.example.app.jasper.routinedeveloper_v2.repository
 
 import android.content.Context
 import android.content.SharedPreferences
-import java.util.*
 
 object SharedPreferenceHelper {
 
