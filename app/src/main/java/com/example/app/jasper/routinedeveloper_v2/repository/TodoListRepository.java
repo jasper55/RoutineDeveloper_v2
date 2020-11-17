@@ -111,4 +111,19 @@ public class TodoListRepository {
     public void addItem(@NotNull Todo item) {
         dataBase.updateItem(item.getId(), item);
     }
+
+    @Nullable
+    public Integer getUndoneCount() {
+        return prefs.getUndoneCount();
+    }
+
+    @Nullable
+    public Integer getDoneCount() {
+        return prefs.getDoneCount();
+    }
+
+    @Nullable
+    public String getChallengeEndingDate() {
+        return prefs.getChallengeEndingDate();
+    }
 }

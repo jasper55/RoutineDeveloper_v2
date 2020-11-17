@@ -70,7 +70,7 @@ class OverviewActivity : AppCompatActivity() {
 
         checkIfFirstStart()
         observeLiveData()
-        loadDataFromPrefs()
+        loadData()
     }
 
     private fun observeLiveData() {
@@ -118,14 +118,8 @@ class OverviewActivity : AppCompatActivity() {
         initActionBar()
     }
 
-    private fun loadDataFromPrefs() {
-        viewModel.challengeEndingDate.value = SharedPreferenceHelper.challengeEndingDate
-        viewModel.undoneCounter.value = SharedPreferenceHelper.undoneCount
-        viewModel.doneCounter.value = SharedPreferenceHelper.doneCount
-        viewModel.todoList.value = repository.getAllItems()
-
-        Log.d("COUNTER","done: ${SharedPreferenceHelper.doneCount}")
-        Log.d("COUNTER","undone: ${SharedPreferenceHelper.undoneCount}")
+    private fun loadData() {
+        viewModel.loadData()
     }
 
     private fun initActionBar() {
@@ -268,7 +262,7 @@ class OverviewActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        loadDataFromPrefs()
+        loadData()
         Log.i("DATE", "onResume")
         Log.d("DATE", "${viewModel.checkHasDateChanged()}")
 //        if (viewModel.checkHasDateChanged()) {

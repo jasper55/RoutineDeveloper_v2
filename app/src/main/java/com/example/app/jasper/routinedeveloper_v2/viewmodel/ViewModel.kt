@@ -12,6 +12,7 @@ import com.example.app.jasper.routinedeveloper_v2.NotificationReceiver
 import com.example.app.jasper.routinedeveloper_v2.NotificationReceiver.Companion.CALL_NOTIFICATION_ALERT_TIME
 import com.example.app.jasper.routinedeveloper_v2.model.SQLDatabaseHelper
 import com.example.app.jasper.routinedeveloper_v2.model.Todo
+import com.example.app.jasper.routinedeveloper_v2.repository.SharedPreferenceHelper
 import com.example.app.jasper.routinedeveloper_v2.repository.TodoListRepository
 import java.util.*
 
@@ -122,6 +123,16 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     fun updateItem(item: Todo, list: List<Todo>) {
         repository.updateItem(item.id,item)
         todoList.value = list
+    }
+
+    fun loadData() {
+        challengeEndingDate.value = repository.getChallengeEndingDate()
+        undoneCounter.value = repository.undoneCount
+        doneCounter.value = repository.doneCount
+        todoList.value = repository.allItems
+
+        Log.d("COUNTER","done: ${repository.doneCount}")
+        Log.d("COUNTER","undone: ${repository.undoneCount}")
     }
 
 }
