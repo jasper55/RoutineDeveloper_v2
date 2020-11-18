@@ -95,7 +95,7 @@ public class TodoListRepository {
         Log.d("COUNTER", "new undone value: " + undone);
     }
 
-    public void setChallengeEndingDate(@NotNull String endingDate) {
+    public void setChallengeEndingDate(String endingDate) {
         prefs.setChallengeEndingDate(endingDate);
     }
 
@@ -103,12 +103,12 @@ public class TodoListRepository {
         prefs.setFirstStart(b);
     }
 
-    public void saveList(@Nullable List<Todo> todos) {
+    public void saveList(List<Todo> todos) {
         for (Todo item : todos)
             dataBase.updateItem(item.getId(), item);
     }
 
-    public void addItem(@NotNull Todo item) {
+    public void addItem(Todo item) {
         dataBase.updateItem(item.getId(), item);
     }
 

@@ -77,8 +77,11 @@ class OverviewActivity : AppCompatActivity() {
 
     private fun observeLiveData() {
         viewModel.todoList.observe(this, Observer { todos: List<Todo> ->
-            viewModel.saveList(todos)
-            recyclerViewAdapter.updateList(todos)
+            if (todos.isNotEmpty()) {
+                Log.d("CHECKED", "todos: ${todos.get(0).isDone}")
+                viewModel.saveList(todos)
+                recyclerViewAdapter.updateList(todos)
+            }
         })
         viewModel.doneCounter.observe(this, Observer { textViewPlus.text = it.toString() })
         viewModel.undoneCounter.observe(this, Observer { textViewMinus.text = it.toString() })
@@ -140,7 +143,10 @@ class OverviewActivity : AppCompatActivity() {
             }
 
             override fun onCheckedChanged(position: Int, isChecked: Boolean) {
+                Log.d("CHECKED","${position}")
+                Log.d("CHECKED","${viewModel.todoList.value!!.get(position).isDone}")
                 viewModel.todoList.value!!.get(position).isDone = isChecked
+                Log.d("CHECKED","${viewModel.todoList.value!!.get(position).isDone}")
             }
 
             override fun onLongItemClick(position: Int) {
@@ -159,15 +165,19 @@ class OverviewActivity : AppCompatActivity() {
                         ItemTouchHelper.UP or
                         ItemTouchHelper.START or
                         ItemTouchHelper.END,
-                ItemTouchHelper.END) {
+                0) {
             override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
-                TODO("Not yet implemented")
+                val fromPosition = viewHolder.adapterPosition
+                val toPosition = target.adapterPosition
+                viewModel.swapPositions(fromPosition,toPosition)
+                return false
             }
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 Toast.makeText(applicationContext,"item deleted", Toast.LENGTH_SHORT).show()
-                val id = viewHolder.itemId
-                viewModel.deleteItem(id)
+                val id = viewHolder.adapterPosition
+//                recyclerView.adapter.getItemId()
+//                viewModel.deleteItem(id)
             }
 
         }
@@ -308,6 +318,7 @@ class OverviewActivity : AppCompatActivity() {
                     item = repository.readItem(id)
                     if (requestCode == CALL_CREATE_ITEM) {
                         Toast.makeText(this, "item created", Toast.LENGTH_LONG).show()
+                        recyclerViewAdapter.addItem(item)
                         viewModel.addItem(item)
                     }
                     if (requestCode == CALL_EDIT_ITEM) {

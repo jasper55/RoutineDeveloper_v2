@@ -8,22 +8,27 @@ import android.content.Intent
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import com.example.app.jasper.routinedeveloper_v2.NotificationReceiver
 import com.example.app.jasper.routinedeveloper_v2.NotificationReceiver.Companion.CALL_NOTIFICATION_ALERT_TIME
 import com.example.app.jasper.routinedeveloper_v2.model.SQLDatabaseHelper
 import com.example.app.jasper.routinedeveloper_v2.model.Todo
 import com.example.app.jasper.routinedeveloper_v2.repository.SharedPreferenceHelper
 import com.example.app.jasper.routinedeveloper_v2.repository.TodoListRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.*
+import kotlin.collections.ArrayList
 
 class ViewModel(application: Application) : AndroidViewModel(application) {
+    val list = ArrayList<Todo>()
     val todoList = MutableLiveData<List<Todo>>()
     val doneCounter = MutableLiveData<Int>()
     val undoneCounter = MutableLiveData<Int>()
     val challengeEndingDate = MutableLiveData<String>()
     val notificationTime = MutableLiveData<Long>()
     val context = application.applicationContext
-    val repository = TodoListRepository(context)
+    val repository = TodoListRepository.getInstance(context)
     private var vmIsUpdating // falls Daten von einem remoteServer geholt werden -> Progressbar implementieren
             : MutableLiveData<Boolean>? = null
 
@@ -37,11 +42,9 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
 
     fun setChallengeEndingDate(endingDate: String) {
         challengeEndingDate.postValue(endingDate)
-        repository.setChallengeEndingDate(endingDate)
-    }
-
-    fun setTodoList(list: List<Todo>) {
-        todoList.postValue(list)
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.setChallengeEndingDate(endingDate)
+        }
     }
 
     fun setVmIsUpdating(vmIsUpdating: MutableLiveData<Boolean>?) {
@@ -61,33 +64,42 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun sumUpCheckBoxes() {
-        val list = todoList.value!!
-        val itemCount = list.size
-        var itemCheckCount = 0
-        for (item in list) {
-            if (item.isDone) {
-                itemCheckCount += 1
+        doneCounter.value?.let {
+            val itemCount = list.size
+            var itemCheckCount = 0
+            for (item in list) {
+                if (item.isDone) {
+                    itemCheckCount += 1
+                }
             }
+            if (itemCheckCount == itemCount) {
+                viewModelScope.launch(Dispatchers.IO) {
+                    doneCounter.postValue(doneCounter.value!!.plus(1))
+                    repository.incrementDoneCounter()
+                }
+            } else {
+                viewModelScope.launch(Dispatchers.IO) {
+                    undoneCounter.postValue(undoneCounter.value!!.plus(1))
+                    repository.incrementUndoneCounter()
+                }
+            }
+            Log.d("COUNTER", "itemCOunt: $itemCount, checks: $itemCheckCount")
         }
-        if (itemCheckCount == itemCount) {
-            doneCounter.value = doneCounter.value!!.plus(1)
-            repository.incrementDoneCounter()
-        } else {
-            undoneCounter.value = undoneCounter.value!!.plus(1)
-            repository.incrementUndoneCounter()
-        }
-        Log.d("COUNTER", "itemCOunt: $itemCount, checks: $itemCheckCount")
     }
 
     fun clearScore() {
-        undoneCounter.value = 0
-        doneCounter.value = 0
-        repository.clearScore()
+        undoneCounter.postValue(0)
+        doneCounter.postValue(0)
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.clearScore()
+        }
     }
 
     fun clearTargetDate() {
-        challengeEndingDate.value = ""
-        repository.clearTargetDate()
+        viewModelScope.launch(Dispatchers.IO) {
+            challengeEndingDate.postValue("")
+            repository.clearTargetDate()
+        }
     }
 
     fun createNotificationIntent(hour: Int, min: Int) {
@@ -109,39 +121,58 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun setFirstStart(b: Boolean) {
-        repository.setFirstStart(b)
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.setFirstStart(b)
+        }
     }
 
-    fun saveList(todos: List<Todo?>?) {
-        repository.saveList(todos)
+    fun saveList(todos: List<Todo>) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.saveList(todos)
+        }
     }
 
     fun addItem(item: Todo) {
-        repository.addItem(item)
-    }
-
-    fun updateItem(item: Todo, list: List<Todo>) {
-        repository.updateItem(item.id, item)
-        todoList.value = list
+        viewModelScope.launch(Dispatchers.IO) {
+            list.add(item)
+            repository.addItem(item)
+        }
     }
 
     fun loadData() {
-        challengeEndingDate.value = repository.getChallengeEndingDate()
-        undoneCounter.value = repository.undoneCount
-        doneCounter.value = repository.doneCount
-        todoList.value = repository.allItems
+        viewModelScope.launch(Dispatchers.IO) {
+            challengeEndingDate.postValue(repository.getChallengeEndingDate())
+            undoneCounter.postValue(repository.undoneCount)
+            doneCounter.postValue(repository.doneCount)
+            val items = repository.allItems
+            todoList.postValue(items)
+            for (item in items) {
+                list.add(item)
+            }
 
-        Log.d("COUNTER", "done: ${repository.doneCount}")
-        Log.d("COUNTER", "undone: ${repository.undoneCount}")
+            if (items.isNotEmpty()) {
+                Log.d("CHECKED", "after todos: ${items.get(0).isDone}")
+
+
+                Log.d("COUNTER", "done: ${repository.doneCount}")
+                Log.d("COUNTER", "undone: ${repository.undoneCount}")
+            }
+        }
     }
 
     fun deleteItem(id: Long) {
-        val list = ArrayList<Todo>()
-        for (item in todoList.value!!)
-            if (item.id != id) {
-                list.add(item)
-            }
-        todoList.value = list
+        list.remove(repository.readItem(id))
+//        val list = ArrayList<Todo>()
+//        for (item in todoList.value!!)
+//            if (item.id != id) {
+//                list.add(item)
+//            }
+        todoList.postValue(list)
+    }
+
+    fun swapPositions(fromPosition: Int, toPosition: Int) {
+        Collections.swap(list, fromPosition, toPosition)
+        todoList.postValue(list)
     }
 
 }

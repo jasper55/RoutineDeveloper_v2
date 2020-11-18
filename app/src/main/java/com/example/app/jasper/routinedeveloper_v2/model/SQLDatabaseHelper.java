@@ -100,7 +100,6 @@ public class SQLDatabaseHelper {
         db.update(TABLE_DATAITEM,values,"ID=?",new String[]{String.valueOf(id)});   // wird benötigt, da sonst mehrere items mit gleicher Id erzeugt werden
         item.setId(id);
         values.put(ID,id);
-        Log.i("SQL/updateItem mockId", String.valueOf(id));
 
         return true;
     }

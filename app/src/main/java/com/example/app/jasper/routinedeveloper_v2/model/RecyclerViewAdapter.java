@@ -1,6 +1,7 @@
 package com.example.app.jasper.routinedeveloper_v2.model;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -62,12 +63,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean b) {
                 boolean checked = viewHolder.checkBox.isChecked();
-
-//                mockItem = todoList.get(position);
-//                long id = mockItem.getId();
-//                mockItem.setDone(checked);
                 customItemClickListener.onCheckedChanged(position,checked);
-//
+                currentPosition = position;
             }
         });
     }
