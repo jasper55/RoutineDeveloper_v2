@@ -32,14 +32,6 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     private var vmIsUpdating // falls Daten von einem remoteServer geholt werden -> Progressbar implementieren
             : MutableLiveData<Boolean>? = null
 
-    fun setDoneCounter(doneCounter: Int) {
-        this.doneCounter.postValue(doneCounter)
-    }
-
-    fun setUndoneCounter(undoneCounter: Int) {
-        this.undoneCounter.postValue(undoneCounter)
-    }
-
     fun setChallengeEndingDate(endingDate: String) {
         challengeEndingDate.postValue(endingDate)
         viewModelScope.launch(Dispatchers.IO) {
@@ -83,7 +75,7 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
                     repository.incrementUndoneCounter()
                 }
             }
-            Log.d("COUNTER", "itemCOunt: $itemCount, checks: $itemCheckCount")
+            Log.d("COUNTER", "itemCount: $itemCount, checks: $itemCheckCount")
         }
     }
 
@@ -126,12 +118,7 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun addItem(item: Todo) {
-        list.add(item)
-        todoList.postValue(list)
-    }
-
-    fun loadData() {
+    fun loadRecentData() {
         viewModelScope.launch(Dispatchers.IO) {
             challengeEndingDate.postValue(repository.getChallengeEndingDate())
             undoneCounter.postValue(repository.undoneCount)
@@ -153,13 +140,6 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun deleteItem(id: Long) {
-        list.remove(repository.readItem(id))
-//        val list = ArrayList<Todo>()
-//        for (item in todoList.value!!)
-//            if (item.id != id) {
-//                list.add(item)
-//            }
-        todoList.postValue(list)
         repository.deleteItem(id)
     }
 

@@ -12,6 +12,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.MutableLiveData;
 
+import static com.example.app.jasper.routinedeveloper_v2.OverviewActivity.POSITION;
+
 public class DetailviewActivity extends AppCompatActivity implements DetailviewActions {
 
     public static final String ARG_ITEM_ID = "itemId";
@@ -26,20 +28,21 @@ public class DetailviewActivity extends AppCompatActivity implements DetailviewA
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.i("RD_", "DetailView");
         final ActivityDetailviewBinding bindingMediator = DataBindingUtil.setContentView(this, R.layout.activity_detailview);
 
         this.crudOperations = new SQLDatabaseHelper(this);
 
         long itemId = getIntent().getLongExtra(ARG_ITEM_ID, -1);
+        int position = getIntent().getIntExtra(POSITION,0);
 
         if (itemId != -1) {
             item = crudOperations.readItem(itemId);
             mutTodo.postValue(item);
         } else {
             this.item = new Todo();
+            item.setPosition(position);
+            Log.d("POSITION",item.toString());
             mutTodo.postValue(item);
-
         }
 
         bindingMediator.setLifecycleOwner(this);

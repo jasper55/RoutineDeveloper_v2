@@ -9,6 +9,8 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.example.app.jasper.routinedeveloper_v2.OverviewActivity.POSITION;
+
 public class SQLDatabaseHelper {
 
     /////////////////  SQL Data Base  //////////////////////
@@ -18,11 +20,12 @@ public class SQLDatabaseHelper {
     private static final String NAME = "NAME";
     private static final String DONE = "DONE";
 
-    private static final String [] ALL_COLUMS = new String[]{ID, NAME, DONE};
+    private static final String [] ALL_COLUMS = new String[]{ID, POSITION, NAME, DONE};
 
     private static final String CREATION_QUERY =
             "CREATE TABLE DATAITEMS " +
                     "(ID INTEGER PRIMARY KEY, " +
+                    "POSITION INTEGER,"+
                     "NAME TEXT, " +
                     "DONE BOOLEAN)";
 
@@ -38,8 +41,7 @@ public class SQLDatabaseHelper {
     // Im Konstrukter wird die SQLiteDAtenbank entweder geöffnet oder erstellt, wenn sie noch nicht exitiert
     public SQLDatabaseHelper(Context applicationContext){
 
-        //Mode_PRIVATE: Ist eine vor-implementierte Konstante von Klasse Context
-        this.db = applicationContext.openOrCreateDatabase("myToDoDB.sqlite", Context.MODE_PRIVATE, null);
+        this.db = applicationContext.openOrCreateDatabase("test3.sqlite", Context.MODE_PRIVATE, null);
         if (db.getVersion() == 0){
             db.setVersion(1);
             db.execSQL(CREATION_QUERY);
@@ -47,13 +49,12 @@ public class SQLDatabaseHelper {
     }
 
     //////////// CRUD Operations ///////////
-    public long createItem(Todo item) {             // item kommt vom databinding, hat also schon namen und done, aber keine id
+    public long createItem(Todo item) {
 
         ContentValues values = new ContentValues();
         values.put(NAME, item.getName());
         values.put(DONE, item.isDone());
-        // Beim Schreiben einer Zeile in einer Datenbank durch die insert
-        // Methode wird ein long wert automatisch zurückgegeben    --- primary key
+        values.put(POSITION, item.getPosition());
         long id = db.insert(TABLE_DATAITEM, null, values);
         item.setId(id);
         return id;
@@ -96,6 +97,7 @@ public class SQLDatabaseHelper {
         ContentValues values = new ContentValues();
         values.put(NAME, item.getName());
         values.put(DONE, item.isDone());
+        values.put(POSITION, item.getPosition());
 
         db.update(TABLE_DATAITEM,values,"ID=?",new String[]{String.valueOf(id)});   // wird benötigt, da sonst mehrere items mit gleicher Id erzeugt werden
         item.setId(id);
@@ -115,11 +117,13 @@ public class SQLDatabaseHelper {
     ///////////   support methods   ////////////
     private Todo getItemValuesFromCursor(Cursor cursor) {
         Todo mockTodo = new Todo();
-        long id = cursor.getLong(cursor.getColumnIndex("ID"));
-        String name = cursor.getString(cursor.getColumnIndex("NAME"));
-        boolean done = cursor.getLong(cursor.getColumnIndex("DONE"))>0;
+        long id = cursor.getLong(cursor.getColumnIndex(ID));
+        String name = cursor.getString(cursor.getColumnIndex(NAME));
+        boolean done = cursor.getLong(cursor.getColumnIndex(DONE))>0;
+        int position = cursor.getInt(cursor.getColumnIndex(POSITION));
 
         mockTodo.setId(id);
+        mockTodo.setPosition(position);
         mockTodo.setName(name);
         mockTodo.setDone(done);
 

@@ -49,7 +49,6 @@ class OverviewActivity : AppCompatActivity() {
     private lateinit var challengeEndingDateSetListener: OnDateSetListener
     private lateinit var textViewPlus: TextView
     private lateinit var textViewMinus: TextView
-    private lateinit var item: Todo
 
     private lateinit var fab_add: FloatingActionButton
     private lateinit var fab_timer: FloatingActionButton
@@ -74,13 +73,12 @@ class OverviewActivity : AppCompatActivity() {
 
         checkIfFirstStart()
         observeLiveData()
-        loadData()
+        viewModel.loadRecentData()
     }
 
     private fun observeLiveData() {
         viewModel.todoList.observe(this, Observer { todos: List<Todo> ->
             if (todos.isNotEmpty()) {
-                Log.d("CHECKED", "todos: ${todos.get(0).isDone}")
                 val sortedList = todos.sortedBy { it.name }
                 recyclerViewAdapter.setList(sortedList)
             }
@@ -125,10 +123,6 @@ class OverviewActivity : AppCompatActivity() {
         initActionBar()
     }
 
-    private fun loadData() {
-        viewModel.loadData()
-    }
-
     private fun initActionBar() {
         supportActionBar!!.displayOptions = ActionBar.DISPLAY_SHOW_CUSTOM
         supportActionBar!!.setDisplayShowCustomEnabled(true)
@@ -146,11 +140,9 @@ class OverviewActivity : AppCompatActivity() {
 
         recyclerView = findViewById(R.id.recycler_view_data)
         recyclerViewAdapter = RecyclerViewAdapter(
-                applicationContext,
                 userActionClickListener,
                 ArrayList(0),
                 viewModel)
-
 
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = recyclerViewAdapter
@@ -163,7 +155,7 @@ class OverviewActivity : AppCompatActivity() {
                         ItemTouchHelper.UP or
                         ItemTouchHelper.START or
                         ItemTouchHelper.END,
-                0) {
+                ItemTouchHelper.END) {
             override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
                 val fromPosition = viewHolder.adapterPosition
                 val toPosition = target.adapterPosition
@@ -175,13 +167,13 @@ class OverviewActivity : AppCompatActivity() {
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 Toast.makeText(applicationContext, "item deleted", Toast.LENGTH_SHORT).show()
                 val position = viewHolder.adapterPosition
-                recyclerViewAdapter.deleteItem(position)
+                val item = recyclerViewAdapter.getItem(position)
+                viewModel.deleteItem(item.id)
+                viewModel.loadRecentData()
             }
-
         }
         val itemTouchHelper = ItemTouchHelper(touchCallback)
         itemTouchHelper.attachToRecyclerView(recyclerView)
-
     }
 
     private fun instantiateTimePicker() {
@@ -209,7 +201,7 @@ class OverviewActivity : AppCompatActivity() {
         fabOverlay.setOnClickListener { closeFABMenu() }
         fab_add = findViewById(R.id.fab_add)
         fab_add.setOnClickListener {
-            showDetailViewForCreate()
+            showDetailViewForCreate(viewModel.todoList.value!!.size)
             closeFABMenu()
         }
         fab_timer = findViewById(R.id.fab_timer)
@@ -301,9 +293,7 @@ class OverviewActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        loadData()
-        Log.i("DATE", "onResume")
-        Log.d("DATE", "${viewModel.checkHasDateChanged()}")
+        viewModel.loadRecentData()
 //        if (viewModel.checkHasDateChanged()) {
         viewModel.sumUpCheckBoxes()
 //        }
@@ -318,13 +308,10 @@ class OverviewActivity : AppCompatActivity() {
                 if (id == EMPTY_ID) {
                     Toast.makeText(this, "no changes", Toast.LENGTH_LONG).show()
                 } else {
-//                    item = repository.readItem(id)
                     if (requestCode == CALL_CREATE_ITEM) {
                         Toast.makeText(this, "item created", Toast.LENGTH_LONG).show()
-//                        viewModel.addItem(item)
                     }
                     if (requestCode == CALL_EDIT_ITEM) {
-//                        viewModel.updateItem(item)
                         Toast.makeText(this, "item updated", Toast.LENGTH_LONG).show()
                     }
                 }
@@ -333,7 +320,7 @@ class OverviewActivity : AppCompatActivity() {
                 e.printStackTrace()
             }
         } // if resultCode
-        viewModel.loadData()
+        viewModel.loadRecentData()
     } // onActivityResult
 
     private fun setChallengeEndingTime() {
@@ -369,9 +356,10 @@ class OverviewActivity : AppCompatActivity() {
     }
 
 
-    private fun showDetailViewForCreate() {
+    private fun showDetailViewForCreate(lastPositionOfAdapter: Int) {
         val createIntent = Intent(this, DetailviewActivity::class.java)
         createIntent.putExtra(CALL_MODE, CALL_MODE_CREATE)
+        createIntent.putExtra(POSITION,lastPositionOfAdapter)
         startActivityForResult(createIntent, CALL_CREATE_ITEM)
     }
 
@@ -414,6 +402,7 @@ class OverviewActivity : AppCompatActivity() {
         private const val CALL_EDIT_ITEM = 0
         private const val CALL_CREATE_ITEM = 1
         private const val CALL_MODE = "callMode"
+        const val POSITION = "POSITION"
         const val CALL_MODE_CREATE = "create"
         const val EMPTY_ID = -99L
     }
