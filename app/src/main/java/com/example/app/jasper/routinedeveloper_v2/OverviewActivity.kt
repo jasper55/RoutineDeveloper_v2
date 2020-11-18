@@ -27,7 +27,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.app.jasper.routinedeveloper_v2.model.RecyclerViewAdapter
-import com.example.app.jasper.routinedeveloper_v2.model.RecyclerViewAdapter.CustomItemClickListener
+import com.example.app.jasper.routinedeveloper_v2.model.RecyclerViewAdapter.UserActionClickListener
 import com.example.app.jasper.routinedeveloper_v2.model.Todo
 import com.example.app.jasper.routinedeveloper_v2.repository.SharedPreferenceHelper
 import com.example.app.jasper.routinedeveloper_v2.repository.TodoListRepository
@@ -38,6 +38,8 @@ import java.util.*
 class OverviewActivity : AppCompatActivity() {
 
     private var isFABOpen = false
+
+    private lateinit var userActionClickListener: UserActionClickListener
 
     private lateinit var timepicker: TimePicker
     private lateinit var alertTimeListener: OnTimeSetListener
@@ -79,8 +81,8 @@ class OverviewActivity : AppCompatActivity() {
         viewModel.todoList.observe(this, Observer { todos: List<Todo> ->
             if (todos.isNotEmpty()) {
                 Log.d("CHECKED", "todos: ${todos.get(0).isDone}")
-                viewModel.saveList(todos)
-                recyclerViewAdapter.updateList(todos)
+                val sortedList = todos.sortedBy { it.name }
+                recyclerViewAdapter.setList(sortedList)
             }
         })
         viewModel.doneCounter.observe(this, Observer { textViewPlus.text = it.toString() })
@@ -136,31 +138,27 @@ class OverviewActivity : AppCompatActivity() {
     }
 
     private fun initRecyclerViewList() {
-        recyclerView = findViewById(R.id.recycler_view_data)
-        recyclerViewAdapter = RecyclerViewAdapter(this, object : CustomItemClickListener {
+        userActionClickListener = object : UserActionClickListener {
             override fun onItemClick(position: Int) {
                 showDetailViewForEdit(recyclerViewAdapter.getItem(position))
             }
+        }
 
-            override fun onCheckedChanged(position: Int, isChecked: Boolean) {
-                Log.d("CHECKED","${position}")
-                Log.d("CHECKED","${viewModel.todoList.value!!.get(position).isDone}")
-                viewModel.todoList.value!!.get(position).isDone = isChecked
-                Log.d("CHECKED","${viewModel.todoList.value!!.get(position).isDone}")
-            }
+        recyclerView = findViewById(R.id.recycler_view_data)
+        recyclerViewAdapter = RecyclerViewAdapter(
+                applicationContext,
+                userActionClickListener,
+                ArrayList(0),
+                viewModel)
 
-            override fun onLongItemClick(position: Int) {
-                Toast.makeText(applicationContext, "Long Pressed", Toast.LENGTH_SHORT).show()
-            }
-        })
 
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = recyclerViewAdapter
 
-        val divider = DividerItemDecoration(this,DividerItemDecoration.VERTICAL)
+        val divider = DividerItemDecoration(this, DividerItemDecoration.VERTICAL)
         recyclerView.addItemDecoration(divider)
 
-        val touchCallback = object: ItemTouchHelper.SimpleCallback(
+        val touchCallback = object : ItemTouchHelper.SimpleCallback(
                 ItemTouchHelper.DOWN or
                         ItemTouchHelper.UP or
                         ItemTouchHelper.START or
@@ -169,15 +167,15 @@ class OverviewActivity : AppCompatActivity() {
             override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
                 val fromPosition = viewHolder.adapterPosition
                 val toPosition = target.adapterPosition
-                viewModel.swapPositions(fromPosition,toPosition)
-                return false
+                recyclerViewAdapter.swapPositions(fromPosition, toPosition)
+                Toast.makeText(applicationContext, "positions swapped", Toast.LENGTH_SHORT).show()
+                return true
             }
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                Toast.makeText(applicationContext,"item deleted", Toast.LENGTH_SHORT).show()
-                val id = viewHolder.adapterPosition
-//                recyclerView.adapter.getItemId()
-//                viewModel.deleteItem(id)
+                Toast.makeText(applicationContext, "item deleted", Toast.LENGTH_SHORT).show()
+                val position = viewHolder.adapterPosition
+                recyclerViewAdapter.deleteItem(position)
             }
 
         }
@@ -276,10 +274,12 @@ class OverviewActivity : AppCompatActivity() {
             super.onBackPressed()
         }
     }
+
     override fun onPause() {
         super.onPause()
         Log.i("RD_", "onPause")
     } // onPause - end
+
     override fun onRestart() {
         super.onRestart()
         Log.i("DATE", "onRestart")
@@ -288,14 +288,17 @@ class OverviewActivity : AppCompatActivity() {
             viewModel.sumUpCheckBoxes()
         }
     }
+
     override fun onStop() {
         super.onStop()
         Log.i("RD_", "onStop")
     }
+
     override fun onDestroy() {
         super.onDestroy()
         Log.i("RD_", "onDestroy")
     }
+
     override fun onResume() {
         super.onResume()
         loadData()
@@ -315,23 +318,22 @@ class OverviewActivity : AppCompatActivity() {
                 if (id == EMPTY_ID) {
                     Toast.makeText(this, "no changes", Toast.LENGTH_LONG).show()
                 } else {
-                    item = repository.readItem(id)
+//                    item = repository.readItem(id)
                     if (requestCode == CALL_CREATE_ITEM) {
                         Toast.makeText(this, "item created", Toast.LENGTH_LONG).show()
-                        recyclerViewAdapter.addItem(item)
-                        viewModel.addItem(item)
+//                        viewModel.addItem(item)
                     }
                     if (requestCode == CALL_EDIT_ITEM) {
-                        recyclerViewAdapter.updateList(viewModel.todoList.value!!)
+//                        viewModel.updateItem(item)
                         Toast.makeText(this, "item updated", Toast.LENGTH_LONG).show()
                     }
                 }
             } catch (e: Exception) {
-                recyclerViewAdapter.updateList(viewModel.todoList.value!!)
                 Toast.makeText(this, "item removed", Toast.LENGTH_LONG).show()
                 e.printStackTrace()
             }
         } // if resultCode
+        viewModel.loadData()
     } // onActivityResult
 
     private fun setChallengeEndingTime() {

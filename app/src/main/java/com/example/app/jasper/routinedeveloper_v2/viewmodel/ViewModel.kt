@@ -126,17 +126,9 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun saveList(todos: List<Todo>) {
-        viewModelScope.launch(Dispatchers.IO) {
-            repository.saveList(todos)
-        }
-    }
-
     fun addItem(item: Todo) {
-        viewModelScope.launch(Dispatchers.IO) {
-            list.add(item)
-            repository.addItem(item)
-        }
+        list.add(item)
+        todoList.postValue(list)
     }
 
     fun loadData() {
@@ -168,11 +160,19 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
 //                list.add(item)
 //            }
         todoList.postValue(list)
+        repository.deleteItem(id)
     }
 
     fun swapPositions(fromPosition: Int, toPosition: Int) {
         Collections.swap(list, fromPosition, toPosition)
-        todoList.postValue(list)
+        TODO("add position to entity todo -- sort list by position")
+//        todoList.postValue(list)
     }
+
+    fun completeTodo(item: Todo, checked: Boolean) {
+        item.isDone = checked
+        repository.updateItem(item.id,item)
+    }
+
 
 }
