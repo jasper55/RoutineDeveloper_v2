@@ -10,72 +10,156 @@
     tools:context="com.example.app.jasper.routinedeveloper_v2.OverviewActivity"
     tools:showIn="@layout/layout_overview">
 
+
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/toolbarLayout"
-        android:layout_gravity="top"
-        android:orientation="vertical"
-        android:weightSum="100">
+        android:layout_height="0dp"
+        android:layout_weight="40"
+        android:gravity="bottom"
+        android:orientation="vertical">
 
+
+        <!--        <LinearLayout-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:gravity="center_vertical"-->
+        <!--            android:orientation="horizontal">-->
+
+
+        <!--            <ImageView-->
+        <!--                android:layout_width="32dp"-->
+        <!--                android:layout_height="32dp"-->
+        <!--                android:layout_margin="8dp"-->
+        <!--                android:scaleType="centerCrop"-->
+        <!--                app:srcCompat="@drawable/event" />-->
+
+        <!--            <TextView-->
+        <!--                android:id="@+id/tvDate"-->
+        <!--                android:layout_width="wrap_content"-->
+        <!--                android:layout_height="wrap_content"-->
+        <!--                android:textSize="25sp" />       &lt;!&ndash; display of the Target Time data &ndash;&gt;-->
+        <!--        </LinearLayout> &lt;!&ndash; display time &ndash;&gt;-->
+
+    </LinearLayout>
+
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="30dp"
+        android:padding="10dp"
+        app:cardBackgroundColor="@color/colorBackground"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="10dp"
+        app:strokeColor="@color/textLight"
+        app:strokeWidth="1dp">
 
         <LinearLayout
             android:id="@+id/recycler_view_layout"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="60"
+            android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+
+
+
+
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recycler_view_data"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_alignParentBottom="true"
-                android:orientation="vertical"
+                android:layout_height="wrap_content"
                 android:longClickable="true"
-                app:layout_behavior="@string/appbar_scrolling_view_behavior"/> <!-- contains the todo items -->
+                android:orientation="vertical"
+                android:padding="10dp"
+                android:paddingBottom="20dp"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+
+            <View
+                style="@style/Divider"
+                android:layout_marginHorizontal="10dp" />
+
+            <LinearLayout
+                android:id="@+id/summaryTable"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingBottom="10dp"
+                android:weightSum="3">
+
+
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="24dp"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center_vertical|left"
+                    android:paddingStart="10dp"
+                    android:orientation="horizontal"
+                    android:layout_weight="1">
+
+
+                <ImageView
+                    android:id="@+id/lock_icon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    app:srcCompat="@drawable/ic_lock_open_black"
+                    app:tint="@color/textDark" />
+                </LinearLayout>
+
+
+
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="24dp"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center_vertical|center_horizontal"
+                    android:orientation="horizontal"
+                    android:layout_weight="1">
+
+                    <ImageView
+                        android:id="@+id/calendar_icon"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="left|bottom"
+                        android:layout_marginEnd="6dp"
+                        app:srcCompat="@drawable/event"
+                        app:tint="@color/textDark" />
+
+                    <TextView
+                        android:id="@+id/tvDate"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="bottom"
+                        android:textSize="10sp" />
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="24dp"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center_vertical|right"
+                    android:paddingEnd="10dp"
+                    android:orientation="horizontal"
+                    android:layout_weight="1">
+                <ImageView
+                    android:id="@+id/menu_icon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    app:srcCompat="@drawable/ic_menu_black"
+                    app:tint="@color/textDark" />
+                </LinearLayout>
+
+
+            </LinearLayout>
 
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="40"
-            android:orientation="vertical"
-            android:gravity="bottom">
-
-
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-
-            <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_margin="8dp"
-                android:scaleType="centerCrop"
-                app:srcCompat="@drawable/event" />
-
-            <TextView
-                android:id="@+id/tvDate"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="25sp" />       <!-- display of the Target Time data -->
-
-
-        </LinearLayout> <!-- display time -->
-
-        </LinearLayout> <!-- display of the local stored data -->
-
-
-    </LinearLayout>  <!--- whole Containter -->
-
+    </com.google.android.material.card.MaterialCardView> <!-- display of the local stored data -->
 
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

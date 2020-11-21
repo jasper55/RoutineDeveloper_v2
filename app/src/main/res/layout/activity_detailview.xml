@@ -1,24 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mainContainer">
-
-    <data>
-        <variable
-            name="todo"
-            type="androidx.lifecycle.MutableLiveData&lt;com.example.app.jasper.routinedeveloper_v2.model.Todo&gt;"/>
-        <variable
-            name="actions"
-            type="com.example.app.jasper.routinedeveloper_v2.view.DetailviewActions"/>
-    </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="10dp"
-        >
+        android:padding="10dp">
         <!--android:layout_gravity="bottom|start"-->
 
         <LinearLayout
@@ -26,67 +15,65 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:weightSum="100"
-            app:layout_constraintBottom_toBottomOf="parent">
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
             <LinearLayout
                 android:layout_width="0dp"
-                android:layout_weight="70"
                 android:layout_height="wrap_content"
+                android:layout_weight="60"
                 android:orientation="vertical">
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/itemNameContainer"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:hint="Todo name">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:text='@={todo.name}'
-                    android:textColor="@color/colorAccent"
-                    android:inputType="textMultiLine"
-                    android:id="@+id/ItemName"
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/itemNameContainer"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="match_parent"
+                    android:background="@color/colorTransBg"
+                    android:hint="Todo name"
+                    android:textColorHint="@color/colorAccent">
 
-            </com.google.android.material.textfield.TextInputLayout>
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/ItemName"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@color/colorBackground"
+                        android:inputType="textMultiLine"
+                        android:text='@={todo.name}'
+                        android:textColor="@color/colorAccent" />
+
+                </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/ll_fabs"
                 android:layout_width="0dp"
-                android:layout_weight="30"
                 android:layout_height="wrap_content"
-                app:layout_constraintBottom_toBottomOf="parent">
+                android:layout_weight="40"
+                android:orientation="horizontal"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                >
+
 
                 <com.google.android.material.floatingactionbutton.FloatingActionButton
                     android:id="@+id/deleteItem"
-                    app:srcCompat="@android:drawable/ic_menu_delete"
-                    app:fabCustomSize="50dp"
-                    android:tint="@color/colorPrimaryDark2"
-                    android:layout_width="0dp"
-                    android:layout_weight="15"
+                    android:layout_width="40dp"
                     android:layout_height="wrap_content"
                     android:onClick="@{() -> actions.deleteTodo()}"
                     android:text="delete"
-                    app:layout_constraintRight_toLeftOf="@id/saveItem"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    android:layout_marginBottom="10sp"
-                    android:layout_marginLeft="10sp"/>
-                androidx.recyclerview.widget.RecyclerView
+                    android:tint="@color/colorPrimaryDark2"
+                    app:fabCustomSize="40dp"
+                    app:srcCompat="@drawable/ic_delete_black" />
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/saveItem"
-            app:srcCompat="@android:drawable/ic_menu_save"
-            app:fabCustomSize="50dp"
-            android:tint="@color/colorPrimaryDark2"
-            android:layout_width="0dp"
-            android:layout_weight="15"
-            android:layout_height="wrap_content"
-            android:onClick="@{() -> actions.saveTodo()}"
-            android:text="speichern"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginBottom="10sp"
-            android:layout_marginLeft="10sp"/>
+                <com.google.android.material.floatingactionbutton.FloatingActionButton
+                    android:id="@+id/saveItem"
+                    android:layout_width="40dp"
+                    android:layout_height="wrap_content"
+                    android:onClick="@{() -> actions.saveTodo()}"
+                    android:text="save"
+                    android:tint="@color/colorPrimaryDark2"
+                    app:fabCustomSize="40dp"
+                    app:srcCompat="@drawable/ic_save_black" />
 
 
             </LinearLayout>
@@ -94,4 +81,15 @@
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <data>
+
+        <variable
+            name="todo"
+            type="androidx.lifecycle.MutableLiveData&lt;com.example.app.jasper.routinedeveloper_v2.model.Todo&gt;" />
+
+        <variable
+            name="actions"
+            type="com.example.app.jasper.routinedeveloper_v2.view.DetailviewActions" />
+    </data>
 </layout>

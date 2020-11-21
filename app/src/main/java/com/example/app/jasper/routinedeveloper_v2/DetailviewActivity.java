@@ -9,6 +9,7 @@ import com.example.app.jasper.routinedeveloper_v2.model.Todo;
 import com.example.app.jasper.routinedeveloper_v2.view.DetailviewActions;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.MutableLiveData;
 
@@ -29,6 +30,8 @@ public class DetailviewActivity extends AppCompatActivity implements DetailviewA
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         final ActivityDetailviewBinding bindingMediator = DataBindingUtil.setContentView(this, R.layout.activity_detailview);
+
+        getWindow().setNavigationBarColor(ResourcesCompat.getColor(getResources(), R.color.colorBackground, null));
 
         this.crudOperations = new SQLDatabaseHelper(this);
 
