@@ -5,10 +5,12 @@ import java.io.Serializable
 class Todo : Serializable {
     var id: Long = -1
     var name: String? = null
-    var isDone = false
+    var isChecked = false
     var position = 0
+    var doneCounts = 0
+    var undoneCounts = 0
 
     override fun toString(): String {
-        return "id: $ id, name: $name, is done: $isDone, position: $position"
+        return "id: $ id, name: $name, is done: $isChecked, position: $position"
     }
 }

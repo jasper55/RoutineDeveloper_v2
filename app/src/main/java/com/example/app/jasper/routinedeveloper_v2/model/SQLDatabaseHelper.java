@@ -18,16 +18,20 @@ public class SQLDatabaseHelper {
     private static final String TABLE_DATAITEM = "DATAITEMS";
     private static final String ID = "ID";
     private static final String NAME = "NAME";
-    private static final String DONE = "DONE";
+    private static final String IS_CHECKED = "IS_CHECKED";
+    private static final String DONE_COUNTER = "DONE_COUNTER";
+    private static final String UNDONE_COUNTER = "UNDONE_COUNTER";
 
-    private static final String [] ALL_COLUMS = new String[]{ID, POSITION, NAME, DONE};
+    private static final String [] ALL_COLUMS = new String[]{ID, POSITION, NAME, IS_CHECKED, DONE_COUNTER, UNDONE_COUNTER};
 
     private static final String CREATION_QUERY =
             "CREATE TABLE DATAITEMS " +
                     "(ID INTEGER PRIMARY KEY, " +
                     "POSITION INTEGER,"+
                     "NAME TEXT, " +
-                    "DONE BOOLEAN)";
+                    "IS_CHECKED BOOLEAN," +
+                    "DONE_COUNTER," +
+                    "UNDONE_COUNTER)";
 
     private static SQLDatabaseHelper instance;
 
@@ -52,9 +56,11 @@ public class SQLDatabaseHelper {
     public long createItem(Todo item) {
 
         ContentValues values = new ContentValues();
-        values.put(NAME, item.getName());
-        values.put(DONE, item.isDone());
         values.put(POSITION, item.getPosition());
+        values.put(NAME, item.getName());
+        values.put(IS_CHECKED, item.isChecked());
+        values.put(DONE_COUNTER, item.getDoneCounts());
+        values.put(UNDONE_COUNTER, item.getUndoneCounts());
         long id = db.insert(TABLE_DATAITEM, null, values);
         item.setId(id);
         return id;
@@ -95,9 +101,11 @@ public class SQLDatabaseHelper {
 
         // Daten vom dataBinding "abgreifen"
         ContentValues values = new ContentValues();
-        values.put(NAME, item.getName());
-        values.put(DONE, item.isDone());
         values.put(POSITION, item.getPosition());
+        values.put(NAME, item.getName());
+        values.put(IS_CHECKED, item.isChecked());
+        values.put(DONE_COUNTER, item.getDoneCounts());
+        values.put(UNDONE_COUNTER, item.getUndoneCounts());
 
         db.update(TABLE_DATAITEM,values,"ID=?",new String[]{String.valueOf(id)});   // wird benötigt, da sonst mehrere items mit gleicher Id erzeugt werden
         item.setId(id);
@@ -118,14 +126,18 @@ public class SQLDatabaseHelper {
     private Todo getItemValuesFromCursor(Cursor cursor) {
         Todo mockTodo = new Todo();
         long id = cursor.getLong(cursor.getColumnIndex(ID));
-        String name = cursor.getString(cursor.getColumnIndex(NAME));
-        boolean done = cursor.getLong(cursor.getColumnIndex(DONE))>0;
         int position = cursor.getInt(cursor.getColumnIndex(POSITION));
+        String name = cursor.getString(cursor.getColumnIndex(NAME));
+        boolean isChecked = cursor.getLong(cursor.getColumnIndex(IS_CHECKED))>0;
+        int doneCounts = cursor.getInt(cursor.getColumnIndex(DONE_COUNTER));
+        int undoneCounts = cursor.getInt(cursor.getColumnIndex(UNDONE_COUNTER));
 
         mockTodo.setId(id);
         mockTodo.setPosition(position);
         mockTodo.setName(name);
-        mockTodo.setDone(done);
+        mockTodo.setChecked(isChecked);
+        mockTodo.setDoneCounts(doneCounts);
+        mockTodo.setUndoneCounts(undoneCounts);
 
         return mockTodo;
     }

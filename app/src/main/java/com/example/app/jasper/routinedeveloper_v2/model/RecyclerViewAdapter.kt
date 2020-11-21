@@ -32,9 +32,11 @@ class RecyclerViewAdapter(
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         val todoItem = todoList[position]
-        viewHolder.todoId.text = "${todoItem.position+1}"
+        viewHolder.todoPosition.text = "${todoItem.position}"
         viewHolder.todoName.text = todoItem.name
-        viewHolder.checkBox.isChecked = todoItem.isDone
+        viewHolder.checkBox.isChecked = todoItem.isChecked
+        viewHolder.doneCounts.text = todoItem.doneCounts.toString()
+        viewHolder.undoneCounts.text = todoItem.undoneCounts.toString()
         viewHolder.itemListContainer.setOnClickListener(object : View.OnClickListener {
             override fun onClick(v: View) {
                 userActionClickListener.onItemClick(position)
@@ -70,15 +72,20 @@ class RecyclerViewAdapter(
     }
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        var todoId: TextView
+//        var todoId: TextView
+        var todoPosition: TextView
         var todoName: TextView
+        var doneCounts: TextView
+        var undoneCounts: TextView
         var checkBox: CheckBox
         var itemListContainer: LinearLayout
 
         init {
             itemListContainer = itemView.findViewById(R.id.item_list_container)
-            todoId = itemView.findViewById(R.id.list_item_id)
+            todoPosition = itemView.findViewById(R.id.list_item_position)
             todoName = itemView.findViewById(R.id.list_item_name)
+            doneCounts = itemView.findViewById(R.id.done_count)
+            undoneCounts = itemView.findViewById(R.id.undone_count)
             checkBox = itemView.findViewById(R.id.list_item_checkBox)
         }
     }

@@ -11,9 +11,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.app.jasper.routinedeveloper_v2.NotificationReceiver
 import com.example.app.jasper.routinedeveloper_v2.NotificationReceiver.Companion.CALL_NOTIFICATION_ALERT_TIME
-import com.example.app.jasper.routinedeveloper_v2.model.SQLDatabaseHelper
 import com.example.app.jasper.routinedeveloper_v2.model.Todo
-import com.example.app.jasper.routinedeveloper_v2.repository.SharedPreferenceHelper
 import com.example.app.jasper.routinedeveloper_v2.repository.TodoListRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -60,7 +58,7 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
             val itemCount = list.size
             var itemCheckCount = 0
             for (item in list) {
-                if (item.isDone) {
+                if (item.isChecked) {
                     itemCheckCount += 1
                 }
             }
@@ -128,14 +126,6 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
             for (item in items) {
                 list.add(item)
             }
-
-            if (items.isNotEmpty()) {
-                Log.d("CHECKED", "after todos: ${items.get(0).isDone}")
-
-
-                Log.d("COUNTER", "done: ${repository.doneCount}")
-                Log.d("COUNTER", "undone: ${repository.undoneCount}")
-            }
         }
     }
 
@@ -150,7 +140,7 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun completeTodo(item: Todo, checked: Boolean) {
-        item.isDone = checked
+        item.isChecked = checked
         repository.updateItem(item.id,item)
     }
 

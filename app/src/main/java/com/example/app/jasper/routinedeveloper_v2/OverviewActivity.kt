@@ -85,7 +85,7 @@ class OverviewActivity : AppCompatActivity() {
     private fun observeLiveData() {
         viewModel.todoList.observe(this, Observer { todos: List<Todo> ->
             if (todos.isNotEmpty()) {
-                val sortedList = todos.sortedBy { it.name }
+                val sortedList = todos.sortedBy { it.position }
                 recyclerViewAdapter.setList(sortedList)
             }
         })
@@ -207,7 +207,7 @@ class OverviewActivity : AppCompatActivity() {
         fabOverlay.setOnClickListener { closeFABMenu() }
         fab_add = findViewById(R.id.fab_add)
         fab_add.setOnClickListener {
-            showDetailViewForCreate(viewModel.todoList.value!!.size)
+            showDetailViewForCreate(viewModel.todoList.value!!.size+1)
             closeFABMenu()
         }
         fab_timer = findViewById(R.id.fab_timer)
