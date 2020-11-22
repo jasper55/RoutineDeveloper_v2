@@ -33,7 +33,7 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     fun setChallengeEndingDate(endingDate: String) {
         challengeEndingDate.postValue(endingDate)
         viewModelScope.launch(Dispatchers.IO) {
-            repository.setChallengeEndingDate(endingDate)
+            repository.challengeEndingDate = endingDate
         }
     }
 
@@ -54,26 +54,34 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun sumUpCheckBoxes() {
-        doneCounter.value?.let {
-            val itemCount = list.size
-            var itemCheckCount = 0
-            for (item in list) {
-                if (item.isChecked) {
-                    itemCheckCount += 1
+        viewModelScope.launch(Dispatchers.IO) {
+            doneCounter.value?.let {
+                val itemCount = todoList.value!!.size
+                var itemsCheckedCount = 0
+                for (item in todoList.value!!) {
+                    if (item.isChecked) {
+                        itemsCheckedCount += 1
+                        var doneCounts = item.doneCounts
+                        doneCounts += 1
+                        item.doneCounts = doneCounts
+                        repository.updateItem(item.id, item)
+                        loadRecentData()
+                    } else {
+                        item.undoneCounts.plus(1) // doesn't work
+                        repository.updateItem(item.id, item)
+                        loadRecentData()
+                    }
                 }
-            }
-            if (itemCheckCount == itemCount) {
-                viewModelScope.launch(Dispatchers.IO) {
+                if (itemsCheckedCount == itemCount) {
                     doneCounter.postValue(doneCounter.value!!.plus(1))
                     repository.incrementDoneCounter()
-                }
-            } else {
-                viewModelScope.launch(Dispatchers.IO) {
+                } else {
                     undoneCounter.postValue(undoneCounter.value!!.plus(1))
                     repository.incrementUndoneCounter()
                 }
+
+                Log.d("COUNTER", "itemCount: $itemCount, checks: $itemsCheckedCount")
             }
-            Log.d("COUNTER", "itemCount: $itemCount, checks: $itemCheckCount")
         }
     }
 
@@ -118,10 +126,10 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
 
     fun loadRecentData() {
         viewModelScope.launch(Dispatchers.IO) {
-            challengeEndingDate.postValue(repository.getChallengeEndingDate())
+            challengeEndingDate.postValue(repository.challengeEndingDate)
             undoneCounter.postValue(repository.undoneCount)
             doneCounter.postValue(repository.doneCount)
-            val items = repository.allItems
+            val items = repository.readAllItems()
             todoList.postValue(items)
             for (item in items) {
                 list.add(item)
@@ -129,7 +137,7 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun deleteItem(id: Long) {
+    suspend fun deleteItem(id: Long) {
         repository.deleteItem(id)
     }
 
@@ -141,7 +149,9 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
 
     fun completeTodo(item: Todo, checked: Boolean) {
         item.isChecked = checked
-        repository.updateItem(item.id,item)
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.updateItem(item.id, item)
+        }
     }
 
 

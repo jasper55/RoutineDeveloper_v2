@@ -11,6 +11,6 @@ class Todo : Serializable {
     var undoneCounts = 0
 
     override fun toString(): String {
-        return "id: $ id, name: $name, is done: $isChecked, position: $position"
+        return "id: $ id, name: $name, is done: $isChecked, position: $position, doneCounts: $doneCounts, undoneCounts: $undoneCounts"
     }
 }

@@ -8,12 +8,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center_vertical"
+            android:gravity=" "
             android:paddingVertical="5dp"
             android:foreground="?attr/selectableItemBackground"
             android:background="@color/colorBackground"
             tools:context=".OverviewActivity"
             tools:showIn="@layout/layout_overview">
+
 
 
             <TextView
@@ -57,7 +58,8 @@
                         android:textSize="12sp"
                         android:text=":"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="2sp"/>
 
                     <TextView
                         android:id="@+id/undone_count"

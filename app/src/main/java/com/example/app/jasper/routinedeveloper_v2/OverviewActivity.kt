@@ -25,6 +25,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -37,9 +38,13 @@ import com.example.app.jasper.routinedeveloper_v2.repository.TodoListRepository
 import com.example.app.jasper.routinedeveloper_v2.view.utils.RecyclerViewItemDivider
 import com.example.app.jasper.routinedeveloper_v2.viewmodel.ViewModel
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import java.util.*
 
-class OverviewActivity : AppCompatActivity() {
+class OverviewActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
     private var isFABOpen = false
 
@@ -79,7 +84,9 @@ class OverviewActivity : AppCompatActivity() {
 
         checkIfFirstStart()
         observeLiveData()
-        viewModel.loadRecentData()
+        launch(Dispatchers.IO) {
+            viewModel.loadRecentData()
+        }
     }
 
     private fun observeLiveData() {
@@ -174,8 +181,10 @@ class OverviewActivity : AppCompatActivity() {
                 Toast.makeText(applicationContext, "item deleted", Toast.LENGTH_SHORT).show()
                 val position = viewHolder.adapterPosition
                 val item = recyclerViewAdapter.getItem(position)
-                viewModel.deleteItem(item.id)
-                viewModel.loadRecentData()
+                launch(Dispatchers.IO) {
+                    viewModel.deleteItem(item.id)
+                    viewModel.loadRecentData()
+                }
             }
         }
         val itemTouchHelper = ItemTouchHelper(touchCallback)
@@ -207,7 +216,7 @@ class OverviewActivity : AppCompatActivity() {
         fabOverlay.setOnClickListener { closeFABMenu() }
         fab_add = findViewById(R.id.fab_add)
         fab_add.setOnClickListener {
-            showDetailViewForCreate(viewModel.todoList.value!!.size+1)
+            showDetailViewForCreate(viewModel.todoList.value!!.size + 1)
             closeFABMenu()
         }
         fab_timer = findViewById(R.id.fab_timer)
@@ -299,7 +308,7 @@ class OverviewActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        viewModel.loadRecentData()
+//        viewModel.loadRecentData()
 //        if (viewModel.checkHasDateChanged()) {
         viewModel.sumUpCheckBoxes()
 //        }
@@ -326,7 +335,9 @@ class OverviewActivity : AppCompatActivity() {
                 e.printStackTrace()
             }
         } // if resultCode
-        viewModel.loadRecentData()
+        launch(Dispatchers.IO) {
+            viewModel.loadRecentData()
+        }
     } // onActivityResult
 
     private fun setChallengeEndingTime() {
@@ -365,7 +376,7 @@ class OverviewActivity : AppCompatActivity() {
     private fun showDetailViewForCreate(lastPositionOfAdapter: Int) {
         val createIntent = Intent(this, DetailviewActivity::class.java)
         createIntent.putExtra(CALL_MODE, CALL_MODE_CREATE)
-        createIntent.putExtra(POSITION,lastPositionOfAdapter)
+        createIntent.putExtra(POSITION, lastPositionOfAdapter)
         startActivityForResult(createIntent, CALL_CREATE_ITEM)
     }
 
