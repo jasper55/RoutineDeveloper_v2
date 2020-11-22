@@ -143,10 +143,14 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
         repository.deleteItem(id)
     }
 
-    fun swapPositions(fromPosition: Int, toPosition: Int) {
-        Collections.swap(list, fromPosition, toPosition)
-        TODO("add position to entity todo -- sort list by position")
-//        todoList.postValue(list)
+    fun swapPositions(item1: Todo, position1: Int, item2: Todo, position2: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            item1.position = position2
+            repository.updateItem(item1.id, item1)
+            item2.position = position1
+            repository.updateItem(item2.id, item2)
+            loadRecentData()
+        }
     }
 
     fun completeTodo(item: Todo, checked: Boolean) {

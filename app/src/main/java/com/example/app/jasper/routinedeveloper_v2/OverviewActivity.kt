@@ -25,7 +25,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -173,9 +172,11 @@ class OverviewActivity : AppCompatActivity(), CoroutineScope by MainScope() {
                         ItemTouchHelper.END,
                 ItemTouchHelper.END) {
             override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
-                val fromPosition = viewHolder.adapterPosition
-                val toPosition = target.adapterPosition
-                recyclerViewAdapter.swapPositions(fromPosition, toPosition)
+                val position1 = viewHolder.adapterPosition + 1
+                val item1 = recyclerViewAdapter.getItem(viewHolder.adapterPosition)
+                val item2 = recyclerViewAdapter.getItem(target.adapterPosition)
+                val position2 = target.adapterPosition + 1
+                viewModel.swapPositions(item1, position1, item2, position2)
                 Toast.makeText(applicationContext, "positions swapped", Toast.LENGTH_SHORT).show()
                 return true
             }

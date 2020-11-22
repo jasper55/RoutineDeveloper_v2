@@ -67,10 +67,6 @@ class RecyclerViewAdapter(
         return todoList[position]
     }
 
-    fun swapPositions(fromPosition: Int, toPosition: Int) {
-        viewModel.swapPositions(fromPosition, toPosition)
-    }
-
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 //        var todoId: TextView
         var todoPosition: TextView
