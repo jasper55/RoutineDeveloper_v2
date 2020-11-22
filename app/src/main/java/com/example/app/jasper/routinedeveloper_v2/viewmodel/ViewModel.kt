@@ -67,7 +67,9 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
                         repository.updateItem(item.id, item)
                         loadRecentData()
                     } else {
-                        item.undoneCounts.plus(1) // doesn't work
+                        var undoneCounts = item.undoneCounts
+                        undoneCounts += 1
+                        item.undoneCounts = undoneCounts
                         repository.updateItem(item.id, item)
                         loadRecentData()
                     }

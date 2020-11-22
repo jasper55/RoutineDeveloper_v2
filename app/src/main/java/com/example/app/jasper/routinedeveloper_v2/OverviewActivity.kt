@@ -74,7 +74,8 @@ class OverviewActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.layout_overview)
 
-        window.navigationBarColor = ResourcesCompat.getColor(resources, R.color.colorBackground, null)
+        setNavigationBarColor(BACKGROUND_COLOR_LIGHT)
+
 
         SharedPreferenceHelper.initWith(applicationContext)
         viewModel = ViewModelProvider(this).get(ViewModel::class.java)
@@ -88,6 +89,8 @@ class OverviewActivity : AppCompatActivity(), CoroutineScope by MainScope() {
             viewModel.loadRecentData()
         }
     }
+
+
 
     private fun observeLiveData() {
         viewModel.todoList.observe(this, Observer { todos: List<Todo> ->
@@ -238,6 +241,7 @@ class OverviewActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         fab_container_timer.visibility = View.VISIBLE
         fab_container_notification.visibility = View.VISIBLE
         fabOverlay.visibility = View.VISIBLE
+        setNavigationBarColor(BACKGROUND_COLOR_DARK)
         fab_menu.animate().rotationBy(270f).setListener(object : Animator.AnimatorListener {
             override fun onAnimationStart(animator: Animator) {}
             override fun onAnimationEnd(animator: Animator) {}
@@ -254,6 +258,7 @@ class OverviewActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 //        removeBlurOnBackground();
         isFABOpen = false
         fabOverlay.visibility = View.GONE
+        setNavigationBarColor(BACKGROUND_COLOR_LIGHT)
         fab_container_add.animate().translationY(0f)
         fab_container_notification.animate().translationY(0f)
         fab_container_timer.animate().translationY(0f)
@@ -270,8 +275,6 @@ class OverviewActivity : AppCompatActivity(), CoroutineScope by MainScope() {
             override fun onAnimationCancel(animator: Animator) {}
             override fun onAnimationRepeat(animator: Animator) {}
         })
-//        mainActivityViewModel.incrementDate()
-//        backgroundTask.changeDate(recyclerViewAdapter)
     }
 
     override fun onBackPressed() {
@@ -415,6 +418,10 @@ class OverviewActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         }
     }
 
+    private fun setNavigationBarColor(color: Int) {
+        window.navigationBarColor = ResourcesCompat.getColor(resources, color, null)
+    }
+
     companion object {
         private const val CALL_EDIT_ITEM = 0
         private const val CALL_CREATE_ITEM = 1
@@ -422,5 +429,7 @@ class OverviewActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         const val POSITION = "POSITION"
         const val CALL_MODE_CREATE = "create"
         const val EMPTY_ID = -99L
+        const val BACKGROUND_COLOR_LIGHT = R.color.colorBackground
+        const val BACKGROUND_COLOR_DARK = R.color.colorTransBg
     }
 }
