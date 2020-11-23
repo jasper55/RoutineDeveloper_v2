@@ -20,11 +20,11 @@ object SharedPreferenceHelper {
         get() = get(STORED_DAY,0)
         set(value) = put(STORED_DAY, value)
 
-    var doneCount
+    var overallDoneCount
         get() = get(DONE_COUNTER,0)
         set(value) = put(DONE_COUNTER, value)
 
-    var undoneCount
+    var overallUndoneCount
         get() = get(UNDONE_COUNTER,0)
         set(value) = put(UNDONE_COUNTER, value)
 

@@ -37,10 +37,6 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun setVmIsUpdating(vmIsUpdating: MutableLiveData<Boolean>?) {
-        this.vmIsUpdating = vmIsUpdating
-    }
-
     fun checkHasDateChanged(): Boolean {
         val currentday = Calendar.getInstance().get(Calendar.DAY_OF_YEAR)
         var dateHasChanged = false
@@ -76,10 +72,10 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
                 }
                 if (itemsCheckedCount == itemCount) {
                     doneCounter.postValue(doneCounter.value!!.plus(1))
-                    repository.incrementDoneCounter()
+                    repository.incrementOverallDoneCounter()
                 } else {
                     undoneCounter.postValue(undoneCounter.value!!.plus(1))
-                    repository.incrementUndoneCounter()
+                    repository.incrementOverallUndoneCounter()
                 }
 
                 Log.d("COUNTER", "itemCount: $itemCount, checks: $itemsCheckedCount")
@@ -139,8 +135,18 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    suspend fun deleteItem(id: Long) {
-        repository.deleteItem(id)
+    fun clearItemScores(item: Todo) = viewModelScope.launch(Dispatchers.IO) {
+        item.doneCounts = 0
+        item.undoneCounts = 0
+        repository.updateItem(item.id, item)
+        loadRecentData()
+    }
+
+    fun deleteItem(id: Long) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.deleteItem(id)
+            loadRecentData()
+        }
     }
 
     fun swapPositions(item1: Todo, position1: Int, item2: Todo, position2: Int) {
@@ -159,6 +165,5 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
             repository.updateItem(item.id, item)
         }
     }
-
 
 }

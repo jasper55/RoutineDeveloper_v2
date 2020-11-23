@@ -11,6 +11,13 @@
 
     <include layout="@layout/fab_menu"/>
 
+    <include layout="@layout/item_menu_overlay"/>
+
+    <include layout="@layout/item_longpress_menu"/>
+
+
+
+
 
     <!--
     <android.support.design.widget.FloatingActionButton

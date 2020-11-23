@@ -16,12 +16,10 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.LinearLayout
-import android.widget.TextView
-import android.widget.TimePicker
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
+import androidx.cardview.widget.CardView
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -37,6 +35,7 @@ import com.example.app.jasper.routinedeveloper_v2.repository.TodoListRepository
 import com.example.app.jasper.routinedeveloper_v2.view.utils.RecyclerViewItemDivider
 import com.example.app.jasper.routinedeveloper_v2.viewmodel.ViewModel
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import kotlinx.android.synthetic.main.item_longpress_menu.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
@@ -57,6 +56,24 @@ class OverviewActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     private lateinit var challengeEndingDateSetListener: OnDateSetListener
     private lateinit var textViewPlus: TextView
     private lateinit var textViewMinus: TextView
+
+    private lateinit var item_menu_overlay: CardView
+    private lateinit var menu_icon: ImageView
+    private lateinit var clear_score: LinearLayout
+    private lateinit var add_item: LinearLayout
+    private lateinit var set_daily_reminder: LinearLayout
+    private lateinit var delte_all_items: LinearLayout
+    private lateinit var set_ending_date: LinearLayout
+    private lateinit var close_dialog_button: ImageView
+    private lateinit var menuOverlay: View
+
+    private lateinit var itemMenuOverlay: View
+    private lateinit var item_longpress_menu_overlay: CardView
+    private lateinit var edit_item: LinearLayout
+    private lateinit var clear_item_score: LinearLayout
+    private lateinit var delete_item: LinearLayout
+    private lateinit var item_close_button: ImageView
+
 
     private lateinit var fab_add: FloatingActionButton
     private lateinit var fab_timer: FloatingActionButton
@@ -88,7 +105,6 @@ class OverviewActivity : AppCompatActivity(), CoroutineScope by MainScope() {
             viewModel.loadRecentData()
         }
     }
-
 
 
     private fun observeLiveData() {
@@ -136,6 +152,77 @@ class OverviewActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         instantiateFABMenu()
         setEndingDateListener()
         initActionBar()
+        initListMenu()
+        initItemMenu()
+    }
+
+    private fun initItemMenu() {
+        itemMenuOverlay = findViewById(R.id.itemMenuOverlay)
+        item_longpress_menu_overlay = findViewById(R.id.item_longpress_menu_overlay)
+        clear_item_score = findViewById(R.id.clear_item_score)
+        delete_item = findViewById(R.id.delete_item)
+        edit_item = findViewById(R.id.edit_item)
+        item_close_button = findViewById(R.id.item_close_button)
+
+        item_close_button.setOnClickListener {
+            item_longpress_menu_overlay.visibility = View.GONE
+            itemMenuOverlay.visibility = View.GONE
+        }
+
+
+    }
+
+    private fun initListMenu() {
+        menu_icon = findViewById(R.id.menu_icon)
+        menuOverlay = findViewById(R.id.menuOverlay)
+
+
+        item_menu_overlay = findViewById(R.id.item_menu_overlay)
+        add_item = findViewById(R.id.add_item)
+        clear_score = findViewById(R.id.clear_score)
+        set_daily_reminder = findViewById(R.id.daily_reminder)
+        set_ending_date = findViewById(R.id.ending_date)
+        delte_all_items = findViewById(R.id.delete_items)
+        close_dialog_button = findViewById(R.id.close_button)
+
+        menu_icon.setOnClickListener {
+            item_menu_overlay.visibility = View.VISIBLE
+            menuOverlay.visibility = View.VISIBLE
+        }
+
+        add_item.setOnClickListener {
+            showDetailViewForCreate(viewModel.todoList.value!!.size + 1)
+            item_menu_overlay.visibility = View.GONE
+            menuOverlay.visibility = View.GONE
+
+        }
+        clear_score.setOnClickListener {
+            viewModel.clearScore()
+            item_menu_overlay.visibility = View.GONE
+            menuOverlay.visibility = View.GONE
+        }
+        set_daily_reminder.setOnClickListener {
+            showTimePicker()
+            item_menu_overlay.visibility = View.GONE
+            menuOverlay.visibility = View.GONE
+        }
+        set_ending_date.setOnClickListener {
+            setChallengeEndingTime()
+            item_menu_overlay.visibility = View.GONE
+            menuOverlay.visibility = View.GONE
+        }
+        delte_all_items.setOnClickListener {
+
+            for (item in viewModel.todoList.value!!) {
+                viewModel.deleteItem(item.id)
+            }
+            item_menu_overlay.visibility = View.GONE
+            menuOverlay.visibility = View.GONE
+        }
+        close_dialog_button.setOnClickListener {
+            item_menu_overlay.visibility = View.GONE
+            menuOverlay.visibility = View.GONE
+        }
     }
 
     private fun initActionBar() {
@@ -149,7 +236,25 @@ class OverviewActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     private fun initRecyclerViewList() {
         userActionClickListener = object : UserActionClickListener {
             override fun onItemClick(position: Int) {
-                showDetailViewForEdit(recyclerViewAdapter.getItem(position))
+
+                edit_item.setOnClickListener {
+                    item_longpress_menu_overlay.visibility = View.GONE
+                    itemMenuOverlay.visibility = View.GONE
+                    showDetailViewForEdit(recyclerViewAdapter.getItem(position))
+                }
+                item_longpress_menu_overlay.visibility = View.VISIBLE
+                itemMenuOverlay.visibility = View.VISIBLE
+                clear_item_score.setOnClickListener {
+                    viewModel.clearItemScores(recyclerViewAdapter.getItem(position))
+                    Log.d("SCORE", "${recyclerViewAdapter.getItem(position).name}")
+                    item_longpress_menu_overlay.visibility = View.GONE
+                    itemMenuOverlay.visibility = View.GONE
+                }
+                delete_item.setOnClickListener {
+                    viewModel.deleteItem(recyclerViewAdapter.getItem(position).id)
+                    item_longpress_menu_overlay.visibility = View.GONE
+                    itemMenuOverlay.visibility = View.GONE
+                }
             }
         }
 
@@ -312,10 +417,9 @@ class OverviewActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
     override fun onResume() {
         super.onResume()
-//        viewModel.loadRecentData()
-//        if (viewModel.checkHasDateChanged()) {
-        viewModel.sumUpCheckBoxes()
-//        }
+        if (viewModel.checkHasDateChanged()) {
+            viewModel.sumUpCheckBoxes()
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
@@ -377,10 +481,10 @@ class OverviewActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     }
 
 
-    private fun showDetailViewForCreate(lastPositionOfAdapter: Int) {
+    private fun showDetailViewForCreate(listSizePlusOne: Int) {
         val createIntent = Intent(this, DetailviewActivity::class.java)
         createIntent.putExtra(CALL_MODE, CALL_MODE_CREATE)
-        createIntent.putExtra(POSITION, lastPositionOfAdapter)
+        createIntent.putExtra(POSITION, listSizePlusOne)
         startActivityForResult(createIntent, CALL_CREATE_ITEM)
     }
 

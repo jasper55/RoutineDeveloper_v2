@@ -1,5 +1,6 @@
 package com.example.app.jasper.routinedeveloper_v2.model
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -43,32 +44,35 @@ class RecyclerViewAdapter(
                 currentPosition = position
             }
         })
-        viewHolder.itemListContainer.setOnLongClickListener(object : View.OnLongClickListener {
-            override fun onLongClick(p0: View?): Boolean {
-                currentPosition = position
-                return true
-            }
-        });
+//        viewHolder.itemListContainer.setOnLongClickListener(object : View.OnLongClickListener {
+//            override fun onLongClick(view: View): Boolean {
+//                if (view.isPressed) {
+//                    userActionClickListener.onLongClick(position)
+//                    currentPosition = position
+//                }
+//                return true
+//            }
+//        })
         viewHolder.checkBox.setOnCheckedChangeListener(object : CompoundButton.OnCheckedChangeListener {
             override fun onCheckedChanged(buttonView: CompoundButton, b: Boolean) {
-                val checked = viewHolder.checkBox.isChecked
-                val item = getItem(position)
-                viewModel.completeTodo(item, checked)
-                viewModel.loadRecentData()
+                if (buttonView.isPressed) {
+                    val checked = viewHolder.checkBox.isChecked
+                    val item = getItem(position)
+                    Log.d("CHECKED", "$position, ${item.id}")
+                    viewModel.completeTodo(item, checked)
+                    viewModel.loadRecentData()
+                }
             }
         })
     }
 
-    override fun getItemId(position: Int) = position.toLong()
+    override fun getItemId(position: Int) = todoList[position].id
 
     override fun getItemCount() = todoList.size
 
-    fun getItem(position: Int): Todo {
-        return todoList[position]
-    }
+    fun getItem(position: Int) = todoList[position]
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-//        var todoId: TextView
         var todoPosition: TextView
         var todoName: TextView
         var doneCounts: TextView
@@ -88,6 +92,7 @@ class RecyclerViewAdapter(
 
     interface UserActionClickListener {
         fun onItemClick(position: Int)
+//        fun onLongClick(position: Int)
     }
 
 

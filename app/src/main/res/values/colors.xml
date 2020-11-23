@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimary2">#373737</color>
+    <color name="grey">#373737</color>
     <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorPrimaryDark2">#000000</color>
+    <color name="black">#000000</color>
     <color name="colorBackground">#4b4c50</color>
     <color name="colorDivider">#3C3B3B</color>
     <color name="textLight">#cbcbcb</color>
@@ -14,5 +14,7 @@
     <color name="orange">#e49443</color>
 
     <color name="colorTransBg">#8d000000</color>
+    <color name="white">#FFFFFF</color>
+    <color name="ListDivider">#5B5C61</color>
 
 </resources>

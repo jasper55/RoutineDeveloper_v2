@@ -36,8 +36,8 @@ class TodoListRepository(context: Context) {
     }
 
     fun clearScore() {
-        prefs.undoneCount = 0
-        prefs.doneCount = 0
+        prefs.overallUndoneCount = 0
+        prefs.overallDoneCount = 0
     }
 
     val storedDay: Int
@@ -47,21 +47,21 @@ class TodoListRepository(context: Context) {
         prefs.updateDate(currentDay)
     }
 
-    fun incrementDoneCounter() {
-        var doneCount = prefs.doneCount
+    fun incrementOverallDoneCounter() {
+        var doneCount = prefs.overallDoneCount
         doneCount += 1
-        prefs.doneCount = doneCount
+        prefs.overallDoneCount = doneCount
         Log.d("COUNTER", "doneCount incremented")
-        val done = prefs.doneCount
+        val done = prefs.overallDoneCount
         Log.d("COUNTER", "new done value: $done")
     }
 
-    fun incrementUndoneCounter() {
-        var undoneCount = prefs.undoneCount
+    fun incrementOverallUndoneCounter() {
+        var undoneCount = prefs.overallUndoneCount
         undoneCount += 1
-        prefs.undoneCount = undoneCount
+        prefs.overallUndoneCount = undoneCount
         Log.d("COUNTER", "undoneCount incremented")
-        val undone = prefs.undoneCount
+        val undone = prefs.overallUndoneCount
         Log.d("COUNTER", "new undone value: $undone")
     }
 
@@ -78,10 +78,10 @@ class TodoListRepository(context: Context) {
     }
 
     val undoneCount: Int?
-        get() = prefs.undoneCount
+        get() = prefs.overallUndoneCount
 
     val doneCount: Int?
-        get() = prefs.doneCount
+        get() = prefs.overallDoneCount
 
     var challengeEndingDate: String?
         get() = prefs.challengeEndingDate
