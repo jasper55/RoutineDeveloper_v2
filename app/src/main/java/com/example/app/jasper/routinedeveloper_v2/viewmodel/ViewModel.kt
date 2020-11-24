@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.app.jasper.routinedeveloper_v2.NotificationReceiver
@@ -21,9 +22,11 @@ import kotlin.collections.ArrayList
 class ViewModel(application: Application) : AndroidViewModel(application) {
     val list = ArrayList<Todo>()
     val todoList = MutableLiveData<List<Todo>>()
+    val isListLocked = MutableLiveData<Boolean>(false)
     val doneCounter = MutableLiveData<Int>()
     val undoneCounter = MutableLiveData<Int>()
     val challengeEndingDate = MutableLiveData<String>()
+    val errorMessage = MutableLiveData<String>()
     val notificationTime = MutableLiveData<Long>()
     val context = application.applicationContext
     val repository = TodoListRepository.getInstance(context)
@@ -164,6 +167,10 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.updateItem(item.id, item)
         }
+    }
+
+    fun toggleLockList() {
+        isListLocked.value = !isListLocked.value!!
     }
 
 }

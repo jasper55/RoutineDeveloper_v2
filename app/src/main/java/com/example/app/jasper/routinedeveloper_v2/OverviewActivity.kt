@@ -11,15 +11,19 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.animation.AnimationUtils
 import android.widget.*
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
+import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -32,14 +36,19 @@ import com.example.app.jasper.routinedeveloper_v2.model.RecyclerViewAdapter.User
 import com.example.app.jasper.routinedeveloper_v2.model.Todo
 import com.example.app.jasper.routinedeveloper_v2.repository.SharedPreferenceHelper
 import com.example.app.jasper.routinedeveloper_v2.repository.TodoListRepository
+import com.example.app.jasper.routinedeveloper_v2.utils.vibratePhone
 import com.example.app.jasper.routinedeveloper_v2.view.utils.RecyclerViewItemDivider
 import com.example.app.jasper.routinedeveloper_v2.viewmodel.ViewModel
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import kotlinx.android.synthetic.main.content_main.*
+import kotlinx.android.synthetic.main.error_prompt.*
 import kotlinx.android.synthetic.main.item_longpress_menu.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import org.jetbrains.anko.backgroundColor
+import org.jetbrains.anko.backgroundDrawable
 import java.util.*
 
 class OverviewActivity : AppCompatActivity(), CoroutineScope by MainScope() {
@@ -57,8 +66,11 @@ class OverviewActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     private lateinit var textViewPlus: TextView
     private lateinit var textViewMinus: TextView
 
+    private lateinit var lock_icon: ImageView
+
     private lateinit var item_menu_overlay: CardView
     private lateinit var menu_icon: ImageView
+
     private lateinit var clear_score: LinearLayout
     private lateinit var add_item: LinearLayout
     private lateinit var set_daily_reminder: LinearLayout
@@ -74,6 +86,8 @@ class OverviewActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     private lateinit var delete_item: LinearLayout
     private lateinit var item_close_button: ImageView
 
+    private lateinit var errorPrompt: CardView
+    private lateinit var errorPromptText: TextView
 
     private lateinit var fab_add: FloatingActionButton
     private lateinit var fab_timer: FloatingActionButton
@@ -117,7 +131,20 @@ class OverviewActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         viewModel.doneCounter.observe(this, Observer { textViewPlus.text = it.toString() })
         viewModel.undoneCounter.observe(this, Observer { textViewMinus.text = it.toString() })
         viewModel.challengeEndingDate.observe(this, Observer { challengeEndingDate.text = it })
+        viewModel.isListLocked.observe(this, Observer {
+            if (it == true) {
+                lock_icon.backgroundDrawable = getDrawable(R.drawable.ic_lock_black)
+                lock_icon.backgroundDrawable!!.setTint(getColor(R.color.textDark))
+                viewModel.errorMessage.value = getString(R.string.lock_activated)
+            } else {
+                lock_icon.backgroundDrawable = getDrawable(R.drawable.ic_lock_open_black)
+            }
+        })
+        viewModel.errorMessage.observe(this, Observer { errorMessage ->
+            errorPromptText.text = errorMessage
+        })
     }
+
 
     private fun initRepository(context: Context) {
         repository = TodoListRepository.getInstance(context)
@@ -127,23 +154,40 @@ class OverviewActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     private fun setEndingDateListener() {
         challengeEndingDate = findViewById(R.id.tvDate)
         challengeEndingDate.setOnClickListener {
-            val calender = Calendar.getInstance()
-            val year = calender[Calendar.YEAR]
-            val month = calender[Calendar.MONTH]
-            val day = calender[Calendar.DAY_OF_MONTH]
-            val datePickerDialog = DatePickerDialog(this@OverviewActivity,
-                    android.R.style.Theme_Holo_Light_Dialog_MinWidth,
-                    challengeEndingDateSetListener,
-                    year, month, day)
-            datePickerDialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-            datePickerDialog.show()
+            if (viewModel.isListLocked.value!!) {
+                showErrorPrompt()
+            } else {
+                val calender = Calendar.getInstance()
+                val year = calender[Calendar.YEAR]
+                val month = calender[Calendar.MONTH]
+                val day = calender[Calendar.DAY_OF_MONTH]
+                val datePickerDialog = DatePickerDialog(this@OverviewActivity,
+                        android.R.style.Theme_Holo_Light_Dialog_MinWidth,
+                        challengeEndingDateSetListener,
+                        year, month, day)
+                datePickerDialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                datePickerDialog.show()
+            }
+            challengeEndingDateSetListener = OnDateSetListener { datePicker, year, month, day ->
+                var month = month
+                month += 1
+                val date = "$day.$month.$year"
+                viewModel.setChallengeEndingDate(date)
+            }
         }
-        challengeEndingDateSetListener = OnDateSetListener { datePicker, year, month, day ->
-            var month = month
-            month += 1
-            val date = "$day.$month.$year"
-            viewModel.setChallengeEndingDate(date)
+    }
+
+    private fun showErrorPrompt() {
+        val timer = object: CountDownTimer(1500, 100) {
+            override fun onFinish() { errorPrompt.visibility = View.GONE }
+
+            override fun onTick(p0: Long) {
+                errorPrompt.visibility = View.VISIBLE
+                errorPrompt.startAnimation(AnimationUtils.loadAnimation(applicationContext, R.anim.shake))
+                vibratePhone()
+            }
         }
+        timer.start()
     }
 
     private fun initView() {
@@ -154,6 +198,7 @@ class OverviewActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         initActionBar()
         initListMenu()
         initItemMenu()
+        initErrorPrompt()
     }
 
     private fun initItemMenu() {
@@ -172,10 +217,15 @@ class OverviewActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
     }
 
+    private fun initErrorPrompt() {
+        errorPrompt = findViewById(R.id.errorPrompt)
+        errorPromptText = findViewById(R.id.errorPromptText)
+    }
+
     private fun initListMenu() {
         menu_icon = findViewById(R.id.menu_icon)
+        lock_icon = findViewById(R.id.lock_icon)
         menuOverlay = findViewById(R.id.menuOverlay)
-
 
         item_menu_overlay = findViewById(R.id.item_menu_overlay)
         add_item = findViewById(R.id.add_item)
@@ -186,8 +236,12 @@ class OverviewActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         close_dialog_button = findViewById(R.id.close_button)
 
         menu_icon.setOnClickListener {
-            item_menu_overlay.visibility = View.VISIBLE
-            menuOverlay.visibility = View.VISIBLE
+            if (viewModel.isListLocked.value!!) {
+                showErrorPrompt()
+            } else {
+                item_menu_overlay.visibility = View.VISIBLE
+                menuOverlay.visibility = View.VISIBLE
+            }
         }
 
         add_item.setOnClickListener {
@@ -207,9 +261,9 @@ class OverviewActivity : AppCompatActivity(), CoroutineScope by MainScope() {
             menuOverlay.visibility = View.GONE
         }
         set_ending_date.setOnClickListener {
-            setChallengeEndingTime()
-            item_menu_overlay.visibility = View.GONE
-            menuOverlay.visibility = View.GONE
+                setChallengeEndingTime()
+                item_menu_overlay.visibility = View.GONE
+                menuOverlay.visibility = View.GONE
         }
         delte_all_items.setOnClickListener {
 
@@ -222,6 +276,10 @@ class OverviewActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         close_dialog_button.setOnClickListener {
             item_menu_overlay.visibility = View.GONE
             menuOverlay.visibility = View.GONE
+        }
+
+        lock_icon.setOnClickListener {
+            viewModel.toggleLockList()
         }
     }
 
@@ -236,24 +294,27 @@ class OverviewActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     private fun initRecyclerViewList() {
         userActionClickListener = object : UserActionClickListener {
             override fun onItemClick(position: Int) {
-
-                edit_item.setOnClickListener {
-                    item_longpress_menu_overlay.visibility = View.GONE
-                    itemMenuOverlay.visibility = View.GONE
-                    showDetailViewForEdit(recyclerViewAdapter.getItem(position))
-                }
-                item_longpress_menu_overlay.visibility = View.VISIBLE
-                itemMenuOverlay.visibility = View.VISIBLE
-                clear_item_score.setOnClickListener {
-                    viewModel.clearItemScores(recyclerViewAdapter.getItem(position))
-                    Log.d("SCORE", "${recyclerViewAdapter.getItem(position).name}")
-                    item_longpress_menu_overlay.visibility = View.GONE
-                    itemMenuOverlay.visibility = View.GONE
-                }
-                delete_item.setOnClickListener {
-                    viewModel.deleteItem(recyclerViewAdapter.getItem(position).id)
-                    item_longpress_menu_overlay.visibility = View.GONE
-                    itemMenuOverlay.visibility = View.GONE
+                if (viewModel.isListLocked.value!!) {
+                    showErrorPrompt()
+                } else {
+                    edit_item.setOnClickListener {
+                        item_longpress_menu_overlay.visibility = View.GONE
+                        itemMenuOverlay.visibility = View.GONE
+                        showDetailViewForEdit(recyclerViewAdapter.getItem(position))
+                    }
+                    item_longpress_menu_overlay.visibility = View.VISIBLE
+                    itemMenuOverlay.visibility = View.VISIBLE
+                    clear_item_score.setOnClickListener {
+                        viewModel.clearItemScores(recyclerViewAdapter.getItem(position))
+                        Log.d("SCORE", "${recyclerViewAdapter.getItem(position).name}")
+                        item_longpress_menu_overlay.visibility = View.GONE
+                        itemMenuOverlay.visibility = View.GONE
+                    }
+                    delete_item.setOnClickListener {
+                        viewModel.deleteItem(recyclerViewAdapter.getItem(position).id)
+                        item_longpress_menu_overlay.visibility = View.GONE
+                        itemMenuOverlay.visibility = View.GONE
+                    }
                 }
             }
         }

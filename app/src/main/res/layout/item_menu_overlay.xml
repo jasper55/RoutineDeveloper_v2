@@ -12,10 +12,10 @@
         android:background="@color/colorTransBg"
         android:visibility="gone" />
 
-    <com.google.android.material.card.MaterialCardView
+   <com.google.android.material.card.MaterialCardView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:cardBackgroundColor="@color/white"
+        app:cardBackgroundColor="@color/colorWhite"
         app:cardCornerRadius="12dp"
         app:cardElevation="0dp"
         app:strokeColor="@color/textLight"

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:elevation="100dp">
+
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/errorPrompt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:cardBackgroundColor="@color/colorRed"
+        android:layout_marginHorizontal="60dp"
+        app:cardCornerRadius="6dp"
+        app:cardElevation="12dp"
+        app:strokeColor="@color/textLight"
+        app:strokeWidth="1dp"
+        android:layout_gravity="center_vertical|center_horizontal"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/errorPromptText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="test sadaslödjasldjasldajslda"
+            android:background="@color/colorRed"
+            android:padding="16dp"
+            android:textColor="@color/colorWhite"
+            android:visibility="visible" />
+
+    </com.google.android.material.card.MaterialCardView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
