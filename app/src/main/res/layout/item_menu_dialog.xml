@@ -5,14 +5,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:elevation="100dp">
 
-    <View
-        android:id="@+id/itemMenuOverlay"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/colorTransBg"
-        android:visibility="gone" />
-
-    <com.google.android.material.card.MaterialCardView
+   <com.google.android.material.card.MaterialCardView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:cardBackgroundColor="@color/colorWhite"
@@ -20,7 +13,7 @@
         app:cardElevation="0dp"
         app:strokeColor="@color/textLight"
         app:strokeWidth="0dp"
-        android:id="@+id/item_longpress_menu_overlay"
+        android:id="@+id/item_menu_dialog"
         android:layout_gravity="center_vertical|center_horizontal"
         android:visibility="gone">
 
@@ -31,7 +24,7 @@
 
 
         <LinearLayout
-            android:id="@+id/edit_item"
+            android:id="@+id/add_item"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -45,41 +38,18 @@
                 android:layout_height="20dp"
                 android:layout_gravity="left|bottom"
                 android:layout_marginEnd="12dp"
-                app:srcCompat="@drawable/ic_edit_black"
-                app:tint="@color/textDark" />
-            <TextView
-                android:text="edit item"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/textDark"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/delete_item"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingVertical="10dp"
-            android:paddingHorizontal="20dp">
-
-
-            <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:layout_gravity="left|bottom"
-                android:layout_marginEnd="12dp"
-                app:srcCompat="@drawable/ic_delete_black"
+                app:srcCompat="@drawable/ic_add_black"
                 app:tint="@color/textDark" />
             <TextView
                 android:id="@+id/tv_add_item"
-                android:text="delete item"
+                android:text="add item"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/textDark"/>
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/clear_item_score"
+            android:id="@+id/clear_score"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -96,14 +66,86 @@
                 app:tint="@color/textDark" />
             <TextView
                 android:id="@+id/tv_clear_score"
-                android:text="clear item score"
+                android:text="clear score"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/textDark"/>
         </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/daily_reminder"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingVertical="10dp"
+            android:paddingHorizontal="20dp">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="left|bottom"
+                android:layout_marginEnd="12dp"
+                app:srcCompat="@drawable/bell"
+                app:tint="@color/textDark" />
+        <TextView
+            android:id="@+id/tv_daily_reminder"
+            android:text="set daily reminder"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/textDark"/>
+    </LinearLayout>
+
+
+            <LinearLayout
+                android:id="@+id/ending_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingVertical="10dp"
+                android:paddingHorizontal="20dp">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="left|bottom"
+                    android:layout_marginEnd="12dp"
+                    app:srcCompat="@drawable/event"
+                    app:tint="@color/textDark" />
+                <TextView
+                    android:id="@+id/tv_ending_date"
+                    android:text="set ending date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/textDark"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/delete_items"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingVertical="10dp"
+            android:paddingHorizontal="20dp">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="left|bottom"
+                android:layout_marginEnd="12dp"
+                app:srcCompat="@drawable/ic_delete_black"
+                app:tint="@color/textDark" />
+            <TextView
+                android:id="@+id/tv_delete_all"
+                android:text="delete all items"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/textDark"/>
+
+        </LinearLayout>
+
         <ImageView
-            android:id="@+id/item_close_button"
+            android:id="@+id/close_button"
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:layout_marginTop="20dp"

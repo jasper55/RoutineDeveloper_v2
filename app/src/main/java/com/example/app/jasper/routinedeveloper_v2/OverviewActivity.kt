@@ -62,7 +62,7 @@ class OverviewActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
     private lateinit var lock_icon: ImageView
 
-    private lateinit var item_menu_overlay: CardView
+    private lateinit var item_menu_dialog: CardView
     private lateinit var menu_icon: ImageView
 
     private lateinit var clear_score: LinearLayout
@@ -71,10 +71,9 @@ class OverviewActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     private lateinit var delte_all_items: LinearLayout
     private lateinit var set_ending_date: LinearLayout
     private lateinit var close_dialog_button: ImageView
-    private lateinit var menuOverlay: View
 
-    private lateinit var itemMenuOverlay: View
-    private lateinit var item_longpress_menu_overlay: CardView
+    private lateinit var item_clicked_menu_overlay: View
+    private lateinit var item_clicked_menu_dialog: CardView
     private lateinit var edit_item: LinearLayout
     private lateinit var clear_item_score: LinearLayout
     private lateinit var delete_item: LinearLayout
@@ -91,7 +90,7 @@ class OverviewActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     private lateinit var fab_container_add: LinearLayout
     private lateinit var fab_container_notification: LinearLayout
     private lateinit var fab_container_timer: LinearLayout
-    private lateinit var fabOverlay: View
+    private lateinit var dark_background: View
     private lateinit var repository: TodoListRepository
     private lateinit var viewModel: ViewModel
 
@@ -178,9 +177,13 @@ class OverviewActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
     private fun showErrorPrompt() {
         val timer = object: CountDownTimer(1500, 100) {
-            override fun onFinish() { errorPrompt.visibility = View.GONE }
+            override fun onFinish() {
+                errorPrompt.visibility = View.GONE
+                lightenBackGround()
+            }
 
             override fun onTick(p0: Long) {
+                darkenBackGround()
                 errorPrompt.visibility = View.VISIBLE
                 errorPrompt.startAnimation(AnimationUtils.loadAnimation(applicationContext, R.anim.shake))
                 vibratePhone()
@@ -189,7 +192,18 @@ class OverviewActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         timer.start()
     }
 
+    private fun darkenBackGround() {
+        dark_background.visibility = View.VISIBLE
+        setNavigationBarColor(BACKGROUND_COLOR_DARK)
+    }
+
+    private fun lightenBackGround() {
+        dark_background.visibility = View.GONE
+        setNavigationBarColor(BACKGROUND_COLOR_LIGHT)
+    }
+
     private fun initView() {
+        dark_background = findViewById(R.id.dark_background)
         initRecyclerViewList()
         instantiateTimePicker()
         instantiateFABMenu()
@@ -201,19 +215,17 @@ class OverviewActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     }
 
     private fun initItemMenu() {
-        itemMenuOverlay = findViewById(R.id.itemMenuOverlay)
-        item_longpress_menu_overlay = findViewById(R.id.item_longpress_menu_overlay)
+        item_clicked_menu_overlay = findViewById(R.id.item_clicked_menu_overlay)
+        item_clicked_menu_dialog = findViewById(R.id.item_clicked_menu_dialog)
         clear_item_score = findViewById(R.id.clear_item_score)
         delete_item = findViewById(R.id.delete_item)
         edit_item = findViewById(R.id.edit_item)
         item_close_button = findViewById(R.id.item_close_button)
 
         item_close_button.setOnClickListener {
-            item_longpress_menu_overlay.visibility = View.GONE
-            itemMenuOverlay.visibility = View.GONE
+            item_clicked_menu_dialog.visibility = View.GONE
+            item_clicked_menu_overlay.visibility = View.GONE
         }
-
-
     }
 
     private fun initErrorPrompt() {
@@ -225,9 +237,8 @@ class OverviewActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     private fun initListMenu() {
         menu_icon = findViewById(R.id.menu_icon)
         lock_icon = findViewById(R.id.lock_icon)
-        menuOverlay = findViewById(R.id.menuOverlay)
 
-        item_menu_overlay = findViewById(R.id.item_menu_overlay)
+        item_menu_dialog = findViewById(R.id.item_menu_dialog)
         add_item = findViewById(R.id.add_item)
         clear_score = findViewById(R.id.clear_score)
         set_daily_reminder = findViewById(R.id.daily_reminder)
@@ -239,43 +250,42 @@ class OverviewActivity : AppCompatActivity(), CoroutineScope by MainScope() {
             if (viewModel.isListLocked.value!!) {
                 showErrorPrompt()
             } else {
-                item_menu_overlay.visibility = View.VISIBLE
-                menuOverlay.visibility = View.VISIBLE
+                item_menu_dialog.visibility = View.VISIBLE
+                darkenBackGround()
             }
         }
 
         add_item.setOnClickListener {
             showDetailViewForCreate(viewModel.todoList.value!!.size + 1)
-            item_menu_overlay.visibility = View.GONE
-            menuOverlay.visibility = View.GONE
-
+            item_menu_dialog.visibility = View.GONE
+            lightenBackGround()
         }
         clear_score.setOnClickListener {
             viewModel.clearScore()
-            item_menu_overlay.visibility = View.GONE
-            menuOverlay.visibility = View.GONE
+            item_menu_dialog.visibility = View.GONE
+            lightenBackGround()
         }
         set_daily_reminder.setOnClickListener {
             showTimePicker()
-            item_menu_overlay.visibility = View.GONE
-            menuOverlay.visibility = View.GONE
+            item_menu_dialog.visibility = View.GONE
+            lightenBackGround()
         }
         set_ending_date.setOnClickListener {
                 setChallengeEndingTime()
-                item_menu_overlay.visibility = View.GONE
-                menuOverlay.visibility = View.GONE
+                item_menu_dialog.visibility = View.GONE
+                lightenBackGround()
         }
         delte_all_items.setOnClickListener {
 
             for (item in viewModel.todoList.value!!) {
                 viewModel.deleteItem(item.id)
             }
-            item_menu_overlay.visibility = View.GONE
-            menuOverlay.visibility = View.GONE
+            item_menu_dialog.visibility = View.GONE
+            lightenBackGround()
         }
         close_dialog_button.setOnClickListener {
-            item_menu_overlay.visibility = View.GONE
-            menuOverlay.visibility = View.GONE
+            item_menu_dialog.visibility = View.GONE
+            lightenBackGround()
         }
 
         lock_icon.setOnClickListener {
@@ -297,23 +307,27 @@ class OverviewActivity : AppCompatActivity(), CoroutineScope by MainScope() {
                 if (viewModel.isListLocked.value!!) {
                     showErrorPrompt()
                 } else {
+                    setNavigationBarColor(BACKGROUND_COLOR_DARK)
                     edit_item.setOnClickListener {
-                        item_longpress_menu_overlay.visibility = View.GONE
-                        itemMenuOverlay.visibility = View.GONE
+                        item_clicked_menu_dialog.visibility = View.GONE
+                        item_clicked_menu_overlay.visibility = View.GONE
                         showDetailViewForEdit(recyclerViewAdapter.getItem(position))
+                        setNavigationBarColor(BACKGROUND_COLOR_LIGHT)
                     }
-                    item_longpress_menu_overlay.visibility = View.VISIBLE
-                    itemMenuOverlay.visibility = View.VISIBLE
+                    item_clicked_menu_dialog.visibility = View.VISIBLE
+                    item_clicked_menu_overlay.visibility = View.VISIBLE
                     clear_item_score.setOnClickListener {
                         viewModel.clearItemScores(recyclerViewAdapter.getItem(position))
                         Log.d("SCORE", "${recyclerViewAdapter.getItem(position).name}")
-                        item_longpress_menu_overlay.visibility = View.GONE
-                        itemMenuOverlay.visibility = View.GONE
+                        item_clicked_menu_dialog.visibility = View.GONE
+                        item_clicked_menu_overlay.visibility = View.GONE
+                        setNavigationBarColor(BACKGROUND_COLOR_LIGHT)
                     }
                     delete_item.setOnClickListener {
                         viewModel.deleteItem(recyclerViewAdapter.getItem(position).id)
-                        item_longpress_menu_overlay.visibility = View.GONE
-                        itemMenuOverlay.visibility = View.GONE
+                        item_clicked_menu_dialog.visibility = View.GONE
+                        item_clicked_menu_overlay.visibility = View.GONE
+                        setNavigationBarColor(BACKGROUND_COLOR_LIGHT)
                     }
                 }
             }
@@ -374,16 +388,15 @@ class OverviewActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         fab_container_add = findViewById(R.id.fab_container_add)
         fab_container_notification = findViewById(R.id.fab_container_notification)
         fab_container_timer = findViewById(R.id.fab_container_timer)
-        fabOverlay = findViewById(R.id.fabOverlay)
         fab_menu = findViewById(R.id.fab_menu)
         fab_menu.setOnClickListener {
             if (!isFABOpen) {
                 showFABMenu()
             } else {
+                dark_background.setOnClickListener { closeFABMenu() }
                 closeFABMenu()
             }
         }
-        fabOverlay.setOnClickListener { closeFABMenu() }
         fab_add = findViewById(R.id.fab_add)
         fab_add.setOnClickListener {
             showDetailViewForCreate(viewModel.todoList.value!!.size + 1)
@@ -403,12 +416,10 @@ class OverviewActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     @SuppressLint("RestrictedApi")
     private fun showFABMenu() {
         isFABOpen = true
-        //applyBlurOnBackground();
         fab_container_add.visibility = View.VISIBLE
         fab_container_timer.visibility = View.VISIBLE
         fab_container_notification.visibility = View.VISIBLE
-        fabOverlay.visibility = View.VISIBLE
-        setNavigationBarColor(BACKGROUND_COLOR_DARK)
+        darkenBackGround()
         fab_menu.animate().rotationBy(270f).setListener(object : Animator.AnimatorListener {
             override fun onAnimationStart(animator: Animator) {}
             override fun onAnimationEnd(animator: Animator) {}
@@ -422,10 +433,8 @@ class OverviewActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
     @SuppressLint("RestrictedApi")
     private fun closeFABMenu() {
-//        removeBlurOnBackground();
         isFABOpen = false
-        fabOverlay.visibility = View.GONE
-        setNavigationBarColor(BACKGROUND_COLOR_LIGHT)
+        lightenBackGround()
         fab_container_add.animate().translationY(0f)
         fab_container_notification.animate().translationY(0f)
         fab_container_timer.animate().translationY(0f)
