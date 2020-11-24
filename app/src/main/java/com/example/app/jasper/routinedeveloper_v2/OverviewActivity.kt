@@ -82,6 +82,7 @@ class OverviewActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
     private lateinit var errorPrompt: CardView
     private lateinit var errorPromptText: TextView
+    private lateinit var errorPromptHeader: TextView
 
     private lateinit var fab_add: FloatingActionButton
     private lateinit var fab_timer: FloatingActionButton
@@ -129,12 +130,16 @@ class OverviewActivity : AppCompatActivity(), CoroutineScope by MainScope() {
             if (it == true) {
                 lock_icon.backgroundDrawable = getDrawable(R.drawable.ic_lock_black)
                 lock_icon.backgroundDrawable!!.setTint(getColor(R.color.textDark))
-                viewModel.errorMessage.value = getString(R.string.lock_activated)
+                viewModel.errorPromptHeader.value = getString(R.string.error_lock_activated_header)
+                viewModel.errorPromptText.value = getString(R.string.error_lock_activated_text)
             } else {
                 lock_icon.backgroundDrawable = getDrawable(R.drawable.ic_lock_open_black)
             }
         })
-        viewModel.errorMessage.observe(this, Observer { errorMessage ->
+        viewModel.errorPromptHeader.observe(this, Observer { errorMessage ->
+            errorPromptHeader.text = errorMessage
+        })
+        viewModel.errorPromptText.observe(this, Observer { errorMessage ->
             errorPromptText.text = errorMessage
         })
     }
@@ -214,6 +219,7 @@ class OverviewActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     private fun initErrorPrompt() {
         errorPrompt = findViewById(R.id.errorPrompt)
         errorPromptText = findViewById(R.id.errorPromptText)
+        errorPromptHeader = findViewById(R.id.errorPromptHeader)
     }
 
     private fun initListMenu() {

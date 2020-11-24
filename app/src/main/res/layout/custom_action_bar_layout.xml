@@ -4,13 +4,13 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <TableRow>
+
         <LinearLayout
             android:id="@+id/appbar_score_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="bottom"
-            android:layout_margin="30dp"
+            android:gravity="center_vertical"
+            android:layout_marginStart="30dp"
             android:orientation="horizontal">
 
             <TextView
@@ -18,42 +18,31 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/colorAccent"
-                android:textSize="25sp">
-                android:textFontWeight="bold"
-            </TextView>
+                android:textSize="25sp"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text=" : "
                 android:textColor="@color/colorAccent"
-                android:textSize="25sp">
-                <!--android:textFontWeight="bold"-->
-
-            </TextView>
+                android:textSize="25sp"/>
 
             <TextView
                 android:id="@+id/scoreMinus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/colorAccent"
-                android:textSize="25sp">
-                <!--android:textFontWeight="bold"-->
-            </TextView>
+                android:textSize="25sp"/>
 
             <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
                 android:layout_margin="8dp"
                 android:scaleType="centerCrop"
                 app:tint="@color/colorAccent"
-                app:srcCompat="@drawable/stats_black" />
+                app:srcCompat="@drawable/stats_black"
+                android:contentDescription="score icon" />
 
-
-
-        </LinearLayout> <!-- display Score data -->
-
-
-    </TableRow>
+        </LinearLayout>
 
 </TableLayout>

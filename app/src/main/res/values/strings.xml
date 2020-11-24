@@ -4,5 +4,6 @@
     <string name="fabLabelAdd">add item</string>
     <string name="LabelNotification">set reminder</string>
     <string name="LabelTimer">set end date</string>
-    <string name="lock_activated">List is locked! In order perform changes to the list unlock the list first!</string>
+    <string name="error_lock_activated_header">List is locked!</string>
+    <string name="error_lock_activated_text">In order to perform changes unlock the list first!</string>
 </resources>

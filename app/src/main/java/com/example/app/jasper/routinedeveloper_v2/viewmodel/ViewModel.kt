@@ -26,7 +26,8 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     val doneCounter = MutableLiveData<Int>()
     val undoneCounter = MutableLiveData<Int>()
     val challengeEndingDate = MutableLiveData<String>()
-    val errorMessage = MutableLiveData<String>()
+    val errorPromptHeader = MutableLiveData<String>()
+    val errorPromptText = MutableLiveData<String>()
     val notificationTime = MutableLiveData<Long>()
     val context = application.applicationContext
     val repository = TodoListRepository.getInstance(context)
