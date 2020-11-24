@@ -11,7 +11,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
@@ -23,7 +22,6 @@ import android.widget.*
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
-import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -40,14 +38,10 @@ import com.example.app.jasper.routinedeveloper_v2.utils.vibratePhone
 import com.example.app.jasper.routinedeveloper_v2.view.utils.RecyclerViewItemDivider
 import com.example.app.jasper.routinedeveloper_v2.viewmodel.ViewModel
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import kotlinx.android.synthetic.main.content_main.*
-import kotlinx.android.synthetic.main.error_prompt.*
-import kotlinx.android.synthetic.main.item_longpress_menu.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
-import org.jetbrains.anko.backgroundColor
 import org.jetbrains.anko.backgroundDrawable
 import java.util.*
 
@@ -328,7 +322,7 @@ class OverviewActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = recyclerViewAdapter
 
-        val diver: ItemDecoration = RecyclerViewItemDivider(ResourcesCompat.getDrawable(resources, R.drawable.divider, null)!!)
+        val diver: ItemDecoration = RecyclerViewItemDivider(ResourcesCompat.getDrawable(resources, R.drawable.item_list_divider, null)!!)
         recyclerView.addItemDecoration(diver)
 
         val touchCallback = object : ItemTouchHelper.SimpleCallback(

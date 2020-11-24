@@ -19,5 +19,6 @@
     <color name="colorTransBg">#8d000000</color>
     <color name="colorWhite">#FFFFFF</color>
     <color name="ListDivider">#5B5C61</color>
+    <color name="colorTransparent">#80FFFFFF</color>
 
 </resources>
